@@ -16,6 +16,8 @@ import { LabEquipment, QualityControl, QualityControlFormData } from "@/features
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { qualityControlSchema, equipmentMaintenanceSchema } from "@/features/diagnostics/laboratory/validations";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { LAB_KM } from "@/features/diagnostics/laboratory/km";
 
 interface EquipmentIntegrationProps {
   equipment: LabEquipment[];
@@ -67,6 +69,9 @@ export function EquipmentIntegration({
   onDisconnectEquipment,
   onCalibrateEquipment,
 }: EquipmentIntegrationProps) {
+  const fmt = useDateFormat();
+  const t = useT(LAB_KM);
+  const tAny = useTranslateAny(LAB_KM);
   const [qcDialogOpen, setQcDialogOpen] = useState(false);
   const [maintenanceDialogOpen, setMaintenanceDialogOpen] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState<LabEquipment | null>(null);
@@ -154,36 +159,36 @@ export function EquipmentIntegration({
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Equipment Integration</h1>
-        <p className="text-gray-600">Manage laboratory equipment, connectivity, and quality control</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("Equipment Integration")}</h1>
+        <p className="text-muted-foreground">{t("Manage laboratory equipment, connectivity, and quality control")}</p>
       </div>
 
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1">
           <Input
-            placeholder="Search equipment by name, serial number, or location..."
+            placeholder={t("Search equipment by name, serial number, or location...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t("Status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="operational">Operational</SelectItem>
-            <SelectItem value="maintenance">Maintenance</SelectItem>
-            <SelectItem value="calibration">Calibration</SelectItem>
-            <SelectItem value="out_of_service">Out of Service</SelectItem>
+            <SelectItem value="all">{t("All Status")}</SelectItem>
+            <SelectItem value="operational">{t("Operational")}</SelectItem>
+            <SelectItem value="maintenance">{t("Maintenance")}</SelectItem>
+            <SelectItem value="calibration">{t("Calibration")}</SelectItem>
+            <SelectItem value="out_of_service">{t("Out of Service")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-48">
-            <SelectValue placeholder="Equipment Type" />
+            <SelectValue placeholder={t("Equipment Type")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="all">{t("All Types")}</SelectItem>
             {EQUIPMENT_TYPES.map((type) => (
               <SelectItem key={type.value} value={type.value}>
                 {type.icon} {type.label}
@@ -210,7 +215,7 @@ export function EquipmentIntegration({
                       <CardTitle className="flex items-center gap-2">
                         {eq.name}
                         <Badge className={getStatusColor(eq.status)}>
-                          {eq.status.replace('_', ' ')}
+                          {tAny(eq.status)}
                         </Badge>
                         <Badge className={getConnectionColor(eq.connectionStatus)}>
                           {eq.connectionStatus}
@@ -218,12 +223,12 @@ export function EquipmentIntegration({
                         {daysUntilMaintenance <= 7 && (
                           <Badge variant="destructive">
                             <Calendar className="h-3 w-3 mr-1" />
-                            Maintenance Due
+                            {t("Maintenance Due")}
                           </Badge>
                         )}
                       </CardTitle>
                       <CardDescription>
-                        {eq.manufacturer} {eq.model} • Serial: {eq.serialNumber} • Location: {eq.location}
+                        {t("{manufacturer} {model} • Serial: {serialNumber} • Location: {location}", { manufacturer: eq.manufacturer, model: eq.model, serialNumber: eq.serialNumber, location: eq.location })}
                       </CardDescription>
                     </div>
                   </div>
@@ -235,7 +240,7 @@ export function EquipmentIntegration({
                       disabled={eq.status !== "operational"}
                     >
                       <CheckCircle className="mr-2 h-4 w-4" />
-                      QC Check
+                      {t("QC Check")}
                     </Button>
                     <Button
                       variant="outline"
@@ -243,7 +248,7 @@ export function EquipmentIntegration({
                       onClick={() => openMaintenanceDialog(eq)}
                     >
                       <Wrench className="mr-2 h-4 w-4" />
-                      Maintenance
+                      {t("Maintenance")}
                     </Button>
                     {eq.connectionStatus === "connected" ? (
                       <Button
@@ -251,7 +256,7 @@ export function EquipmentIntegration({
                         size="sm"
                         onClick={() => onDisconnectEquipment(eq.id)}
                       >
-                        Disconnect
+                        {t("Disconnect")}
                       </Button>
                     ) : (
                       <Button
@@ -259,7 +264,7 @@ export function EquipmentIntegration({
                         size="sm"
                         onClick={() => onConnectEquipment(eq.id)}
                       >
-                        Connect
+                        {t("Connect")}
                       </Button>
                     )}
                   </div>
@@ -268,32 +273,32 @@ export function EquipmentIntegration({
               <CardContent>
                 <Tabs defaultValue="overview" className="w-full">
                   <TabsList>
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="qc">Quality Control</TabsTrigger>
-                    <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-                    <TabsTrigger value="tests">Supported Tests</TabsTrigger>
+                    <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+                    <TabsTrigger value="qc">{t("Quality Control")}</TabsTrigger>
+                    <TabsTrigger value="maintenance">{t("Maintenance")}</TabsTrigger>
+                    <TabsTrigger value="tests">{t("Supported Tests")}</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="overview" className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <p className="font-medium text-gray-900">Equipment Type</p>
-                        <p className="text-gray-600">{getEquipmentIcon(eq.type)} {eq.type.replace('_', ' ')}</p>
+                        <p className="font-medium text-foreground">{t("Equipment Type")}</p>
+                        <p className="text-muted-foreground">{getEquipmentIcon(eq.type)} {tAny(eq.type)}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Interface</p>
-                        <p className="text-gray-600">{eq.interfaceType}</p>
+                        <p className="font-medium text-foreground">{t("Interface")}</p>
+                        <p className="text-muted-foreground">{eq.interfaceType}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Install Date</p>
-                        <p className="text-gray-600">{new Date(eq.installDate).toLocaleDateString()}</p>
+                        <p className="font-medium text-foreground">{t("Install Date")}</p>
+                        <p className="text-muted-foreground">{fmt(eq.installDate, "PP")}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Last Data</p>
-                        <p className="text-gray-600">
+                        <p className="font-medium text-foreground">{t("Last Data")}</p>
+                        <p className="text-muted-foreground">
                           {eq.lastDataReceived 
-                            ? new Date(eq.lastDataReceived).toLocaleString()
-                            : "No data received"
+                            ? fmt(eq.lastDataReceived, "PP p")
+                            : t("No data received")
                           }
                         </p>
                       </div>
@@ -303,34 +308,34 @@ export function EquipmentIntegration({
                       <div className="p-4 bg-blue-50 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <TrendingUp className="h-5 w-5 text-blue-600" />
-                          <span className="font-medium text-blue-900">Performance</span>
+                          <span className="font-medium text-blue-900">{t("Performance")}</span>
                         </div>
                         <p className="text-2xl font-bold text-blue-600">
                           {eq.status === "operational" ? "98.5%" : "N/A"}
                         </p>
-                        <p className="text-sm text-blue-800">Uptime</p>
+                        <p className="text-sm text-blue-800">{t("Uptime")}</p>
                       </div>
 
                       <div className="p-4 bg-green-50 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <CheckCircle className="h-5 w-5 text-green-600" />
-                          <span className="font-medium text-green-900">QC Status</span>
+                          <span className="font-medium text-green-900">{t("QC Status")}</span>
                         </div>
                         <p className="text-2xl font-bold text-green-600">
                           {recentQCs.filter(qc => qc.status === "pass").length}
                         </p>
-                        <p className="text-sm text-green-800">Passed this week</p>
+                        <p className="text-sm text-green-800">{t("Passed this week")}</p>
                       </div>
 
                       <div className="p-4 bg-yellow-50 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <Calendar className="h-5 w-5 text-yellow-600" />
-                          <span className="font-medium text-yellow-900">Maintenance</span>
+                          <span className="font-medium text-yellow-900">{t("Maintenance")}</span>
                         </div>
                         <p className="text-2xl font-bold text-yellow-600">
-                          {daysUntilMaintenance > 0 ? daysUntilMaintenance : "Overdue"}
+                          {daysUntilMaintenance > 0 ? daysUntilMaintenance : t("Overdue")}
                         </p>
-                        <p className="text-sm text-yellow-800">Days until next</p>
+                        <p className="text-sm text-yellow-800">{t("Days until next")}</p>
                       </div>
                     </div>
 
@@ -338,20 +343,19 @@ export function EquipmentIntegration({
                       <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                         <div className="flex items-center gap-2">
                           <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                          <span className="font-medium text-yellow-900">Equipment Status Alert</span>
+                          <span className="font-medium text-yellow-900">{t("Equipment Status Alert")}</span>
                         </div>
                         <p className="text-sm text-yellow-800 mt-1">
-                          Equipment is currently {eq.status.replace('_', ' ')} and not available for testing.
-                        </p>
+                          {t("Equipment is currently {replace} and not available for testing.", { replace: tAny(eq.status) })}</p>
                       </div>
                     )}
                   </TabsContent>
 
                   <TabsContent value="qc" className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <h4 className="font-medium">Recent Quality Control Results</h4>
+                      <h4 className="font-medium">{t("Recent Quality Control Results")}</h4>
                       <Button size="sm" onClick={() => openQcDialog(eq)}>
-                        Perform QC
+                        {t("Perform QC")}
                       </Button>
                     </div>
                     
@@ -360,54 +364,54 @@ export function EquipmentIntegration({
                         {recentQCs.slice(0, 5).map((qc) => (
                           <div key={qc.id} className="flex justify-between items-center p-3 border rounded">
                             <div>
-                              <p className="font-medium">{qc.testCode} - {qc.level} level</p>
-                              <p className="text-sm text-gray-600">
-                                Expected: {qc.expectedValue} {qc.unit} • Actual: {qc.actualValue} {qc.unit}
+                              <p className="font-medium">{t("{testCode} - {level} level", { testCode: qc.testCode, level: qc.level })}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {t("Expected: {expectedValue} {unit} • Actual: {actualValue} {unit2}", { expectedValue: qc.expectedValue, unit: qc.unit, actualValue: qc.actualValue, unit2: qc.unit })}
                               </p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(qc.date).toLocaleString()} by {qc.performedBy}
+                              <p className="text-xs text-muted-foreground">
+                                {t("{amount} by {performedBy}", { amount: fmt(qc.date, "PP p"), performedBy: qc.performedBy })}
                               </p>
                             </div>
                             <Badge className={getQcColor(qc.status)}>
-                              {qc.status}
+                              {tAny(qc.status)}
                             </Badge>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500 text-center py-4">No recent quality control results</p>
+                      <p className="text-muted-foreground text-center py-4">{t("No recent quality control results")}</p>
                     )}
                   </TabsContent>
 
                   <TabsContent value="maintenance" className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="font-medium text-gray-900">Last Maintenance</p>
-                        <p className="text-gray-600">
+                        <p className="font-medium text-foreground">{t("Last Maintenance")}</p>
+                        <p className="text-muted-foreground">
                           <Wrench className="inline h-4 w-4 mr-1" />
-                          {new Date(eq.lastMaintenance).toLocaleDateString()}
+                          {fmt(eq.lastMaintenance, "PP")}
                         </p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Next Maintenance</p>
-                        <p className={`${daysUntilMaintenance <= 7 ? "text-red-600" : "text-gray-600"}`}>
+                        <p className="font-medium text-foreground">{t("Next Maintenance")}</p>
+                        <p className={`${daysUntilMaintenance <= 7 ? "text-red-600" : "text-muted-foreground"}`}>
                           <Calendar className="inline h-4 w-4 mr-1" />
-                          {new Date(eq.nextMaintenance).toLocaleDateString()}
-                          {daysUntilMaintenance <= 7 && " (Due Soon)"}
+                          {fmt(eq.nextMaintenance, "PP")}
+                          {daysUntilMaintenance <= 7 && t("(Due Soon)")}
                         </p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Last Calibration</p>
-                        <p className="text-gray-600">
+                        <p className="font-medium text-foreground">{t("Last Calibration")}</p>
+                        <p className="text-muted-foreground">
                           <Activity className="inline h-4 w-4 mr-1" />
-                          {new Date(eq.lastCalibration).toLocaleDateString()}
+                          {fmt(eq.lastCalibration, "PP")}
                         </p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Next Calibration</p>
-                        <p className="text-gray-600">
+                        <p className="font-medium text-foreground">{t("Next Calibration")}</p>
+                        <p className="text-muted-foreground">
                           <Activity className="inline h-4 w-4 mr-1" />
-                          {new Date(eq.nextCalibration).toLocaleDateString()}
+                          {fmt(eq.nextCalibration, "PP")}
                         </p>
                       </div>
                     </div>
@@ -420,7 +424,7 @@ export function EquipmentIntegration({
                         disabled={eq.status === "out_of_service"}
                       >
                         <Activity className="mr-2 h-4 w-4" />
-                        Calibrate
+                        {t("Calibrate")}
                       </Button>
                       <Button
                         variant="outline"
@@ -428,13 +432,13 @@ export function EquipmentIntegration({
                         onClick={() => openMaintenanceDialog(eq)}
                       >
                         <Wrench className="mr-2 h-4 w-4" />
-                        Schedule Maintenance
+                        {t("Schedule Maintenance")}
                       </Button>
                     </div>
                   </TabsContent>
 
                   <TabsContent value="tests" className="space-y-4">
-                    <h4 className="font-medium">Supported Test Codes</h4>
+                    <h4 className="font-medium">{t("Supported Test Codes")}</h4>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                       {eq.supportedTests.map((testCode) => (
                         <Badge key={testCode} variant="outline" className="text-center">
@@ -443,7 +447,7 @@ export function EquipmentIntegration({
                       ))}
                     </div>
                     {eq.supportedTests.length === 0 && (
-                      <p className="text-gray-500 text-center py-4">No supported tests configured</p>
+                      <p className="text-muted-foreground text-center py-4">{t("No supported tests configured")}</p>
                     )}
                   </TabsContent>
                 </Tabs>
@@ -457,22 +461,22 @@ export function EquipmentIntegration({
       <Dialog open={qcDialogOpen} onOpenChange={setQcDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Quality Control Check</DialogTitle>
+            <DialogTitle>{t("Quality Control Check")}</DialogTitle>
             <DialogDescription>
-              Perform quality control for {selectedEquipment?.name}
+              {t("Perform quality control for {name}", { name: selectedEquipment?.name })}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={qcForm.handleSubmit(handlePerformQC)} className="space-y-4">
             <div className="space-y-2">
-              <Label>Test Code</Label>
+              <Label>{t("Test Code")}</Label>
               <Select onValueChange={(value) => qcForm.setValue("testCode", value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select test code" />
+                  <SelectValue placeholder={t("Select test code")} />
                 </SelectTrigger>
                 <SelectContent>
                   {selectedEquipment?.supportedTests.map((testCode) => (
                     <SelectItem key={testCode} value={testCode}>
-                      {testCode}
+                      {tAny(testCode)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -480,22 +484,22 @@ export function EquipmentIntegration({
             </div>
 
             <div className="space-y-2">
-              <Label>QC Level</Label>
+              <Label>{t("QC Level")}</Label>
               <Select onValueChange={(value) => qcForm.setValue("level", value as any)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="low">{t("Low")}</SelectItem>
+                  <SelectItem value="normal">{t("Normal")}</SelectItem>
+                  <SelectItem value="high">{t("High")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="expectedValue">Expected Value</Label>
+                <Label htmlFor="expectedValue">{t("Expected Value")}</Label>
                 <Input
                   id="expectedValue"
                   type="number"
@@ -504,7 +508,7 @@ export function EquipmentIntegration({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="actualValue">Actual Value</Label>
+                <Label htmlFor="actualValue">{t("Actual Value")}</Label>
                 <Input
                   id="actualValue"
                   type="number"
@@ -515,38 +519,38 @@ export function EquipmentIntegration({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="unit">Unit</Label>
+              <Label htmlFor="unit">{t("Unit")}</Label>
               <Input
                 id="unit"
                 {...qcForm.register("unit")}
-                placeholder="e.g., mg/dL, mmol/L"
+                placeholder={t("e.g., mg/dL, mmol/L")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="performedBy">Performed By</Label>
+              <Label htmlFor="performedBy">{t("Performed By")}</Label>
               <Input
                 id="performedBy"
                 {...qcForm.register("performedBy")}
-                placeholder="Technologist name"
+                placeholder={t("Technologist name")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t("Notes")}</Label>
               <Textarea
                 id="notes"
                 {...qcForm.register("notes")}
-                placeholder="QC observations or notes..."
+                placeholder={t("QC observations or notes...")}
                 rows={3}
               />
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setQcDialogOpen(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
-              <Button type="submit">Submit QC</Button>
+              <Button type="submit">{t("Submit QC")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -556,39 +560,39 @@ export function EquipmentIntegration({
       <Dialog open={maintenanceDialogOpen} onOpenChange={setMaintenanceDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Schedule Maintenance</DialogTitle>
+            <DialogTitle>{t("Schedule Maintenance")}</DialogTitle>
             <DialogDescription>
-              Schedule maintenance for {selectedEquipment?.name}
+              {t("Schedule maintenance for {name}", { name: selectedEquipment?.name })}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={maintenanceForm.handleSubmit(handleScheduleMaintenance)} className="space-y-4">
             <div className="space-y-2">
-              <Label>Maintenance Type</Label>
+              <Label>{t("Maintenance Type")}</Label>
               <Select onValueChange={(value) => maintenanceForm.setValue("type", value as "maintenance" | "calibration" | "repair")}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="maintenance">Routine Maintenance</SelectItem>
-                  <SelectItem value="calibration">Calibration</SelectItem>
-                  <SelectItem value="repair">Repair</SelectItem>
+                  <SelectItem value="maintenance">{t("Routine Maintenance")}</SelectItem>
+                  <SelectItem value="calibration">{t("Calibration")}</SelectItem>
+                  <SelectItem value="repair">{t("Repair")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t("Description")}</Label>
               <Textarea
                 id="description"
                 {...maintenanceForm.register("description")}
-                placeholder="Describe the maintenance work..."
+                placeholder={t("Describe the maintenance work...")}
                 rows={3}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="date">Scheduled Date</Label>
+                <Label htmlFor="date">{t("Scheduled Date")}</Label>
                 <Input
                   id="date"
                   type="date"
@@ -596,20 +600,20 @@ export function EquipmentIntegration({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="performedBy">Performed By</Label>
+                <Label htmlFor="performedBy">{t("Performed By")}</Label>
                 <Input
                   id="performedBy"
                   {...maintenanceForm.register("performedBy")}
-                  placeholder="Technician name"
+                  placeholder={t("Technician name")}
                 />
               </div>
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setMaintenanceDialogOpen(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
-              <Button type="submit">Schedule</Button>
+              <Button type="submit">{t("Schedule")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

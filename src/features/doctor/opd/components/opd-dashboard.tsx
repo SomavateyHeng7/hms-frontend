@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OPDPatient, ConsultationNote, Diagnosis, TreatmentPlan, Prescription } from "@/features/doctor/opd/types";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { OPD_KM } from "@/features/doctor/opd/km";
 
 interface OPDDashboardProps {
   patients: OPDPatient[];
@@ -38,6 +40,9 @@ export function OPDDashboard({
   onNavigateToDiagnosis,
   onNavigateToPrescription,
 }: OPDDashboardProps) {
+  const fmt = useDateFormat();
+  const t = useT(OPD_KM);
+  const tAny = useTranslateAny(OPD_KM);
   const [selectedTimeframe, setSelectedTimeframe] = useState("today");
 
   // Calculate dashboard statistics
@@ -91,48 +96,45 @@ export function OPDDashboard({
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">OPD Management Dashboard</h1>
-        <p className="text-gray-600">Comprehensive outpatient department management</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("OPD Management Dashboard")}</h1>
+        <p className="text-muted-foreground">{t("Comprehensive outpatient department management")}</p>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Patients</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Today's Patients")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.todayPatients}</div>
             <p className="text-xs text-muted-foreground">
-              +{Math.round((stats.todayPatients / Math.max(patients.length, 1)) * 100)}% of total
-            </p>
+              {t("+{round}% of total", { round: Math.round((stats.todayPatients / Math.max(patients.length, 1)) * 100) })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Consultations</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Pending Consultations")}</CardTitle>
             <Stethoscope className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pendingConsultations}</div>
             <p className="text-xs text-muted-foreground">
-              {consultations.length} total consultations
-            </p>
+              {t("{length} total consultations", { length: consultations.length })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Treatments</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Active Treatments")}</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.activeTreatments}</div>
             <p className="text-xs text-muted-foreground">
-              {treatments.length} total treatments
-            </p>
+              {t("{length} total treatments", { length: treatments.length })}</p>
           </CardContent>
         </Card>
 
@@ -141,8 +143,8 @@ export function OPDDashboard({
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Navigate to common OPD tasks</CardDescription>
+          <CardTitle>{t("Quick Actions")}</CardTitle>
+          <CardDescription>{t("Navigate to common OPD tasks")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -152,7 +154,7 @@ export function OPDDashboard({
               onClick={onNavigateToRegistration}
             >
               <Users className="h-6 w-6" />
-              <span className="text-sm">New Patient</span>
+              <span className="text-sm">{t("New Patient")}</span>
             </Button>
             <Button
               variant="outline"
@@ -160,7 +162,7 @@ export function OPDDashboard({
               onClick={onNavigateToConsultation}
             >
               <Stethoscope className="h-6 w-6" />
-              <span className="text-sm">Consultation</span>
+              <span className="text-sm">{t("Consultation")}</span>
             </Button>
             <Button
               variant="outline"
@@ -168,7 +170,7 @@ export function OPDDashboard({
               onClick={onNavigateToDiagnosis}
             >
               <FileText className="h-6 w-6" />
-              <span className="text-sm">Diagnosis</span>
+              <span className="text-sm">{t("Diagnosis")}</span>
             </Button>
             <Button
               variant="outline"
@@ -176,7 +178,7 @@ export function OPDDashboard({
               onClick={onNavigateToPrescription}
             >
               <Pill className="h-6 w-6" />
-              <span className="text-sm">Prescription</span>
+              <span className="text-sm">{t("Prescription")}</span>
             </Button>
           </div>
         </CardContent>
@@ -187,12 +189,12 @@ export function OPDDashboard({
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Recent Patients</CardTitle>
+              <CardTitle>{t("Recent Patients")}</CardTitle>
               <Button variant="ghost" size="sm" onClick={onNavigateToRegistration}>
-                View All <ChevronRight className="ml-1 h-4 w-4" />
+                {t("View All")} <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
-            <CardDescription>Latest patient registrations</CardDescription>
+            <CardDescription>{t("Latest patient registrations")}</CardDescription>
           </CardHeader>
           <CardContent>
             {recentPatients.length > 0 ? (
@@ -202,22 +204,22 @@ export function OPDDashboard({
                     <div>
                       <p className="font-medium">{patient.personalInfo.firstName} {patient.personalInfo.lastName}</p>
                       <p className="text-sm text-muted-foreground">
-                        {patient.visitInfo.chiefComplaint} • {new Date(patient.visitInfo.registrationDate).toLocaleDateString()}
+                        {patient.visitInfo.chiefComplaint} • {fmt(patient.visitInfo.registrationDate, "PP")}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge className={getStatusColor(patient.status)}>
-                        {patient.status.replace('_', ' ')}
+                        {tAny(patient.status)}
                       </Badge>
                       <Badge className={getPriorityColor(patient.visitInfo.priority)}>
-                        {patient.visitInfo.priority}
+                        {tAny(patient.visitInfo.priority)}
                       </Badge>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-4">No recent patients</p>
+              <p className="text-center text-muted-foreground py-4">{t("No recent patients")}</p>
             )}
           </CardContent>
         </Card>
@@ -226,12 +228,12 @@ export function OPDDashboard({
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Active Consultations</CardTitle>
+              <CardTitle>{t("Active Consultations")}</CardTitle>
               <Button variant="ghost" size="sm" onClick={onNavigateToConsultation}>
-                View All <ChevronRight className="ml-1 h-4 w-4" />
+                {t("View All")} <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
-            <CardDescription>Ongoing patient consultations</CardDescription>
+            <CardDescription>{t("Ongoing patient consultations")}</CardDescription>
           </CardHeader>
           <CardContent>
             {recentConsultations.length > 0 ? (
@@ -239,19 +241,19 @@ export function OPDDashboard({
                 {recentConsultations.map((consultation) => (
                   <div key={consultation.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <p className="font-medium">Patient ID: {consultation.patientId}</p>
+                      <p className="font-medium">{t("Patient ID: {patientId}", { patientId: consultation.patientId })}</p>
                       <p className="text-sm text-muted-foreground">
-                        {consultation.chiefComplaint} • {new Date(consultation.createdAt).toLocaleDateString()}
+                        {consultation.chiefComplaint} • {fmt(consultation.createdAt, "PP")}
                       </p>
                     </div>
                     <Badge variant="outline">
-                      consultation
+                      {t("consultation")}
                     </Badge>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-4">No active consultations</p>
+              <p className="text-center text-muted-foreground py-4">{t("No active consultations")}</p>
             )}
           </CardContent>
         </Card>
@@ -262,12 +264,12 @@ export function OPDDashboard({
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Urgent Treatments</CardTitle>
+              <CardTitle>{t("Urgent Treatments")}</CardTitle>
               <Button variant="ghost" size="sm" onClick={onNavigateToDiagnosis}>
-                View All <ChevronRight className="ml-1 h-4 w-4" />
+                {t("View All")} <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
-            <CardDescription>High priority treatment plans</CardDescription>
+            <CardDescription>{t("High priority treatment plans")}</CardDescription>
           </CardHeader>
           <CardContent>
             {urgentTreatments.length > 0 ? (
@@ -277,22 +279,22 @@ export function OPDDashboard({
                     <div>
                       <p className="font-medium">{treatment.title}</p>
                       <p className="text-sm text-muted-foreground">
-                        {treatment.planType} • Due: {new Date(treatment.endDate || treatment.startDate).toLocaleDateString()}
+                        {t("{planType} • Due: {toLocaleDateString}", { planType: treatment.planType, toLocaleDateString: fmt(treatment.endDate || treatment.startDate, "PP") })}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge className={getPriorityColor(treatment.priority)}>
-                        {treatment.priority}
+                        {tAny(treatment.priority)}
                       </Badge>
                       <Badge className={getStatusColor(treatment.status)}>
-                        {treatment.status.replace('_', ' ')}
+                        {tAny(treatment.status)}
                       </Badge>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-4">No urgent treatments</p>
+              <p className="text-center text-muted-foreground py-4">{t("No urgent treatments")}</p>
             )}
           </CardContent>
         </Card>
@@ -302,14 +304,14 @@ export function OPDDashboard({
       {/* Department Performance */}
       <Card>
         <CardHeader>
-          <CardTitle>Department Performance</CardTitle>
-          <CardDescription>Key metrics and performance indicators</CardDescription>
+          <CardTitle>{t("Department Performance")}</CardTitle>
+          <CardDescription>{t("Key metrics and performance indicators")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Patient Satisfaction</span>
+                <span className="text-sm font-medium">{t("Patient Satisfaction")}</span>
                 <span className="text-sm text-muted-foreground">95%</span>
               </div>
               <Progress value={95} className="h-2" />
@@ -317,7 +319,7 @@ export function OPDDashboard({
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Treatment Completion</span>
+                <span className="text-sm font-medium">{t("Treatment Completion")}</span>
                 <span className="text-sm text-muted-foreground">88%</span>
               </div>
               <Progress value={88} className="h-2" />
@@ -325,7 +327,7 @@ export function OPDDashboard({
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Payment Collection</span>
+                <span className="text-sm font-medium">{t("Payment Collection")}</span>
                 <span className="text-sm text-muted-foreground">92%</span>
               </div>
               <Progress value={92} className="h-2" />
@@ -335,19 +337,19 @@ export function OPDDashboard({
           <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
               <p className="text-2xl font-bold text-blue-600">{patients.length}</p>
-              <p className="text-sm text-muted-foreground">Total Patients</p>
+              <p className="text-sm text-muted-foreground">{t("Total Patients")}</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-green-600">{prescriptions.length}</p>
-              <p className="text-sm text-muted-foreground">Prescriptions</p>
+              <p className="text-sm text-muted-foreground">{t("Prescriptions")}</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-orange-600">{diagnoses.length}</p>
-              <p className="text-sm text-muted-foreground">Diagnoses</p>
+              <p className="text-sm text-muted-foreground">{t("Diagnoses")}</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-purple-600">{consultations.length}</p>
-              <p className="text-sm text-muted-foreground">Consultations</p>
+              <p className="text-sm text-muted-foreground">{t("Consultations")}</p>
             </div>
           </div>
         </CardContent>

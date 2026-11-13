@@ -6,10 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Surgery, OperationTheater } from "@/features/nursing/operation-theater/types";
 import { Calendar, Clock, Users, Activity, AlertCircle, CheckCircle2, Scissors } from "lucide-react";
-import { format } from "date-fns";
 import { useTabParam } from "@/hooks/use-tab-param";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { OT_KM } from "@/features/nursing/operation-theater/km";
 
 export function OperationTheaterDashboard() {
+  const t = useT(OT_KM);
+  const tAny = useTranslateAny(OT_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useTabParam("overview", ["overview", "schedule", "theaters"] as const);
 
   // Mock data
@@ -45,7 +49,7 @@ export function OperationTheaterDashboard() {
       id: "1",
       surgeryNumber: "SUR-2025-001",
       patientId: "PAT001",
-      patientName: "John Doe",
+      patientName: "Sok Dara",
       surgeryType: "Orthopedic",
       surgeryName: "Total Knee Replacement",
       operationTheaterId: "1",
@@ -62,13 +66,13 @@ export function OperationTheaterDashboard() {
       preOpInstructions: "NPO after midnight, pre-op antibiotics",
       consentObtained: true,
       surgeonId: "DOC001",
-      surgeonName: "Dr. Smith",
-      assistantSurgeons: [{ id: "DOC002", name: "Dr. Johnson" }],
+      surgeonName: "Dr. Chea Sovann",
+      assistantSurgeons: [{ id: "DOC002", name: "Dr. Lim Pisey" }],
       anesthesiologistId: "DOC003",
-      anesthesiologistName: "Dr. Williams",
+      anesthesiologistName: "Dr. Touch Bunthoeun",
       nurses: [
-        { id: "NUR001", name: "Nurse Sarah", role: "scrub" },
-        { id: "NUR002", name: "Nurse Mike", role: "circulating" },
+        { id: "NUR001", name: "Nurse Sreyleak", role: "scrub" },
+        { id: "NUR002", name: "Nurse Rotha", role: "circulating" },
       ],
       requiredEquipment: ["Knee Replacement Set", "Drills", "Saw"],
       requiredInstruments: ["Scalpels", "Retractors", "Sutures"],
@@ -105,15 +109,15 @@ export function OperationTheaterDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Operation Theater Management</h1>
-        <p className="text-muted-foreground">Manage surgical procedures and OT schedules</p>
+        <h1 className="text-3xl font-bold">{t("Operation Theater Management")}</h1>
+        <p className="text-muted-foreground">{t("Manage surgical procedures and OT schedules")}</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="schedule">Surgery Schedule</TabsTrigger>
-          <TabsTrigger value="theaters">Theaters</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="schedule">{t("Surgery Schedule")}</TabsTrigger>
+          <TabsTrigger value="theaters">{t("Theaters")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -121,49 +125,47 @@ export function OperationTheaterDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Theaters</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Total Theaters")}</CardTitle>
                 <Scissors className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalTheaters}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.availableTheaters} available · {stats.occupiedTheaters} occupied
-                </p>
+                  {t("{availableTheaters} available · {occupiedTheaters} occupied", { availableTheaters: stats.availableTheaters, occupiedTheaters: stats.occupiedTheaters })}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Surgeries Today</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Surgeries Today")}</CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.scheduledToday}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.completed} completed · {stats.inProgress} in progress
-                </p>
+                  {t("{completed} completed · {inProgress} in progress", { completed: stats.completed, inProgress: stats.inProgress })}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("In Progress")}</CardTitle>
                 <Activity className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
-                <p className="text-xs text-muted-foreground">Active surgeries</p>
+                <p className="text-xs text-muted-foreground">{t("Active surgeries")}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Utilization Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Utilization Rate")}</CardTitle>
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.utilizationRate}%</div>
-                <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-blue-500"
                     style={{ width: `${stats.utilizationRate}%` }}
@@ -176,8 +178,8 @@ export function OperationTheaterDashboard() {
           {/* Theater Status */}
           <Card>
             <CardHeader>
-              <CardTitle>Theater Status</CardTitle>
-              <CardDescription>Current status of all operation theaters</CardDescription>
+              <CardTitle>{t("Theater Status")}</CardTitle>
+              <CardDescription>{t("Current status of all operation theaters")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -192,10 +194,10 @@ export function OperationTheaterDashboard() {
                         <div className={`w-3 h-3 rounded-full ${getStatusColor(theater.status)}`} />
                       </div>
                       <Badge variant="outline" className="capitalize mb-2">
-                        {theater.type}
+                        {tAny(theater.type)}
                       </Badge>
                       <div className="text-sm">
-                        <Badge className="capitalize">{theater.status}</Badge>
+                        <Badge className="capitalize">{tAny(theater.status)}</Badge>
                       </div>
                     </CardContent>
                   </Card>
@@ -210,12 +212,12 @@ export function OperationTheaterDashboard() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Today's Surgery Schedule</CardTitle>
-                  <CardDescription>{format(new Date(), "PPPP")}</CardDescription>
+                  <CardTitle>{t("Today's Surgery Schedule")}</CardTitle>
+                  <CardDescription>{fmt(new Date(), "PPPP")}</CardDescription>
                 </div>
                 <Button>
                   <Calendar className="mr-2 h-4 w-4" />
-                  Schedule Surgery
+                  {t("Schedule Surgery")}
                 </Button>
               </div>
             </CardHeader>
@@ -239,44 +241,44 @@ export function OperationTheaterDashboard() {
                               }
                               className="capitalize"
                             >
-                              {surgery.status}
+                              {tAny(surgery.status)}
                             </Badge>
                           </div>
 
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
-                              <div className="text-muted-foreground">Patient</div>
+                              <div className="text-muted-foreground">{t("Patient")}</div>
                               <div className="font-medium">{surgery.patientName}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Theater</div>
+                              <div className="text-muted-foreground">{t("Theater")}</div>
                               <div className="font-medium">{surgery.operationTheaterName}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Time</div>
+                              <div className="text-muted-foreground">{t("Time")}</div>
                               <div className="font-medium">
                                 {surgery.scheduledStartTime} - {surgery.scheduledEndTime}
                               </div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Duration</div>
-                              <div className="font-medium">{surgery.estimatedDuration} mins</div>
+                              <div className="text-muted-foreground">{t("Duration")}</div>
+                              <div className="font-medium">{t("{estimatedDuration} mins", { estimatedDuration: surgery.estimatedDuration })}</div>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-4 text-sm">
                             <div className="flex items-center gap-2">
                               <Users className="h-4 w-4 text-muted-foreground" />
-                              <span>Surgeon: {surgery.surgeonName}</span>
+                              <span>{t("Surgeon: {surgeonName}", { surgeonName: surgery.surgeonName })}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Activity className="h-4 w-4 text-muted-foreground" />
-                              <span>Anesthesia: {surgery.anesthesiaType}</span>
+                              <span>{t("Anesthesia: {anesthesiaType}", { anesthesiaType: surgery.anesthesiaType })}</span>
                             </div>
                           </div>
 
                           <div className="text-sm">
-                            <div className="text-muted-foreground">Procedure</div>
+                            <div className="text-muted-foreground">{t("Procedure")}</div>
                             <div>{surgery.surgicalProcedure}</div>
                           </div>
                         </div>
@@ -292,8 +294,8 @@ export function OperationTheaterDashboard() {
         <TabsContent value="theaters" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>All Operation Theaters</CardTitle>
-              <CardDescription>Manage theater availability and equipment</CardDescription>
+              <CardTitle>{t("All Operation Theaters")}</CardTitle>
+              <CardDescription>{t("Manage theater availability and equipment")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -305,25 +307,25 @@ export function OperationTheaterDashboard() {
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-lg">{theater.name}</h3>
                             <Badge variant="outline">{theater.code}</Badge>
-                            <Badge className="capitalize">{theater.status}</Badge>
+                            <Badge className="capitalize">{tAny(theater.status)}</Badge>
                           </div>
 
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
-                              <div className="text-muted-foreground">Type</div>
-                              <div className="font-medium capitalize">{theater.type}</div>
+                              <div className="text-muted-foreground">{t("Type")}</div>
+                              <div className="font-medium capitalize">{tAny(theater.type)}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Location</div>
+                              <div className="text-muted-foreground">{t("Location")}</div>
                               <div className="font-medium">{theater.floor}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Capacity</div>
-                              <div className="font-medium">{theater.capacity} persons</div>
+                              <div className="text-muted-foreground">{t("Capacity")}</div>
+                              <div className="font-medium">{t("{capacity} persons", { capacity: theater.capacity })}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Equipment</div>
-                              <div className="font-medium">{theater.equipment.length} items</div>
+                              <div className="text-muted-foreground">{t("Equipment")}</div>
+                              <div className="font-medium">{t("{length} items", { length: theater.equipment.length })}</div>
                             </div>
                           </div>
 
@@ -335,8 +337,7 @@ export function OperationTheaterDashboard() {
                             ))}
                             {theater.equipment.length > 3 && (
                               <Badge variant="secondary" className="text-xs">
-                                +{theater.equipment.length - 3} more
-                              </Badge>
+                                {t("+{value} more", { value: theater.equipment.length - 3 })}</Badge>
                             )}
                           </div>
                         </div>

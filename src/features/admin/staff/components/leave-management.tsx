@@ -12,13 +12,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Badge } from "@/components/ui/badge";
 import { Leave } from "@/features/admin/staff/types";
 import { CalendarIcon, Plus, Check, X, FileText } from "lucide-react";
-import { format } from "date-fns";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { STAFF_KM } from "@/features/admin/staff/km";
 
 interface LeaveManagementProps {
   staffId?: string;
 }
 
 export function LeaveManagement({ staffId }: LeaveManagementProps) {
+  const t = useT(STAFF_KM);
+  const tAny = useTranslateAny(STAFF_KM);
+  const fmt = useDateFormat();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [formData, setFormData] = useState({
@@ -36,7 +40,7 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
       id: "1",
       leaveId: "LV-2025-001",
       staffId: "STF001",
-      staffName: "Dr. John Smith",
+      staffName: "Dr. Nhem Rithy",
       department: "Cardiology",
       leaveType: "sick",
       startDate: new Date(2025, 11, 25),
@@ -102,8 +106,8 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Leave Management</h2>
-          <p className="text-muted-foreground">Manage staff leave applications</p>
+          <h2 className="text-2xl font-bold">{t("Leave Management")}</h2>
+          <p className="text-muted-foreground">{t("Manage staff leave applications")}</p>
         </div>
       </div>
 
@@ -111,52 +115,52 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
         {/* Leave Application Form */}
         <Card>
           <CardHeader>
-            <CardTitle>Apply for Leave</CardTitle>
-            <CardDescription>Submit new leave application</CardDescription>
+            <CardTitle>{t("Apply for Leave")}</CardTitle>
+            <CardDescription>{t("Submit new leave application")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="staff">Staff Member *</Label>
+                <Label htmlFor="staff">{t("Staff Member *")}</Label>
                 <Select
                   value={formData.staffId}
                   onValueChange={(value) => handleChange("staffId", value)}
                 >
                   <SelectTrigger id="staff">
-                    <SelectValue placeholder="Select staff" />
+                    <SelectValue placeholder={t("Select staff")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="STF001">Dr. John Smith (Cardiology)</SelectItem>
-                    <SelectItem value="STF002">Nurse Sarah (Emergency)</SelectItem>
-                    <SelectItem value="STF003">Tech Mike (Radiology)</SelectItem>
+                    <SelectItem value="STF001">Dr. Nhem Rithy ({tAny("Cardiology")})</SelectItem>
+                    <SelectItem value="STF002">Nurse Sophea ({tAny("Emergency")})</SelectItem>
+                    <SelectItem value="STF003">Tech. Vannak ({tAny("Radiology")})</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="leaveType">Leave Type *</Label>
+                <Label htmlFor="leaveType">{t("Leave Type *")}</Label>
                 <Select
                   value={formData.leaveType}
                   onValueChange={(value) => handleChange("leaveType", value)}
                 >
                   <SelectTrigger id="leaveType">
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("Select type")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="sick">Sick Leave</SelectItem>
-                    <SelectItem value="casual">Casual Leave</SelectItem>
-                    <SelectItem value="earned">Earned Leave</SelectItem>
-                    <SelectItem value="maternity">Maternity Leave</SelectItem>
-                    <SelectItem value="paternity">Paternity Leave</SelectItem>
-                    <SelectItem value="unpaid">Unpaid Leave</SelectItem>
-                    <SelectItem value="compensatory">Compensatory Off</SelectItem>
+                    <SelectItem value="sick">{t("Sick Leave")}</SelectItem>
+                    <SelectItem value="casual">{t("Casual Leave")}</SelectItem>
+                    <SelectItem value="earned">{t("Earned Leave")}</SelectItem>
+                    <SelectItem value="maternity">{t("Maternity Leave")}</SelectItem>
+                    <SelectItem value="paternity">{t("Paternity Leave")}</SelectItem>
+                    <SelectItem value="unpaid">{t("Unpaid Leave")}</SelectItem>
+                    <SelectItem value="compensatory">{t("Compensatory Off")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="startDate">Start Date *</Label>
+                  <Label htmlFor="startDate">{t("Start Date *")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -165,7 +169,7 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
                         className="w-full justify-start text-left font-normal"
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {startDate ? format(startDate, "PPP") : "Select"}
+                        {startDate ? fmt(startDate, "PPP") : t("Select")}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -175,7 +179,7 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="endDate">End Date *</Label>
+                  <Label htmlFor="endDate">{t("End Date *")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -184,7 +188,7 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
                         className="w-full justify-start text-left font-normal"
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {endDate ? format(endDate, "PPP") : "Select"}
+                        {endDate ? fmt(endDate, "PPP") : t("Select")}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -195,10 +199,10 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="reason">Reason *</Label>
+                <Label htmlFor="reason">{t("Reason *")}</Label>
                 <Textarea
                   id="reason"
-                  placeholder="Reason for leave..."
+                  placeholder={t("Reason for leave...")}
                   value={formData.reason}
                   onChange={(e) => handleChange("reason", e.target.value)}
                   rows={3}
@@ -206,20 +210,20 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="emergencyName">Emergency Contact Name</Label>
+                <Label htmlFor="emergencyName">{t("Emergency Contact Name")}</Label>
                 <Input
                   id="emergencyName"
-                  placeholder="Contact name"
+                  placeholder={t("Contact name")}
                   value={formData.emergencyContactName}
                   onChange={(e) => handleChange("emergencyContactName", e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="emergencyPhone">Emergency Contact Phone</Label>
+                <Label htmlFor="emergencyPhone">{t("Emergency Contact Phone")}</Label>
                 <Input
                   id="emergencyPhone"
-                  placeholder="Phone number"
+                  placeholder={t("Phone number")}
                   value={formData.emergencyContactPhone}
                   onChange={(e) => handleChange("emergencyContactPhone", e.target.value)}
                 />
@@ -227,7 +231,7 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
 
               <Button type="submit" className="w-full">
                 <Plus className="mr-2 h-4 w-4" />
-                Submit Leave Application
+                {t("Submit Leave Application")}
               </Button>
             </form>
           </CardContent>
@@ -236,52 +240,52 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
         {/* Leave Balance */}
         <Card>
           <CardHeader>
-            <CardTitle>Leave Balance</CardTitle>
-            <CardDescription>Available leave days for 2025</CardDescription>
+            <CardTitle>{t("Leave Balance")}</CardTitle>
+            <CardDescription>{t("Available leave days for 2025")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <div className="font-semibold">Casual Leave</div>
-                  <div className="text-sm text-muted-foreground">12 allocated</div>
+                  <div className="font-semibold">{t("Casual Leave")}</div>
+                  <div className="text-sm text-muted-foreground">{t("12 allocated")}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-green-600">8</div>
-                  <div className="text-xs text-muted-foreground">remaining</div>
+                  <div className="text-xs text-muted-foreground">{t("remaining")}</div>
                 </div>
               </div>
 
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <div className="font-semibold">Sick Leave</div>
-                  <div className="text-sm text-muted-foreground">10 allocated</div>
+                  <div className="font-semibold">{t("Sick Leave")}</div>
+                  <div className="text-sm text-muted-foreground">{t("10 allocated")}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-green-600">7</div>
-                  <div className="text-xs text-muted-foreground">remaining</div>
+                  <div className="text-xs text-muted-foreground">{t("remaining")}</div>
                 </div>
               </div>
 
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <div className="font-semibold">Earned Leave</div>
-                  <div className="text-sm text-muted-foreground">20 allocated</div>
+                  <div className="font-semibold">{t("Earned Leave")}</div>
+                  <div className="text-sm text-muted-foreground">{t("20 allocated")}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-blue-600">15</div>
-                  <div className="text-xs text-muted-foreground">remaining</div>
+                  <div className="text-xs text-muted-foreground">{t("remaining")}</div>
                 </div>
               </div>
 
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <div className="font-semibold">Compensatory Off</div>
-                  <div className="text-sm text-muted-foreground">Earned</div>
+                  <div className="font-semibold">{t("Compensatory Off")}</div>
+                  <div className="text-sm text-muted-foreground">{t("Earned")}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-purple-600">3</div>
-                  <div className="text-xs text-muted-foreground">available</div>
+                  <div className="text-xs text-muted-foreground">{t("available")}</div>
                 </div>
               </div>
             </div>
@@ -292,8 +296,8 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
       {/* Leave Applications List */}
       <Card>
         <CardHeader>
-          <CardTitle>Leave Applications</CardTitle>
-          <CardDescription>Recent leave requests</CardDescription>
+          <CardTitle>{t("Leave Applications")}</CardTitle>
+          <CardDescription>{t("Recent leave requests")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -305,44 +309,43 @@ export function LeaveManagement({ staffId }: LeaveManagementProps) {
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">{leave.leaveId}</Badge>
                         <h3 className="font-semibold">{leave.staffName}</h3>
-                        <Badge variant="secondary">{leave.department}</Badge>
+                        <Badge variant="secondary">{tAny(leave.department)}</Badge>
                         <Badge className={`${getStatusColor(leave.status)} text-white capitalize`}>
-                          {leave.status}
+                          {tAny(leave.status)}
                         </Badge>
                       </div>
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
-                          <div className="text-muted-foreground">Leave Type</div>
-                          <div className="font-medium capitalize">{leave.leaveType}</div>
+                          <div className="text-muted-foreground">{t("Leave Type")}</div>
+                          <div className="font-medium capitalize">{tAny(leave.leaveType)}</div>
                         </div>
                         <div>
-                          <div className="text-muted-foreground">Duration</div>
-                          <div className="font-medium">{leave.totalDays} day(s)</div>
+                          <div className="text-muted-foreground">{t("Duration")}</div>
+                          <div className="font-medium">{t("{totalDays} day(s)", { totalDays: leave.totalDays })}</div>
                         </div>
                         <div>
-                          <div className="text-muted-foreground">From</div>
+                          <div className="text-muted-foreground">{t("From")}</div>
                           <div className="font-medium">
-                            {format(new Date(leave.startDate), "PP")}
+                            {fmt(new Date(leave.startDate), "PP")}
                           </div>
                         </div>
                         <div>
-                          <div className="text-muted-foreground">To</div>
+                          <div className="text-muted-foreground">{t("To")}</div>
                           <div className="font-medium">
-                            {format(new Date(leave.endDate), "PP")}
+                            {fmt(new Date(leave.endDate), "PP")}
                           </div>
                         </div>
                       </div>
 
                       <div className="text-sm">
-                        <div className="text-muted-foreground">Reason</div>
+                        <div className="text-muted-foreground">{t("Reason")}</div>
                         <div>{leave.reason}</div>
                       </div>
 
                       {leave.reviewedBy && (
                         <div className="text-sm text-muted-foreground">
-                          {leave.status === "approved" ? "Approved" : "Reviewed"} by {leave.reviewedBy} on{" "}
-                          {leave.reviewedDate && format(new Date(leave.reviewedDate), "PP")}
+                          {t(leave.status === "approved" ? "Approved by {name} on {date}" : "Reviewed by {name} on {date}", { name: leave.reviewedBy, date: leave.reviewedDate ? fmt(leave.reviewedDate, "PP") : "" })}
                         </div>
                       )}
                     </div>

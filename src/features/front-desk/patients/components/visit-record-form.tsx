@@ -15,6 +15,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useT, useTranslateAny } from "@/lib/i18n/messages";
+import { PATIENTS_KM } from "../km";
 
 interface VisitRecordFormProps {
   onSubmit: (data: VisitFormData) => void;
@@ -35,6 +37,8 @@ export function VisitRecordForm({
   preSelectedAppointmentId,
   isEditing = false
 }: VisitRecordFormProps) {
+  const t = useT(PATIENTS_KM);
+  const tAny = useTranslateAny(PATIENTS_KM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
@@ -75,10 +79,10 @@ export function VisitRecordForm({
   };
 
   const visitTypes = [
-    { value: "routine", label: "Routine Checkup" },
-    { value: "emergency", label: "Emergency" },
-    { value: "follow-up", label: "Follow-up" },
-    { value: "consultation", label: "Consultation" }
+    { value: "routine", label: t("Routine Checkup") },
+    { value: "emergency", label: t("Emergency") },
+    { value: "follow-up", label: t("Follow-up") },
+    { value: "consultation", label: t("Consultation") }
   ];
 
   const departments = [
@@ -89,6 +93,7 @@ export function VisitRecordForm({
     "Gastroenterology",
     "General Medicine",
     "Neurology",
+    "Obstetrics & Gynecology",
     "Oncology",
     "Orthopedics",
     "Pediatrics",
@@ -107,30 +112,30 @@ export function VisitRecordForm({
 
   // Mock doctors data
   const doctors = [
-    { id: "DOC001", name: "Dr. Sarah Johnson", department: "Cardiology" },
-    { id: "DOC002", name: "Dr. Michael Chen", department: "General Medicine" },
-    { id: "DOC003", name: "Dr. Emily Rodriguez", department: "Pediatrics" },
-    { id: "DOC004", name: "Dr. David Wilson", department: "Orthopedics" },
-    { id: "DOC005", name: "Dr. Lisa Thompson", department: "Dermatology" },
+    { id: "DOC001", name: "Dr. Chea Sovann", department: "General Medicine" },
+    { id: "DOC002", name: "Dr. Lim Pisey", department: "Pediatrics" },
+    { id: "DOC003", name: "Dr. Nhem Rithy", department: "Cardiology" },
+    { id: "DOC004", name: "Dr. Ouk Sreyneang", department: "Obstetrics & Gynecology" },
+    { id: "DOC005", name: "Dr. Pich Sokunthea", department: "Orthopedics" },
   ];
 
   // Mock patients data
   const patients = [
-    { id: "PAT001", name: "John Smith" },
-    { id: "PAT002", name: "Mary Johnson" },
-    { id: "PAT003", name: "Robert Davis" },
-    { id: "PAT004", name: "Sarah Wilson" },
-    { id: "PAT005", name: "Michael Brown" },
+    { id: "PT-000001", name: "សុខ ដារ៉ា · SOK Dara" },
+    { id: "PT-000002", name: "ចាន់ ស្រីមុំ · CHAN Sreymom" },
+    { id: "PT-000003", name: "គីម សុខា · KIM Sokha" },
+    { id: "PT-000004", name: "ហេង សុភាព · HENG Sopheap" },
+    { id: "PT-000005", name: "ឡុង វណ្ណៈ · LONG Vannak" },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{isEditing ? "Edit Visit Record" : "Record New Visit"}</h1>
+        <h1 className="text-2xl font-bold">{isEditing ? t("Edit Visit Record") : t("Record New Visit")}</h1>
         <p className="text-muted-foreground">
           {preSelectedPatientName 
-            ? `Recording visit for ${preSelectedPatientName}`
-            : "Document patient visit and medical information"
+            ? t("Recording visit for {name}", { name: preSelectedPatientName })
+            : t("Document patient visit and medical information")
           }
         </p>
       </div>
@@ -139,14 +144,14 @@ export function VisitRecordForm({
         {/* Visit Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Visit Information</CardTitle>
-            <CardDescription>Basic visit details and scheduling information</CardDescription>
+            <CardTitle>{t("Visit Information")}</CardTitle>
+            <CardDescription>{t("Basic visit details and scheduling information")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Patient Selection */}
             {!preSelectedPatientId && (
               <div className="space-y-2">
-                <Label>Patient *</Label>
+                <Label>{t("Patient *")}</Label>
                 <Select 
                   onValueChange={(value) => {
                     setValue("patientId", value);
@@ -155,7 +160,7 @@ export function VisitRecordForm({
                   defaultValue={initialData?.patientId}
                 >
                   <SelectTrigger className={errors.patientId ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select a patient" />
+                    <SelectValue placeholder={t("Select a patient")} />
                   </SelectTrigger>
                   <SelectContent>
                     {patients.map((patient) => (
@@ -166,7 +171,7 @@ export function VisitRecordForm({
                   </SelectContent>
                 </Select>
                 {errors.patientId && (
-                  <p className="text-sm text-red-500">{errors.patientId.message}</p>
+                  <p className="text-sm text-red-500">{tAny(errors.patientId.message)}</p>
                 )}
               </div>
             )}
@@ -183,7 +188,7 @@ export function VisitRecordForm({
             {/* Date and Time */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Visit Date *</Label>
+                <Label>{t("Visit Date *")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -195,7 +200,7 @@ export function VisitRecordForm({
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {watchedVisitDate ? format(watchedVisitDate, "PPP") : "Pick a date"}
+                      {watchedVisitDate ? format(watchedVisitDate, "PPP") : t("Pick a date")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -212,12 +217,12 @@ export function VisitRecordForm({
                   </PopoverContent>
                 </Popover>
                 {errors.visitDate && (
-                  <p className="text-sm text-red-500">{errors.visitDate.message}</p>
+                  <p className="text-sm text-red-500">{tAny(errors.visitDate.message)}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label>Visit Time *</Label>
+                <Label>{t("Visit Time *")}</Label>
                 <Select 
                   onValueChange={(value) => {
                     setValue("visitTime", value);
@@ -226,7 +231,7 @@ export function VisitRecordForm({
                   defaultValue={initialData?.visitTime}
                 >
                   <SelectTrigger className={errors.visitTime ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select time" />
+                    <SelectValue placeholder={t("Select time")} />
                   </SelectTrigger>
                   <SelectContent>
                     {timeSlots.map((time) => (
@@ -240,23 +245,23 @@ export function VisitRecordForm({
                   </SelectContent>
                 </Select>
                 {errors.visitTime && (
-                  <p className="text-sm text-red-500">{errors.visitTime.message}</p>
+                  <p className="text-sm text-red-500">{tAny(errors.visitTime.message)}</p>
                 )}
               </div>
             </div>
 
             {/* Visit Type */}
             <div className="space-y-2">
-              <Label>Visit Type *</Label>
+              <Label>{t("Visit Type *")}</Label>
               <Select 
                 onValueChange={(value) => {
-                  setValue("type", value as any);
+                  setValue("type", value as VisitFormData["type"]);
                   trigger("type");
                 }}
                 defaultValue={initialData?.type}
               >
                 <SelectTrigger className={errors.type ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select visit type" />
+                  <SelectValue placeholder={t("Select visit type")} />
                 </SelectTrigger>
                 <SelectContent>
                   {visitTypes.map((type) => (
@@ -267,14 +272,14 @@ export function VisitRecordForm({
                 </SelectContent>
               </Select>
               {errors.type && (
-                <p className="text-sm text-red-500">{errors.type.message}</p>
+                <p className="text-sm text-red-500">{tAny(errors.type.message)}</p>
               )}
             </div>
 
             {/* Doctor and Department */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Doctor *</Label>
+                <Label>{t("Doctor *")}</Label>
                 <Select 
                   onValueChange={(value) => {
                     const doctor = doctors.find(d => d.id === value);
@@ -288,23 +293,23 @@ export function VisitRecordForm({
                   defaultValue={initialData?.doctorId}
                 >
                   <SelectTrigger className={errors.doctorId ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select a doctor" />
+                    <SelectValue placeholder={t("Select a doctor")} />
                   </SelectTrigger>
                   <SelectContent>
                     {doctors.map((doctor) => (
                       <SelectItem key={doctor.id} value={doctor.id}>
-                        {doctor.name} - {doctor.department}
+                        {doctor.name} - {tAny(doctor.department)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {errors.doctorId && (
-                  <p className="text-sm text-red-500">{errors.doctorId.message}</p>
+                  <p className="text-sm text-red-500">{tAny(errors.doctorId.message)}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label>Department *</Label>
+                <Label>{t("Department *")}</Label>
                 <Select 
                   onValueChange={(value) => {
                     setValue("department", value);
@@ -313,18 +318,18 @@ export function VisitRecordForm({
                   defaultValue={initialData?.department}
                 >
                   <SelectTrigger className={errors.department ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder={t("Select department")} />
                   </SelectTrigger>
                   <SelectContent>
                     {departments.map((dept) => (
                       <SelectItem key={dept} value={dept}>
-                        {dept}
+                        {tAny(dept)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {errors.department && (
-                  <p className="text-sm text-red-500">{errors.department.message}</p>
+                  <p className="text-sm text-red-500">{tAny(errors.department.message)}</p>
                 )}
               </div>
             </div>
@@ -337,65 +342,65 @@ export function VisitRecordForm({
         {/* Medical Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Medical Information</CardTitle>
-            <CardDescription>Patient complaints, diagnosis, and treatment details</CardDescription>
+            <CardTitle>{t("Medical Information")}</CardTitle>
+            <CardDescription>{t("Patient complaints, diagnosis, and treatment details")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Chief Complaint */}
             <div className="space-y-2">
-              <Label htmlFor="chiefComplaint">Chief Complaint *</Label>
+              <Label htmlFor="chiefComplaint">{t("Chief Complaint *")}</Label>
               <Textarea
                 id="chiefComplaint"
                 {...register("chiefComplaint")}
-                placeholder="Describe the patient's main concern or reason for the visit"
+                placeholder={t("Describe the patient's main concern or reason for the visit")}
                 rows={2}
                 className={errors.chiefComplaint ? "border-red-500" : ""}
               />
               {errors.chiefComplaint && (
-                <p className="text-sm text-red-500">{errors.chiefComplaint.message}</p>
+                <p className="text-sm text-red-500">{tAny(errors.chiefComplaint.message)}</p>
               )}
             </div>
 
             {/* Diagnosis */}
             <div className="space-y-2">
-              <Label htmlFor="diagnosis">Diagnosis</Label>
+              <Label htmlFor="diagnosis">{t("Diagnosis")}</Label>
               <Textarea
                 id="diagnosis"
                 {...register("diagnosis")}
-                placeholder="Enter the diagnosis or assessment"
+                placeholder={t("Enter the diagnosis or assessment")}
                 rows={2}
               />
             </div>
 
             {/* Treatment */}
             <div className="space-y-2">
-              <Label htmlFor="treatment">Treatment</Label>
+              <Label htmlFor="treatment">{t("Treatment")}</Label>
               <Textarea
                 id="treatment"
                 {...register("treatment")}
-                placeholder="Describe the treatment provided or recommended"
+                placeholder={t("Describe the treatment provided or recommended")}
                 rows={3}
               />
             </div>
 
             {/* Prescriptions */}
             <div className="space-y-2">
-              <Label htmlFor="prescriptions">Prescriptions</Label>
+              <Label htmlFor="prescriptions">{t("Prescriptions")}</Label>
               <Textarea
                 id="prescriptions"
                 {...register("prescriptions")}
-                placeholder="List any medications prescribed with dosage and instructions"
+                placeholder={t("List any medications prescribed with dosage and instructions")}
                 rows={3}
               />
             </div>
 
             {/* Visit Notes */}
             <div className="space-y-2">
-              <Label htmlFor="notes">Additional Notes</Label>
+              <Label htmlFor="notes">{t("Additional Notes")}</Label>
               <Textarea
                 id="notes"
                 {...register("notes")}
-                placeholder="Any additional notes or observations about the visit"
+                placeholder={t("Any additional notes or observations about the visit")}
                 rows={3}
               />
             </div>
@@ -407,9 +412,9 @@ export function VisitRecordForm({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              Vital Signs
+              {t("Vital Signs")}
             </CardTitle>
-            <CardDescription>Record patient's vital signs during the visit</CardDescription>
+            <CardDescription>{t("Record patient's vital signs during the visit")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -417,20 +422,20 @@ export function VisitRecordForm({
               <div className="space-y-2">
                 <Label htmlFor="temperature" className="flex items-center gap-2">
                   <Thermometer className="h-4 w-4" />
-                  Temperature (°F)
+                  {t("Temperature (°C)")}
                 </Label>
                 <Input
                   id="temperature"
                   type="number"
                   step="0.1"
                   {...register("vitals.temperature", { valueAsNumber: true })}
-                  placeholder="98.6"
+                  placeholder="37.0"
                 />
               </div>
 
               {/* Blood Pressure */}
               <div className="space-y-2">
-                <Label htmlFor="bloodPressure">Blood Pressure</Label>
+                <Label htmlFor="bloodPressure">{t("Blood Pressure")}</Label>
                 <Input
                   id="bloodPressure"
                   {...register("vitals.bloodPressure")}
@@ -442,7 +447,7 @@ export function VisitRecordForm({
               <div className="space-y-2">
                 <Label htmlFor="heartRate" className="flex items-center gap-2">
                   <Activity className="h-4 w-4" />
-                  Heart Rate (bpm)
+                  {t("Heart Rate (bpm)")}
                 </Label>
                 <Input
                   id="heartRate"
@@ -454,7 +459,7 @@ export function VisitRecordForm({
 
               {/* Respiratory Rate */}
               <div className="space-y-2">
-                <Label htmlFor="respiratoryRate">Respiratory Rate (bpm)</Label>
+                <Label htmlFor="respiratoryRate">{t("Respiratory Rate (bpm)")}</Label>
                 <Input
                   id="respiratoryRate"
                   type="number"
@@ -467,14 +472,14 @@ export function VisitRecordForm({
               <div className="space-y-2">
                 <Label htmlFor="weight" className="flex items-center gap-2">
                   <Weight className="h-4 w-4" />
-                  Weight (lbs)
+                  {t("Weight (kg)")}
                 </Label>
                 <Input
                   id="weight"
                   type="number"
                   step="0.1"
                   {...register("vitals.weight", { valueAsNumber: true })}
-                  placeholder="150.5"
+                  placeholder="60"
                 />
               </div>
 
@@ -482,14 +487,14 @@ export function VisitRecordForm({
               <div className="space-y-2">
                 <Label htmlFor="height" className="flex items-center gap-2">
                   <Ruler className="h-4 w-4" />
-                  Height (inches)
+                  {t("Height (cm)")}
                 </Label>
                 <Input
                   id="height"
                   type="number"
                   step="0.1"
                   {...register("vitals.height", { valueAsNumber: true })}
-                  placeholder="70"
+                  placeholder="165"
                 />
               </div>
             </div>
@@ -500,11 +505,11 @@ export function VisitRecordForm({
         <div className="flex justify-end space-x-4">
           {onCancel && (
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+              {t("Cancel")}
             </Button>
           )}
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : isEditing ? "Update Visit" : "Save Visit Record"}
+            {isSubmitting ? t("Saving...") : isEditing ? t("Update Visit") : t("Save Visit Record")}
           </Button>
         </div>
       </form>

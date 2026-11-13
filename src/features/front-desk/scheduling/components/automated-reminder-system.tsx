@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { 
   Bell, 
   Mail, 
@@ -36,6 +36,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { SCHEDULING_KM } from "@/features/front-desk/scheduling/km";
 
 // Reminder Types
 interface ReminderTemplate {
@@ -118,6 +120,9 @@ export function AutomatedReminderSystem({
   onCancelReminder,
   onResendReminder
 }: AutomatedReminderSystemProps) {
+  const t = useT(SCHEDULING_KM);
+  const tAny = useTranslateAny(SCHEDULING_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useState("overview");
   const [editingTemplate, setEditingTemplate] = useState<ReminderTemplate | null>(null);
   const [selectedAppointments, setSelectedAppointments] = useState<string[]>([]);
@@ -228,7 +233,7 @@ export function AutomatedReminderSystem({
       type: "sms",
       timing: 1440,
       isActive: true,
-      message: "Hi {patient_name}, this is a reminder that you have an appointment with {doctor_name} tomorrow at {appointment_time}. Please call us at {clinic_phone} if you need to reschedule."
+      message: t("Hi {patient_name}, this is a reminder that you have an appointment with {doctor_name} tomorrow at {appointment_time}. Please call us at {clinic_phone} if you need to reschedule.")
     },
     {
       id: "template-2", 
@@ -237,7 +242,7 @@ export function AutomatedReminderSystem({
       timing: 120,
       isActive: true,
       subject: "Upcoming Appointment Reminder - {appointment_time}",
-      message: "Dear {patient_name},\n\nThis is a reminder that you have an appointment with {doctor_name} in 2 hours at {appointment_time}.\n\nLocation: {clinic_address}\nPhone: {clinic_phone}\n\nPlease arrive 15 minutes early for check-in.\n\nBest regards,\n{clinic_name}"
+      message: t("Dear {patient_name}, This is a reminder that you have an appointment with {doctor_name} in 2 hours at {appointment_time}. Location: {clinic_address} Phone: {clinic_phone} Please arrive 15 minutes early for check-in. Best regards, {clinic_name}")
     }
   ];
 
@@ -247,14 +252,14 @@ export function AutomatedReminderSystem({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-orange-600">Reminder Center</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-orange-600">{t("Reminder Center")}</h1>
           <p className="text-muted-foreground">
-            Automated appointment reminders and patient communication
+            {t("Automated appointment reminders and patient communication")}
           </p>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-sm">
-            <span className="font-medium">Sent Today: </span>
+            <span className="font-medium">{t("Sent Today:")} </span>
             <span className="text-2xl font-bold text-green-600">{reminderStats.sentToday}</span>
           </div>
         </div>
@@ -267,7 +272,7 @@ export function AutomatedReminderSystem({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{getUpcomingReminders().length}</p>
-                <p className="text-xs text-muted-foreground">Upcoming Reminders</p>
+                <p className="text-xs text-muted-foreground">{t("Upcoming Reminders")}</p>
               </div>
               <Clock className="h-8 w-8 text-blue-500" />
             </div>
@@ -278,7 +283,7 @@ export function AutomatedReminderSystem({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{reminderStats.sentToday}</p>
-                <p className="text-xs text-muted-foreground">Sent Today</p>
+                <p className="text-xs text-muted-foreground">{t("Sent Today")}</p>
               </div>
               <Send className="h-8 w-8 text-green-500" />
             </div>
@@ -289,7 +294,7 @@ export function AutomatedReminderSystem({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{reminderStats.failedToday}</p>
-                <p className="text-xs text-muted-foreground">Failed Today</p>
+                <p className="text-xs text-muted-foreground">{t("Failed Today")}</p>
               </div>
               <AlertTriangle className="h-8 w-8 text-red-500" />
             </div>
@@ -300,7 +305,7 @@ export function AutomatedReminderSystem({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{Math.round(reminderStats.appointmentAttendanceRate)}%</p>
-                <p className="text-xs text-muted-foreground">Attendance Rate</p>
+                <p className="text-xs text-muted-foreground">{t("Attendance Rate")}</p>
               </div>
               <BarChart3 className="h-8 w-8 text-purple-500" />
             </div>
@@ -310,11 +315,11 @@ export function AutomatedReminderSystem({
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
-          <TabsTrigger value="bulk">Bulk Send</TabsTrigger>
-          <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="templates">{t("Templates")}</TabsTrigger>
+          <TabsTrigger value="bulk">{t("Bulk Send")}</TabsTrigger>
+          <TabsTrigger value="scheduled">{t("Scheduled")}</TabsTrigger>
+          <TabsTrigger value="history">{t("History")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -324,7 +329,7 @@ export function AutomatedReminderSystem({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-blue-500" />
-                  Upcoming Reminders
+                  {t("Upcoming Reminders")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -332,15 +337,15 @@ export function AutomatedReminderSystem({
                   {getUpcomingReminders().length === 0 ? (
                     <div className="text-center py-4 text-muted-foreground">
                       <Clock className="mx-auto h-8 w-8 mb-2" />
-                      <p>No upcoming reminders</p>
+                      <p>{t("No upcoming reminders")}</p>
                     </div>
                   ) : (
                     getUpcomingReminders().map((reminder) => (
-                      <div key={reminder.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div key={reminder.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                         <div className="flex items-center gap-3">
                           {getReminderTypeIcon(reminder.type)}
                           <div className="text-sm">
-                            <div className="font-medium">Patient: {reminder.patientId}</div>
+                            <div className="font-medium">{t("Patient: {patientId}", { patientId: reminder.patientId })}</div>
                             <div className="text-muted-foreground">
                               {formatDistanceToNow(reminder.scheduledTime, { addSuffix: true })}
                             </div>
@@ -351,7 +356,7 @@ export function AutomatedReminderSystem({
                           variant="outline"
                           onClick={() => onCancelReminder(reminder.id)}
                         >
-                          Cancel
+                          {t("Cancel")}
                         </Button>
                       </div>
                     ))
@@ -365,7 +370,7 @@ export function AutomatedReminderSystem({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Send className="h-5 w-5 text-green-500" />
-                  Recent Activity
+                  {t("Recent Activity")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -373,26 +378,26 @@ export function AutomatedReminderSystem({
                   {getRecentReminders().length === 0 ? (
                     <div className="text-center py-4 text-muted-foreground">
                       <Send className="mx-auto h-8 w-8 mb-2" />
-                      <p>No recent activity</p>
+                      <p>{t("No recent activity")}</p>
                     </div>
                   ) : (
                     getRecentReminders().map((reminder) => (
-                      <div key={reminder.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div key={reminder.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                         <div className="flex items-center gap-3">
                           {getReminderTypeIcon(reminder.type)}
                           <div className="text-sm">
-                            <div className="font-medium">Patient: {reminder.patientId}</div>
+                            <div className="font-medium">{t("Patient: {patientId}", { patientId: reminder.patientId })}</div>
                             <div className="text-muted-foreground">
                               {reminder.sentAt ? 
-                                format(reminder.sentAt, "MMM dd, HH:mm") : 
-                                "Failed to send"
+                                fmt(reminder.sentAt, "MMM dd, HH:mm") : 
+                                t("Failed to send")
                               }
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge className={getReminderStatusColor(reminder.status)}>
-                            {reminder.status}
+                            {tAny(reminder.status)}
                           </Badge>
                           {reminder.status === "failed" && (
                             <Button
@@ -401,7 +406,7 @@ export function AutomatedReminderSystem({
                               onClick={() => onResendReminder(reminder.id)}
                             >
                               <RefreshCw className="h-3 w-3 mr-1" />
-                              Retry
+                              {t("Retry")}
                             </Button>
                           )}
                         </div>
@@ -420,57 +425,57 @@ export function AutomatedReminderSystem({
             <Card>
               <CardHeader>
                 <CardTitle>
-                  {editingTemplate ? "Edit Template" : "Create New Template"}
+                  {editingTemplate ? t("Edit Template") : t("Create New Template")}
                 </CardTitle>
                 <CardDescription>
-                  {editingTemplate ? "Update reminder template" : "Create a new reminder template"}
+                  {editingTemplate ? t("Update reminder template") : t("Create a new reminder template")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={templateForm.handleSubmit(handleTemplateSubmit)} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Template Name *</Label>
+                    <Label htmlFor="name">{t("Template Name *")}</Label>
                     <Input
                       id="name"
                       {...templateForm.register("name")}
                       className={templateForm.formState.errors.name ? "border-red-500" : ""}
-                      placeholder="24 Hour SMS Reminder"
+                      placeholder={t("24 Hour SMS Reminder")}
                     />
                     {templateForm.formState.errors.name && (
-                      <p className="text-sm text-red-500">{templateForm.formState.errors.name.message}</p>
+                      <p className="text-sm text-red-500">{tAny(templateForm.formState.errors.name.message)}</p>
                     )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Reminder Type *</Label>
+                      <Label>{t("Reminder Type *")}</Label>
                       <Select onValueChange={(value) => templateForm.setValue("type", value as any)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
+                          <SelectValue placeholder={t("Select type")} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="sms">
                             <div className="flex items-center gap-2">
                               <MessageSquare className="h-4 w-4" />
-                              SMS
+                              {t("SMS")}
                             </div>
                           </SelectItem>
                           <SelectItem value="email">
                             <div className="flex items-center gap-2">
                               <Mail className="h-4 w-4" />
-                              Email
+                              {t("Email")}
                             </div>
                           </SelectItem>
                           <SelectItem value="phone">
                             <div className="flex items-center gap-2">
                               <Phone className="h-4 w-4" />
-                              Phone Call
+                              {t("Phone Call")}
                             </div>
                           </SelectItem>
                           <SelectItem value="push">
                             <div className="flex items-center gap-2">
                               <Bell className="h-4 w-4" />
-                              Push Notification
+                              {t("Push Notification")}
                             </div>
                           </SelectItem>
                         </SelectContent>
@@ -478,20 +483,20 @@ export function AutomatedReminderSystem({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="timing">Timing (minutes before) *</Label>
+                      <Label htmlFor="timing">{t("Timing (minutes before) *")}</Label>
                       <Select onValueChange={(value) => templateForm.setValue("timing", parseInt(value))}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select timing" />
+                          <SelectValue placeholder={t("Select timing")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="30">30 minutes</SelectItem>
-                          <SelectItem value="60">1 hour</SelectItem>
-                          <SelectItem value="120">2 hours</SelectItem>
-                          <SelectItem value="360">6 hours</SelectItem>
-                          <SelectItem value="720">12 hours</SelectItem>
-                          <SelectItem value="1440">1 day</SelectItem>
-                          <SelectItem value="2880">2 days</SelectItem>
-                          <SelectItem value="4320">3 days</SelectItem>
+                          <SelectItem value="30">{t("30 minutes")}</SelectItem>
+                          <SelectItem value="60">{t("1 hour")}</SelectItem>
+                          <SelectItem value="120">{t("2 hours")}</SelectItem>
+                          <SelectItem value="360">{t("6 hours")}</SelectItem>
+                          <SelectItem value="720">{t("12 hours")}</SelectItem>
+                          <SelectItem value="1440">{t("1 day")}</SelectItem>
+                          <SelectItem value="2880">{t("2 days")}</SelectItem>
+                          <SelectItem value="4320">{t("3 days")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -499,29 +504,29 @@ export function AutomatedReminderSystem({
 
                   {templateForm.watch("type") === "email" && (
                     <div className="space-y-2">
-                      <Label htmlFor="subject">Email Subject</Label>
+                      <Label htmlFor="subject">{t("Email Subject")}</Label>
                       <Input
                         id="subject"
                         {...templateForm.register("subject")}
-                        placeholder="Appointment Reminder - {appointment_time}"
+                        placeholder={t("Appointment Reminder - {appointment_time}")}
                       />
                     </div>
                   )}
 
                   <div className="space-y-2">
-                    <Label htmlFor="message">Message *</Label>
+                    <Label htmlFor="message">{t("Message *")}</Label>
                     <Textarea
                       id="message"
                       {...templateForm.register("message")}
                       className={templateForm.formState.errors.message ? "border-red-500" : ""}
-                      placeholder="Hi {patient_name}, you have an appointment with {doctor_name} at {appointment_time}..."
+                      placeholder={t("Hi {patient_name}, you have an appointment with {doctor_name} at {appointment_time}...")}
                       rows={4}
                     />
                     {templateForm.formState.errors.message && (
-                      <p className="text-sm text-red-500">{templateForm.formState.errors.message.message}</p>
+                      <p className="text-sm text-red-500">{tAny(templateForm.formState.errors.message.message)}</p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      Available variables: {"{patient_name}, {doctor_name}, {appointment_time}, {clinic_name}, {clinic_phone}, {clinic_address}"}
+                      {t("Available variables: {patient_name}, {doctor_name}, {appointment_time}, {clinic_name}, {clinic_phone}, {clinic_address}", {  })}
                     </p>
                   </div>
 
@@ -530,7 +535,7 @@ export function AutomatedReminderSystem({
                       id="isActive"
                       {...templateForm.register("isActive")}
                     />
-                    <Label htmlFor="isActive">Active Template</Label>
+                    <Label htmlFor="isActive">{t("Active Template")}</Label>
                   </div>
 
                   <div className="flex justify-end space-x-2">
@@ -543,11 +548,11 @@ export function AutomatedReminderSystem({
                           templateForm.reset();
                         }}
                       >
-                        Cancel
+                        {t("Cancel")}
                       </Button>
                     )}
                     <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? "Saving..." : (editingTemplate ? "Update Template" : "Create Template")}
+                      {isSubmitting ? t("Saving...") : (editingTemplate ? t("Update Template") : t("Create Template"))}
                     </Button>
                   </div>
                 </form>
@@ -557,9 +562,9 @@ export function AutomatedReminderSystem({
             {/* Template List */}
             <Card>
               <CardHeader>
-                <CardTitle>Reminder Templates</CardTitle>
+                <CardTitle>{t("Reminder Templates")}</CardTitle>
                 <CardDescription>
-                  Manage your reminder templates
+                  {t("Manage your reminder templates")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -567,7 +572,7 @@ export function AutomatedReminderSystem({
                   {allTemplates.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <Settings className="mx-auto h-8 w-8 mb-2" />
-                      <p>No templates created yet</p>
+                      <p>{t("No templates created yet")}</p>
                     </div>
                   ) : (
                     allTemplates.map((template) => (
@@ -577,17 +582,17 @@ export function AutomatedReminderSystem({
                             <div className="flex items-center gap-2">
                               <span className="font-medium">{template.name}</span>
                               {!template.isActive && (
-                                <Badge variant="outline">Inactive</Badge>
+                                <Badge variant="outline">{t("Inactive")}</Badge>
                               )}
                             </div>
                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
                               <div className="flex items-center gap-1">
                                 {getReminderTypeIcon(template.type)}
-                                <span className="capitalize">{template.type}</span>
+                                <span className="capitalize">{tAny(template.type)}</span>
                               </div>
                               <div className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                <span>{template.timing} min before</span>
+                                <span>{t("{timing} min before", { timing: template.timing })}</span>
                               </div>
                             </div>
                             <p className="text-sm text-muted-foreground line-clamp-2">
@@ -636,19 +641,19 @@ export function AutomatedReminderSystem({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-blue-500" />
-                Bulk Reminder Scheduling
+                {t("Bulk Reminder Scheduling")}
               </CardTitle>
               <CardDescription>
-                Send reminders to multiple appointments at once
+                {t("Send reminders to multiple appointments at once")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={bulkForm.handleSubmit(handleBulkReminderSubmit)} className="space-y-6">
                 <div className="space-y-2">
-                  <Label>Reminder Template *</Label>
+                  <Label>{t("Reminder Template *")}</Label>
                   <Select onValueChange={(value) => bulkForm.setValue("templateId", value)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select template" />
+                      <SelectValue placeholder={t("Select template")} />
                     </SelectTrigger>
                     <SelectContent>
                       {allTemplates
@@ -659,8 +664,7 @@ export function AutomatedReminderSystem({
                               {getReminderTypeIcon(template.type)}
                               <span>{template.name}</span>
                               <span className="text-muted-foreground">
-                                ({template.timing} min)
-                              </span>
+                                {t("({timing} min)", { timing: template.timing })}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -671,7 +675,7 @@ export function AutomatedReminderSystem({
                 {/* Appointment Selection */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label>Select Appointments ({selectedAppointments.length} selected)</Label>
+                    <Label>{t("Select Appointments ({length} selected)", { length: selectedAppointments.length })}</Label>
                     <Button
                       type="button"
                       variant="outline"
@@ -683,21 +687,21 @@ export function AutomatedReminderSystem({
                         );
                       }}
                     >
-                      {selectedAppointments.length === appointments.length ? "Deselect All" : "Select All"}
+                      {selectedAppointments.length === appointments.length ? t("Deselect All") : t("Select All")}
                     </Button>
                   </div>
                   
                   <div className="max-h-60 overflow-y-auto border rounded-lg">
                     {appointments.length === 0 ? (
                       <div className="p-4 text-center text-muted-foreground">
-                        No appointments available
+                        {t("No appointments available")}
                       </div>
                     ) : (
                       <div className="space-y-1 p-2">
                         {appointments.map((appointment) => (
                           <div
                             key={appointment.id}
-                            className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded"
+                            className="flex items-center space-x-3 p-3 hover:bg-muted rounded"
                           >
                             <Checkbox
                               checked={selectedAppointments.includes(appointment.id)}
@@ -714,11 +718,11 @@ export function AutomatedReminderSystem({
                                 {appointment.patientId} - {appointment.doctorId}
                               </div>
                               <div className="text-muted-foreground">
-                                {format(appointment.appointmentDate, "MMM dd, yyyy HH:mm")}
+                                {fmt(appointment.appointmentDate, "MMM dd, yyyy HH:mm")}
                               </div>
                             </div>
                             <Badge variant="outline">
-                              {appointment.status}
+                              {tAny(appointment.status)}
                             </Badge>
                           </div>
                         ))}
@@ -728,11 +732,11 @@ export function AutomatedReminderSystem({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="customMessage">Custom Message (Optional)</Label>
+                  <Label htmlFor="customMessage">{t("Custom Message (Optional)")}</Label>
                   <Textarea
                     id="customMessage"
                     {...bulkForm.register("customMessage")}
-                    placeholder="Override template message for this bulk send"
+                    placeholder={t("Override template message for this bulk send")}
                     rows={3}
                   />
                 </div>
@@ -742,12 +746,12 @@ export function AutomatedReminderSystem({
                     id="sendImmediately"
                     {...bulkForm.register("sendImmediately")}
                   />
-                  <Label htmlFor="sendImmediately">Send immediately (ignore timing)</Label>
+                  <Label htmlFor="sendImmediately">{t("Send immediately (ignore timing)")}</Label>
                 </div>
 
                 <div className="flex justify-end">
                   <Button type="submit" disabled={isSubmitting || selectedAppointments.length === 0}>
-                    {isSubmitting ? "Scheduling..." : `Schedule ${selectedAppointments.length} Reminders`}
+                    {isSubmitting ? t("Scheduling...") : t("Schedule {length} Reminders", { length: selectedAppointments.length })}
                   </Button>
                 </div>
               </form>
@@ -758,9 +762,9 @@ export function AutomatedReminderSystem({
         <TabsContent value="scheduled" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Scheduled Reminders</CardTitle>
+              <CardTitle>{t("Scheduled Reminders")}</CardTitle>
               <CardDescription>
-                View and manage upcoming reminders
+                {t("View and manage upcoming reminders")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -768,7 +772,7 @@ export function AutomatedReminderSystem({
                 {scheduledReminders.filter(r => r.status === "pending").length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Clock className="mx-auto h-12 w-12 mb-4" />
-                    <p>No scheduled reminders</p>
+                    <p>{t("No scheduled reminders")}</p>
                   </div>
                 ) : (
                   scheduledReminders
@@ -783,15 +787,15 @@ export function AutomatedReminderSystem({
                           <div className="flex items-center gap-3">
                             {getReminderTypeIcon(reminder.type)}
                             <span className="font-medium">
-                              Patient: {reminder.patientId}
+                              {t("Patient: {patientId}", { patientId: reminder.patientId })}
                             </span>
                             <Badge className={getReminderStatusColor(reminder.status)}>
-                              {reminder.status}
+                              {tAny(reminder.status)}
                             </Badge>
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            <div>Scheduled: {format(reminder.scheduledTime, "MMM dd, yyyy HH:mm")}</div>
-                            <div className="line-clamp-1">Message: {reminder.message}</div>
+                            <div>{t("Scheduled: {scheduledTime}", { scheduledTime: fmt(reminder.scheduledTime, "MMM dd, yyyy HH:mm") })}</div>
+                            <div className="line-clamp-1">{t("Message: {message}", { message: reminder.message })}</div>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -801,7 +805,7 @@ export function AutomatedReminderSystem({
                             onClick={() => onCancelReminder(reminder.id)}
                             className="text-red-600 hover:text-red-700"
                           >
-                            Cancel
+                            {t("Cancel")}
                           </Button>
                         </div>
                       </div>
@@ -815,9 +819,9 @@ export function AutomatedReminderSystem({
         <TabsContent value="history" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Reminder History</CardTitle>
+              <CardTitle>{t("Reminder History")}</CardTitle>
               <CardDescription>
-                View sent and failed reminders
+                {t("View sent and failed reminders")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -825,7 +829,7 @@ export function AutomatedReminderSystem({
                 {scheduledReminders.filter(r => r.status !== "pending").length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Send className="mx-auto h-12 w-12 mb-4" />
-                    <p>No reminder history available</p>
+                    <p>{t("No reminder history available")}</p>
                   </div>
                 ) : (
                   scheduledReminders
@@ -844,22 +848,22 @@ export function AutomatedReminderSystem({
                           <div className="flex items-center gap-3">
                             {getReminderTypeIcon(reminder.type)}
                             <span className="font-medium">
-                              Patient: {reminder.patientId}
+                              {t("Patient: {patientId}", { patientId: reminder.patientId })}
                             </span>
                             <Badge className={getReminderStatusColor(reminder.status)}>
-                              {reminder.status}
+                              {tAny(reminder.status)}
                             </Badge>
                           </div>
                           <div className="text-sm text-muted-foreground">
                             <div>
                               {reminder.sentAt ? 
-                                `Sent: ${format(reminder.sentAt, "MMM dd, yyyy HH:mm")}` :
-                                `Failed: ${format(reminder.scheduledTime, "MMM dd, yyyy HH:mm")}`
+                                t("Sent: {sentAt}", { sentAt: fmt(reminder.sentAt, "MMM dd, yyyy HH:mm") }) :
+                                t("Failed: {scheduledTime}", { scheduledTime: fmt(reminder.scheduledTime, "MMM dd, yyyy HH:mm") })
                               }
                             </div>
-                            <div className="line-clamp-1">Message: {reminder.message}</div>
+                            <div className="line-clamp-1">{t("Message: {message}", { message: reminder.message })}</div>
                             {reminder.error && (
-                              <div className="text-red-600">Error: {reminder.error}</div>
+                              <div className="text-red-600">{t("Error: {error}", { error: reminder.error })}</div>
                             )}
                           </div>
                         </div>
@@ -871,7 +875,7 @@ export function AutomatedReminderSystem({
                               onClick={() => onResendReminder(reminder.id)}
                             >
                               <RefreshCw className="h-3 w-3 mr-1" />
-                              Retry
+                              {t("Retry")}
                             </Button>
                           )}
                         </div>

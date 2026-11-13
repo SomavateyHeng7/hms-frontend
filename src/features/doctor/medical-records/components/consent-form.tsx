@@ -13,6 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useT, useTranslateAny } from "@/lib/i18n/messages";
+import { RECORDS_KM } from "@/features/doctor/medical-records/km";
 
 export const CONSENT_TYPE_LABELS: Record<ConsentFormData["consentType"], string> = {
   surgery: "Surgery",
@@ -39,7 +41,8 @@ interface ConsentFormProps {
 }
 
 function FieldErrorText({ error }: { error?: { message?: string } }) {
-  return error?.message ? <p className="text-sm text-red-500">{error.message}</p> : null;
+  const tAny = useTranslateAny(RECORDS_KM);
+  return error?.message ? <p className="text-sm text-red-500">{tAny(error.message)}</p> : null;
 }
 
 function ListField({
@@ -125,6 +128,8 @@ function ListField({
 }
 
 export function ConsentForm({ patients, onSubmit, onCancel, initialData }: ConsentFormProps) {
+  const t = useT(RECORDS_KM);
+  const tAny = useTranslateAny(RECORDS_KM);
   const {
     register,
     control,
@@ -164,20 +169,20 @@ export function ConsentForm({ patients, onSubmit, onCancel, initialData }: Conse
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
       <Card>
         <CardHeader>
-          <CardTitle>Procedure Details</CardTitle>
-          <CardDescription>What the patient is consenting to</CardDescription>
+          <CardTitle>{t("Procedure Details")}</CardTitle>
+          <CardDescription>{t("What the patient is consenting to")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Patient *</Label>
+              <Label htmlFor="consent-patient">{t("Patient *")}</Label>
               <Controller
                 control={control}
                 name="patientId"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className={errors.patientId ? "border-red-500" : ""}>
-                      <SelectValue placeholder="Select patient" />
+                    <SelectTrigger id="consent-patient" className={errors.patientId ? "border-red-500" : ""}>
+                      <SelectValue placeholder={t("Select patient")} />
                     </SelectTrigger>
                     <SelectContent>
                       {patients.map((p) => (
@@ -192,19 +197,19 @@ export function ConsentForm({ patients, onSubmit, onCancel, initialData }: Conse
               <FieldErrorText error={errors.patientId} />
             </div>
             <div className="space-y-2">
-              <Label>Consent Type *</Label>
+              <Label htmlFor="consent-type">{t("Consent Type *")}</Label>
               <Controller
                 control={control}
                 name="consentType"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
+                    <SelectTrigger id="consent-type">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(CONSENT_TYPE_LABELS).map(([value, label]) => (
                         <SelectItem key={value} value={value}>
-                          {label}
+                          {tAny(label)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -216,28 +221,28 @@ export function ConsentForm({ patients, onSubmit, onCancel, initialData }: Conse
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="procedureName">Procedure Name *</Label>
+              <Label htmlFor="procedureName">{t("Procedure Name *")}</Label>
               <Input
                 id="procedureName"
                 {...register("procedureName")}
-                placeholder="e.g. Laparoscopic Cholecystectomy"
+                placeholder={t("e.g. Laparoscopic Cholecystectomy")}
                 className={errors.procedureName ? "border-red-500" : ""}
               />
               <FieldErrorText error={errors.procedureName} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="relatedProcedureId">Related Procedure / Surgery ID</Label>
-              <Input id="relatedProcedureId" {...register("relatedProcedureId")} placeholder="Optional, e.g. SUR-0042" />
+              <Label htmlFor="relatedProcedureId">{t("Related Procedure / Surgery ID")}</Label>
+              <Input id="relatedProcedureId" {...register("relatedProcedureId")} placeholder={t("Optional, e.g. SUR-0042")} />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="procedureDescription">Description (in plain language) *</Label>
+            <Label htmlFor="procedureDescription">{t("Description (in plain language) *")}</Label>
             <Textarea
               id="procedureDescription"
               rows={4}
               {...register("procedureDescription")}
-              placeholder="Describe the procedure in terms the patient can understand"
+              placeholder={t("Describe the procedure in terms the patient can understand")}
               className={errors.procedureDescription ? "border-red-500" : ""}
             />
             <FieldErrorText error={errors.procedureDescription} />
@@ -247,39 +252,39 @@ export function ConsentForm({ patients, onSubmit, onCancel, initialData }: Conse
 
       <Card>
         <CardHeader>
-          <CardTitle>Risks, Benefits &amp; Alternatives</CardTitle>
-          <CardDescription>Press Enter or + to add each item</CardDescription>
+          <CardTitle>{t("Risks, Benefits & Alternatives")}</CardTitle>
+          <CardDescription>{t("Press Enter or + to add each item")}</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ListField control={control} name="risks" label="Risks" placeholder="e.g. Bleeding" required />
-          <ListField control={control} name="benefits" label="Benefits" placeholder="e.g. Pain relief" required />
-          <ListField control={control} name="alternatives" label="Alternatives" placeholder="e.g. Medication" />
+          <ListField control={control} name="risks" label={t("Risks")} placeholder={t("e.g. Bleeding")} required />
+          <ListField control={control} name="benefits" label={t("Benefits")} placeholder={t("e.g. Pain relief")} required />
+          <ListField control={control} name="alternatives" label={t("Alternatives")} placeholder={t("e.g. Medication")} />
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Explanation</CardTitle>
-          <CardDescription>Clinician who explained the procedure and the consenter&apos;s understanding</CardDescription>
+          <CardTitle>{t("Explanation")}</CardTitle>
+          <CardDescription>{t("Clinician who explained the procedure and the consenter's understanding")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="explainedBy">Explained By *</Label>
+              <Label htmlFor="explainedBy">{t("Explained By *")}</Label>
               <Input
                 id="explainedBy"
                 {...register("explainedBy")}
-                placeholder="e.g. Dr. Johnson"
+                placeholder={t("e.g. Dr. Chea Sovann")}
                 className={errors.explainedBy ? "border-red-500" : ""}
               />
               <FieldErrorText error={errors.explainedBy} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="explainedByDesignation">Designation *</Label>
+              <Label htmlFor="explainedByDesignation">{t("Designation *")}</Label>
               <Input
                 id="explainedByDesignation"
                 {...register("explainedByDesignation")}
-                placeholder="e.g. Consultant Surgeon"
+                placeholder={t("e.g. Consultant Surgeon")}
                 className={errors.explainedByDesignation ? "border-red-500" : ""}
               />
               <FieldErrorText error={errors.explainedByDesignation} />
@@ -306,7 +311,7 @@ export function ConsentForm({ patients, onSubmit, onCancel, initialData }: Conse
                       className="mt-0.5"
                     />
                     <Label htmlFor={name} className="font-normal leading-snug">
-                      {text}
+                      {tAny(text)}
                     </Label>
                   </div>
                   <FieldErrorText error={errors[name]} />
@@ -319,22 +324,22 @@ export function ConsentForm({ patients, onSubmit, onCancel, initialData }: Conse
 
       <Card>
         <CardHeader>
-          <CardTitle>Consent &amp; Signatures</CardTitle>
-          <CardDescription>Who is giving consent, and the witness</CardDescription>
+          <CardTitle>{t("Consent & Signatures")}</CardTitle>
+          <CardDescription>{t("Who is giving consent, and the witness")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Consent Given By *</Label>
+            <Label>{t("Consent Given By *")}</Label>
             <Controller
               control={control}
               name="consentGivenBy"
               render={({ field }) => (
-                <RadioGroup value={field.value} onValueChange={field.onChange} className="flex flex-wrap gap-6">
+                <RadioGroup value={field.value} onValueChange={field.onChange} className="flex flex-wrap gap-6" aria-label={t("Consent given by")}>
                   {Object.entries(CONSENTER_LABELS).map(([value, label]) => (
                     <div key={value} className="flex items-center gap-2">
                       <RadioGroupItem value={value} id={`consenter-${value}`} />
                       <Label htmlFor={`consenter-${value}`} className="font-normal">
-                        {label}
+                        {tAny(label)}
                       </Label>
                     </div>
                   ))}
@@ -346,7 +351,7 @@ export function ConsentForm({ patients, onSubmit, onCancel, initialData }: Conse
           {!consenterIsPatient && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 rounded-md border p-4">
               <div className="space-y-2">
-                <Label htmlFor="guardianName">{CONSENTER_LABELS[consentGivenBy]} Name *</Label>
+                <Label htmlFor="guardianName">{t("Name of {role} *", { role: tAny(CONSENTER_LABELS[consentGivenBy]) })}</Label>
                 <Input
                   id="guardianName"
                   {...register("guardianName")}
@@ -355,17 +360,17 @@ export function ConsentForm({ patients, onSubmit, onCancel, initialData }: Conse
                 <FieldErrorText error={errors.guardianName} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="guardianRelation">Relationship to Patient *</Label>
+                <Label htmlFor="guardianRelation">{t("Relationship to Patient *")}</Label>
                 <Input
                   id="guardianRelation"
                   {...register("guardianRelation")}
-                  placeholder="e.g. Parent"
+                  placeholder={t("e.g. Parent")}
                   className={errors.guardianRelation ? "border-red-500" : ""}
                 />
                 <FieldErrorText error={errors.guardianRelation} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="guardianPhone">Phone *</Label>
+                <Label htmlFor="guardianPhone">{t("Phone *")}</Label>
                 <Input
                   id="guardianPhone"
                   type="tel"
@@ -378,15 +383,20 @@ export function ConsentForm({ patients, onSubmit, onCancel, initialData }: Conse
           )}
 
           <div className="rounded-md bg-muted p-4 text-sm">
-            I, the undersigned{consenterIsPatient ? "" : `, acting as ${CONSENTER_LABELS[consentGivenBy].toLowerCase()} of the patient`}
-            {patientName ? ` (${patientName})` : ""}, confirm that the procedure described above has been explained
-            to me, and I voluntarily give my consent. I understand I may withdraw this consent at any time before
-            the procedure.
+            {consenterIsPatient
+              ? t(
+                  "I, the undersigned{patient}, confirm that the procedure described above has been explained to me, and I voluntarily give my consent. I understand I may withdraw this consent at any time before the procedure.",
+                  { patient: patientName ? ` (${patientName})` : "" }
+                )
+              : t(
+                  "I, the undersigned, acting as {role} of the patient{patient}, confirm that the procedure described above has been explained to me, and I voluntarily give my consent. I understand I may withdraw this consent at any time before the procedure.",
+                  { role: tAny(CONSENTER_LABELS[consentGivenBy]), patient: patientName ? ` (${patientName})` : "" }
+                )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="signatureName">Signature of Consenter (type full name) *</Label>
+              <Label htmlFor="signatureName">{t("Signature of Consenter (type full name) *")}</Label>
               <Input
                 id="signatureName"
                 {...register("signatureName")}
@@ -395,7 +405,7 @@ export function ConsentForm({ patients, onSubmit, onCancel, initialData }: Conse
               <FieldErrorText error={errors.signatureName} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="witnessName">Witness Name *</Label>
+              <Label htmlFor="witnessName">{t("Witness Name *")}</Label>
               <Input
                 id="witnessName"
                 {...register("witnessName")}
@@ -410,11 +420,11 @@ export function ConsentForm({ patients, onSubmit, onCancel, initialData }: Conse
       <div className="flex justify-end gap-2">
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+            {t("Cancel")}
           </Button>
         )}
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Sign & Save Consent"}
+          {isSubmitting ? t("Saving...") : t("Sign & Save Consent")}
         </Button>
       </div>
     </form>

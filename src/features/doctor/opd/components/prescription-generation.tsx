@@ -17,6 +17,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Prescription, PrescriptionMedication } from "@/features/doctor/opd/types";
 import { prescriptionSchema, type PrescriptionFormData } from "@/features/doctor/opd/validations";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { OPD_KM } from "@/features/doctor/opd/km";
 
 interface PrescriptionGenerationProps {
   patientId: string;
@@ -138,16 +140,17 @@ const emptyMedication = (): MedicationFormData => ({
   warnings: [],
 });
 
-const fromTemplate = (t: MedicationTemplate): MedicationFormData => ({
+/** `tr` puts the template's patient instructions and frequency in the reader's language. */
+const fromTemplate = (t: MedicationTemplate, tr: (text: string) => string = (x) => x): MedicationFormData => ({
   ...emptyMedication(),
   drugName: t.drugName,
   genericName: t.genericName,
   strength: t.strength,
   dosageForm: t.dosageForm,
   dosage: t.defaultDosage,
-  frequency: t.defaultFrequency,
+  frequency: tr(t.defaultFrequency),
   duration: t.defaultDuration,
-  instructions: t.commonInstructions.join("; "),
+  instructions: t.commonInstructions.map(tr).join("; "),
 });
 
 const emptyPrescription = (): PrescriptionFormData => ({
@@ -198,6 +201,9 @@ export function PrescriptionGeneration({
   onDeletePrescription,
   onPrintPrescription,
 }: PrescriptionGenerationProps) {
+  const t = useT(OPD_KM);
+  const tAny = useTranslateAny(OPD_KM);
+  const fmt = useDateFormat();
   const [prescriptionDialogOpen, setPrescriptionDialogOpen] = useState(false);
   const [editingPrescription, setEditingPrescription] = useState<Prescription | null>(null);
   const [medicationSearch, setMedicationSearch] = useState("");
@@ -233,7 +239,7 @@ export function PrescriptionGeneration({
   };
 
   const applyTemplate = (template: MedicationTemplate, index: number) => {
-    const med = fromTemplate(template);
+    const med = fromTemplate(template, tAny);
     (Object.keys(med) as (keyof MedicationFormData)[]).forEach((key) => {
       form.setValue(`medications.${index}.${key}`, med[key] as never, { shouldValidate: false });
     });
@@ -243,7 +249,7 @@ export function PrescriptionGeneration({
     const meds = selectedTemplates
       .map((id) => medicationTemplates.find((t) => t.id === id))
       .filter((t): t is MedicationTemplate => !!t)
-      .map(fromTemplate);
+      .map((tpl) => fromTemplate(tpl, tAny));
     if (meds.length > 0) {
       form.reset({ ...emptyPrescription(), medications: meds });
       replace(meds);
@@ -265,30 +271,30 @@ export function PrescriptionGeneration({
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Prescription Generation</h1>
-        <p className="text-muted-foreground">Create and manage patient prescriptions</p>
+        <h1 className="text-3xl font-bold">{t("Prescription Generation")}</h1>
+        <p className="text-muted-foreground">{t("Create and manage patient prescriptions")}</p>
       </div>
 
       <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-        <h2 className="text-xl font-semibold">Prescriptions ({prescriptions.length})</h2>
+        <h2 className="text-xl font-semibold">{t("Prescriptions ({length})", { length: prescriptions.length })}</h2>
         <div className="flex gap-2">
           <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
                 <Search className="mr-2 h-4 w-4" />
-                Browse Templates
+                {t("Browse Templates")}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-4xl">
               <DialogHeader>
-                <DialogTitle>Medication Templates</DialogTitle>
-                <DialogDescription>Select common medications to start a prescription</DialogDescription>
+                <DialogTitle>{t("Medication Templates")}</DialogTitle>
+                <DialogDescription>{t("Select common medications to start a prescription")}</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search medications..."
+                    placeholder={t("Search medications...")}
                     value={medicationSearch}
                     onChange={(e) => setMedicationSearch(e.target.value)}
                     className="pl-10"
@@ -298,12 +304,12 @@ export function PrescriptionGeneration({
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-12">Select</TableHead>
-                        <TableHead>Medication</TableHead>
-                        <TableHead>Generic Name</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Strength</TableHead>
-                        <TableHead>Frequency</TableHead>
+                        <TableHead className="w-12">{t("Select")}</TableHead>
+                        <TableHead>{t("Medication")}</TableHead>
+                        <TableHead>{t("Generic Name")}</TableHead>
+                        <TableHead>{t("Category")}</TableHead>
+                        <TableHead>{t("Strength")}</TableHead>
+                        <TableHead>{t("Frequency")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -322,10 +328,10 @@ export function PrescriptionGeneration({
                           <TableCell className="font-medium">{template.drugName}</TableCell>
                           <TableCell>{template.genericName}</TableCell>
                           <TableCell>
-                            <Badge variant="outline">{template.category}</Badge>
+                            <Badge variant="outline">{tAny(template.category)}</Badge>
                           </TableCell>
                           <TableCell>{template.strength}</TableCell>
-                          <TableCell>{template.defaultFrequency}</TableCell>
+                          <TableCell>{tAny(template.defaultFrequency)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -334,11 +340,10 @@ export function PrescriptionGeneration({
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setTemplateDialogOpen(false)}>
-                  Cancel
+                  {t("Cancel")}
                 </Button>
                 <Button onClick={applyMultipleTemplates} disabled={selectedTemplates.length === 0}>
-                  Start Prescription ({selectedTemplates.length})
-                </Button>
+                  {t("Start Prescription ({length})", { length: selectedTemplates.length })}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -346,20 +351,20 @@ export function PrescriptionGeneration({
           <Dialog open={prescriptionDialogOpen} onOpenChange={setPrescriptionDialogOpen}>
             <Button onClick={() => openPrescriptionDialog()}>
               <Plus className="mr-2 h-4 w-4" />
-              New Prescription
+              {t("New Prescription")}
             </Button>
             <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{editingPrescription ? "Edit Prescription" : "Create New Prescription"}</DialogTitle>
-                <DialogDescription>Add medications and instructions for the patient</DialogDescription>
+                <DialogTitle>{editingPrescription ? t("Edit Prescription") : t("Create New Prescription")}</DialogTitle>
+                <DialogDescription>{t("Add medications and instructions for the patient")}</DialogDescription>
               </DialogHeader>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label className="text-lg">Medications</Label>
+                    <Label className="text-lg">{t("Medications")}</Label>
                     <Button type="button" onClick={() => append(emptyMedication())} size="sm">
                       <Plus className="mr-2 h-4 w-4" />
-                      Add Medication
+                      {t("Add Medication")}
                     </Button>
                   </div>
                   <FieldError message={errors.medications?.root?.message ?? errors.medications?.message} />
@@ -369,7 +374,7 @@ export function PrescriptionGeneration({
                     return (
                       <Card key={field.id} className="p-4">
                         <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-sm font-medium">Medication {index + 1}</h4>
+                          <h4 className="text-sm font-medium">{t("Medication {value}", { value: index + 1 })}</h4>
                           <div className="flex gap-2">
                             <Select
                               onValueChange={(templateId) => {
@@ -377,8 +382,8 @@ export function PrescriptionGeneration({
                                 if (template) applyTemplate(template, index);
                               }}
                             >
-                              <SelectTrigger className="w-48">
-                                <SelectValue placeholder="Apply template" />
+                              <SelectTrigger className="w-48" aria-label={t("Apply a template to medication {value}", { value: index + 1 })}>
+                                <SelectValue placeholder={t("Apply template")} />
                               </SelectTrigger>
                               <SelectContent>
                                 {medicationTemplates.map((template) => (
@@ -389,7 +394,7 @@ export function PrescriptionGeneration({
                               </SelectContent>
                             </Select>
                             {fields.length > 1 && (
-                              <Button type="button" variant="outline" size="sm" onClick={() => remove(index)} aria-label="Remove medication">
+                              <Button type="button" variant="outline" size="sm" onClick={() => remove(index)} aria-label={t("Remove medication")}>
                                 <Minus className="h-4 w-4" />
                               </Button>
                             )}
@@ -398,30 +403,30 @@ export function PrescriptionGeneration({
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                           <div className="space-y-2 md:col-span-2">
-                            <Label htmlFor={`med-${index}-drugName`}>Drug Name *</Label>
-                            <Input id={`med-${index}-drugName`} {...form.register(`medications.${index}.drugName`)} placeholder="e.g., Paracetamol" />
+                            <Label htmlFor={`med-${index}-drugName`}>{t("Drug Name *")}</Label>
+                            <Input id={`med-${index}-drugName`} {...form.register(`medications.${index}.drugName`)} placeholder={t("e.g., Paracetamol")} />
                             <FieldError message={medErrors?.drugName?.message} />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor={`med-${index}-genericName`}>Generic Name</Label>
-                            <Input id={`med-${index}-genericName`} {...form.register(`medications.${index}.genericName`)} placeholder="e.g., Acetaminophen" />
+                            <Label htmlFor={`med-${index}-genericName`}>{t("Generic Name")}</Label>
+                            <Input id={`med-${index}-genericName`} {...form.register(`medications.${index}.genericName`)} placeholder={t("e.g., Acetaminophen")} />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor={`med-${index}-strength`}>Strength *</Label>
-                            <Input id={`med-${index}-strength`} {...form.register(`medications.${index}.strength`)} placeholder="e.g., 500mg" />
+                            <Label htmlFor={`med-${index}-strength`}>{t("Strength *")}</Label>
+                            <Input id={`med-${index}-strength`} {...form.register(`medications.${index}.strength`)} placeholder={t("e.g., 500mg")} />
                             <FieldError message={medErrors?.strength?.message} />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                           <div className="space-y-2">
-                            <Label>Form</Label>
+                            <Label htmlFor={`med-${index}-dosageForm`}>{t("Form")}</Label>
                             <Controller
                               control={form.control}
                               name={`medications.${index}.dosageForm`}
                               render={({ field: f }) => (
                                 <Select value={f.value} onValueChange={f.onChange}>
-                                  <SelectTrigger>
+                                  <SelectTrigger id={`med-${index}-dosageForm`}>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -436,29 +441,29 @@ export function PrescriptionGeneration({
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor={`med-${index}-dosage`}>Dosage *</Label>
-                            <Input id={`med-${index}-dosage`} {...form.register(`medications.${index}.dosage`)} placeholder="e.g., 1 tablet" />
+                            <Label htmlFor={`med-${index}-dosage`}>{t("Dosage *")}</Label>
+                            <Input id={`med-${index}-dosage`} {...form.register(`medications.${index}.dosage`)} placeholder={t("e.g., 1 tablet")} />
                             <FieldError message={medErrors?.dosage?.message} />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor={`med-${index}-frequency`}>Frequency *</Label>
-                            <Input id={`med-${index}-frequency`} {...form.register(`medications.${index}.frequency`)} placeholder="e.g., Twice daily" />
+                            <Label htmlFor={`med-${index}-frequency`}>{t("Frequency *")}</Label>
+                            <Input id={`med-${index}-frequency`} {...form.register(`medications.${index}.frequency`)} placeholder={t("e.g., Twice daily")} />
                             <FieldError message={medErrors?.frequency?.message} />
                           </div>
                           <div className="space-y-2">
-                            <Label>Route</Label>
+                            <Label htmlFor={`med-${index}-route`}>{t("Route")}</Label>
                             <Controller
                               control={form.control}
                               name={`medications.${index}.route`}
                               render={({ field: f }) => (
                                 <Select value={f.value} onValueChange={f.onChange}>
-                                  <SelectTrigger>
+                                  <SelectTrigger id={`med-${index}-route`}>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
                                     {ROUTES.map((r) => (
                                       <SelectItem key={r.value} value={r.value}>
-                                        {r.label}
+                                        {tAny(r.label)}
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
@@ -470,17 +475,17 @@ export function PrescriptionGeneration({
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                           <div className="space-y-2">
-                            <Label htmlFor={`med-${index}-duration`}>Duration *</Label>
-                            <Input id={`med-${index}-duration`} {...form.register(`medications.${index}.duration`)} placeholder="e.g., 7 days" />
+                            <Label htmlFor={`med-${index}-duration`}>{t("Duration *")}</Label>
+                            <Input id={`med-${index}-duration`} {...form.register(`medications.${index}.duration`)} placeholder={t("e.g., 7 days")} />
                             <FieldError message={medErrors?.duration?.message} />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor={`med-${index}-quantity`}>Quantity *</Label>
+                            <Label htmlFor={`med-${index}-quantity`}>{t("Quantity *")}</Label>
                             <Input id={`med-${index}-quantity`} type="number" min={1} {...form.register(`medications.${index}.quantity`, { valueAsNumber: true })} />
                             <FieldError message={medErrors?.quantity?.message} />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor={`med-${index}-refills`}>Refills</Label>
+                            <Label htmlFor={`med-${index}-refills`}>{t("Refills")}</Label>
                             <Input id={`med-${index}-refills`} type="number" min={0} max={12} {...form.register(`medications.${index}.refills`, { valueAsNumber: true })} />
                             <FieldError message={medErrors?.refills?.message} />
                           </div>
@@ -491,7 +496,7 @@ export function PrescriptionGeneration({
                               <div className="flex items-end gap-2 pb-2">
                                 <Checkbox id={`med-${index}-sub`} checked={f.value} onCheckedChange={(v) => f.onChange(v === true)} />
                                 <Label htmlFor={`med-${index}-sub`} className="font-normal">
-                                  Generic substitution allowed
+                                  {t("Generic substitution allowed")}
                                 </Label>
                               </div>
                             )}
@@ -499,8 +504,8 @@ export function PrescriptionGeneration({
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor={`med-${index}-instructions`}>Instructions for the patient *</Label>
-                          <Textarea id={`med-${index}-instructions`} {...form.register(`medications.${index}.instructions`)} placeholder="e.g., Take with food, avoid alcohol" rows={2} />
+                          <Label htmlFor={`med-${index}-instructions`}>{t("Instructions for the patient *")}</Label>
+                          <Textarea id={`med-${index}-instructions`} {...form.register(`medications.${index}.instructions`)} placeholder={t("e.g., Take with food, avoid alcohol")} rows={2} />
                           <FieldError message={medErrors?.instructions?.message} />
                         </div>
                       </Card>
@@ -510,34 +515,34 @@ export function PrescriptionGeneration({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="rx-duration">Treatment Duration *</Label>
-                    <Input id="rx-duration" {...form.register("duration")} placeholder="e.g., 7 days" />
+                    <Label htmlFor="rx-duration">{t("Treatment Duration *")}</Label>
+                    <Input id="rx-duration" {...form.register("duration")} placeholder={t("e.g., 7 days")} />
                     <FieldError message={errors.duration?.message} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="rx-followUp">Follow-up Date</Label>
+                    <Label htmlFor="rx-followUp">{t("Follow-up Date")}</Label>
                     <Input id="rx-followUp" type="date" {...form.register("followUpDate")} />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="rx-instructions">General Instructions *</Label>
-                  <Textarea id="rx-instructions" {...form.register("instructions")} placeholder="e.g., Drink plenty of water; return if fever persists" rows={2} />
+                  <Label htmlFor="rx-instructions">{t("General Instructions *")}</Label>
+                  <Textarea id="rx-instructions" {...form.register("instructions")} placeholder={t("e.g., Drink plenty of water; return if fever persists")} rows={2} />
                   <FieldError message={errors.instructions?.message} />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="rx-pharmacyNotes">Notes for the Pharmacy</Label>
-                  <Textarea id="rx-pharmacyNotes" {...form.register("pharmacyNotes")} placeholder="Optional" rows={2} />
+                  <Label htmlFor="rx-pharmacyNotes">{t("Notes for the Pharmacy")}</Label>
+                  <Textarea id="rx-pharmacyNotes" {...form.register("pharmacyNotes")} placeholder={t("Optional")} rows={2} />
                 </div>
 
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setPrescriptionDialogOpen(false)}>
-                    Cancel
+                    {t("Cancel")}
                   </Button>
                   <Button type="submit" disabled={form.formState.isSubmitting}>
                     <Save className="mr-2 h-4 w-4" />
-                    {editingPrescription ? "Update" : "Create"} Prescription
+                    {editingPrescription ? t("Update Prescription") : t("Create Prescription")}
                   </Button>
                 </DialogFooter>
               </form>
@@ -553,22 +558,22 @@ export function PrescriptionGeneration({
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    Prescription #{prescription.prescriptionNumber}
-                    <Badge className={STATUS_COLORS[prescription.status]}>{prescription.status}</Badge>
+                    {t("Prescription #")}{prescription.prescriptionNumber}
+                    <Badge className={STATUS_COLORS[prescription.status]}>{tAny(prescription.status)}</Badge>
                   </CardTitle>
                   <CardDescription>
-                    Issued {format(prescription.issuedDate, "PP")} • By {prescription.doctorName} • Duration {prescription.duration}
+                    {t("Issued {issuedDate} • By {doctorName} • Duration {duration}", { issuedDate: fmt(prescription.issuedDate, "PP"), doctorName: prescription.doctorName, duration: prescription.duration })}
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => openPrescriptionDialog(prescription)}>
-                    Edit
+                    {t("Edit")}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => onPrintPrescription(prescription.id)}>
                     <Printer className="mr-2 h-4 w-4" />
-                    Print
+                    {t("Print")}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => onDeletePrescription(prescription.id)} aria-label="Delete prescription">
+                  <Button variant="outline" size="sm" onClick={() => onDeletePrescription(prescription.id)} aria-label={t("Delete prescription")}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -577,37 +582,37 @@ export function PrescriptionGeneration({
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium mb-2">Medications ({prescription.medications.length})</h4>
+                  <h4 className="font-medium mb-2">{t("Medications ({length})", { length: prescription.medications.length })}</h4>
                   <div className="grid gap-3">
                     {prescription.medications.map((medication) => (
                       <div key={medication.id} className="border rounded-lg p-3 bg-muted/40">
                         <div className="flex items-center justify-between mb-2">
                           <h5 className="font-medium">
                             {medication.drugName} {medication.strength}
-                            <span className="ml-2 text-sm font-normal text-muted-foreground capitalize">{medication.dosageForm}</span>
+                            <span className="ml-2 text-sm font-normal text-muted-foreground capitalize">{tAny(medication.dosageForm)}</span>
                           </h5>
                           {medication.genericName && <Badge variant="outline">{medication.genericName}</Badge>}
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm text-muted-foreground">
                           <div>
-                            <span className="font-medium">Dosage:</span> {medication.dosage}
+                            <span className="font-medium">{t("Dosage:")}</span> {medication.dosage}
                           </div>
                           <div>
-                            <span className="font-medium">Frequency:</span> {medication.frequency}
+                            <span className="font-medium">{t("Frequency:")}</span> {tAny(medication.frequency)}
                           </div>
                           <div>
-                            <span className="font-medium">Duration:</span> {medication.duration}
+                            <span className="font-medium">{t("Duration:")}</span> {medication.duration}
                           </div>
                           <div>
-                            <span className="font-medium">Route:</span> {medication.route}
+                            <span className="font-medium">{t("Route:")}</span> {tAny(ROUTES.find((r) => r.value === medication.route)?.label ?? medication.route)}
                           </div>
                           <div>
-                            <span className="font-medium">Qty:</span> {medication.quantity}
+                            <span className="font-medium">{t("Qty:")}</span> {medication.quantity}
                           </div>
                         </div>
                         {medication.instructions && (
                           <div className="text-sm text-muted-foreground mt-2 p-2 bg-blue-50 rounded">
-                            <span className="font-medium">Instructions:</span> {medication.instructions}
+                            <span className="font-medium">{t("Instructions:")}</span> {medication.instructions}
                           </div>
                         )}
                       </div>
@@ -615,12 +620,12 @@ export function PrescriptionGeneration({
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-medium mb-1">Instructions</h4>
+                  <h4 className="font-medium mb-1">{t("Instructions")}</h4>
                   <p className="text-sm text-muted-foreground">{prescription.instructions}</p>
                 </div>
                 {prescription.pharmacyNotes && (
                   <div>
-                    <h4 className="font-medium mb-1">Pharmacy Notes</h4>
+                    <h4 className="font-medium mb-1">{t("Pharmacy Notes")}</h4>
                     <p className="text-sm text-muted-foreground">{prescription.pharmacyNotes}</p>
                   </div>
                 )}
@@ -632,8 +637,8 @@ export function PrescriptionGeneration({
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-8">
-                <p className="text-muted-foreground">No prescriptions found</p>
-                <p className="text-sm text-muted-foreground mt-2">Create a new prescription to get started</p>
+                <p className="text-muted-foreground">{t("No prescriptions found")}</p>
+                <p className="text-sm text-muted-foreground mt-2">{t("Create a new prescription to get started")}</p>
               </div>
             </CardContent>
           </Card>

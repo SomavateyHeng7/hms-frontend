@@ -1,11 +1,7 @@
 "use client";
 
 import { ReportingAnalytics } from "@/features/admin/reporting/components/reporting-analytics";
-import {
-  emptyBillingSummary,
-  emptyDailyCensus,
-  emptyInventoryReport,
-} from "@/features/admin/reporting/empty-reports";
+import { emptyDailyCensus } from "@/features/admin/reporting/empty-reports";
 
 export default function ReportingPage() {
   return (
@@ -13,8 +9,6 @@ export default function ReportingPage() {
       <ReportingAnalytics
         dailyCensus={emptyDailyCensus()}
         clinicalReports={[]}
-        billingSummary={emptyBillingSummary()}
-        inventoryReport={emptyInventoryReport()}
         customDashboards={[]}
       />
     </div>

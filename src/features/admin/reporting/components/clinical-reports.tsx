@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
 import { 
   FileText, 
   Plus, 
@@ -28,6 +27,8 @@ import { Label } from "@/components/ui/label";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import { clinicalReportSchema, ClinicalReportFormData } from "@/features/admin/reporting/validations";
 import { ClinicalReport } from "@/features/admin/reporting/types";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { REPORTING_KM } from "@/features/admin/reporting/km";
 
 interface ClinicalReportsProps {
   reports: ClinicalReport[];
@@ -36,6 +37,9 @@ interface ClinicalReportsProps {
 }
 
 export function ClinicalReports({ reports, onGenerateReport, onExportReport }: ClinicalReportsProps) {
+  const t = useT(REPORTING_KM);
+  const tAny = useTranslateAny(REPORTING_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useState("reports");
   const [selectedReportType, setSelectedReportType] = useState("all");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -88,7 +92,7 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
       case "critical":
         return <AlertTriangle className="h-4 w-4 text-red-500" />;
       default:
-        return <Activity className="h-4 w-4 text-gray-500" />;
+        return <Activity className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -96,9 +100,9 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Clinical Reports</h2>
+          <h2 className="text-2xl font-bold">{t("Clinical Reports")}</h2>
           <p className="text-muted-foreground">
-            Generate and manage clinical quality reports
+            {t("Generate and manage clinical quality reports")}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -107,26 +111,26 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Reports</SelectItem>
-              <SelectItem value="diagnostic">Diagnostic</SelectItem>
-              <SelectItem value="treatment">Treatment</SelectItem>
-              <SelectItem value="outcome">Outcome</SelectItem>
-              <SelectItem value="quality">Quality</SelectItem>
-              <SelectItem value="safety">Safety</SelectItem>
+              <SelectItem value="all">{t("All Reports")}</SelectItem>
+              <SelectItem value="diagnostic">{t("Diagnostic")}</SelectItem>
+              <SelectItem value="treatment">{t("Treatment")}</SelectItem>
+              <SelectItem value="outcome">{t("Outcome")}</SelectItem>
+              <SelectItem value="quality">{t("Quality")}</SelectItem>
+              <SelectItem value="safety">{t("Safety")}</SelectItem>
             </SelectContent>
           </Select>
           <Button onClick={() => setActiveTab("generate")}>
             <Plus className="mr-2 h-4 w-4" />
-            Generate Report
+            {t("Generate Report")}
           </Button>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="reports">Clinical Reports</TabsTrigger>
-          <TabsTrigger value="generate">Generate New</TabsTrigger>
-          <TabsTrigger value="quality">Quality Indicators</TabsTrigger>
+          <TabsTrigger value="reports">{t("Clinical Reports")}</TabsTrigger>
+          <TabsTrigger value="generate">{t("Generate New")}</TabsTrigger>
+          <TabsTrigger value="quality">{t("Quality Indicators")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="reports" className="space-y-6">
@@ -135,13 +139,13 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
               <CardContent className="pt-6">
                 <div className="text-center py-8">
                   <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Clinical Reports</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t("No Clinical Reports")}</h3>
                   <p className="text-muted-foreground mb-4">
-                    No reports found for the selected criteria
+                    {t("No reports found for the selected criteria")}
                   </p>
                   <Button onClick={() => setActiveTab("generate")}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Generate Your First Report
+                    {t("Generate Your First Report")}
                   </Button>
                 </div>
               </CardContent>
@@ -155,10 +159,10 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Badge className={getReportTypeColor(report.reportType)}>
-                            {report.reportType}
+                            {tAny(report.reportType)}
                           </Badge>
                           <span className="text-sm text-muted-foreground">
-                            {format(report.generatedAt, "MMM dd, yyyy")}
+                            {fmt(report.generatedAt, "MMM dd, yyyy")}
                           </span>
                         </div>
                         <CardTitle className="text-lg">{report.title}</CardTitle>
@@ -180,7 +184,7 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
                       {/* Key Metrics */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {report.metrics.slice(0, 3).map((metric, index) => (
-                          <div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
+                          <div key={index} className="text-center p-3 bg-muted/50 rounded-lg">
                             <div className="text-2xl font-bold">{metric.value}</div>
                             <div className="text-sm text-muted-foreground">{metric.name}</div>
                             {metric.trend && (
@@ -192,7 +196,7 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
                                   <TrendingDown className="h-3 w-3" />
                                 }
                                 <span className="text-xs">
-                                  {metric.trend === "up" ? "Improving" : "Declining"}
+                                  {metric.trend === "up" ? t("Improving") : t("Declining")}
                                 </span>
                               </div>
                             )}
@@ -203,10 +207,10 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
                       {/* Quality Indicators */}
                       {report.qualityIndicators && report.qualityIndicators.length > 0 && (
                         <div className="space-y-2">
-                          <h4 className="font-medium text-sm">Quality Indicators</h4>
+                          <h4 className="font-medium text-sm">{t("Quality Indicators")}</h4>
                           <div className="space-y-2">
                             {report.qualityIndicators.slice(0, 3).map((indicator, index) => (
-                              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                              <div key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded">
                                 <div className="flex items-center gap-2">
                                   {getQualityStatusIcon(indicator.status)}
                                   <span className="text-sm">{indicator.indicator}</span>
@@ -220,7 +224,7 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
                                            indicator.status === "warning" ? "secondary" : "destructive"}
                                     className="text-xs"
                                   >
-                                    {indicator.status}
+                                    {tAny(indicator.status)}
                                   </Badge>
                                 </div>
                               </div>
@@ -232,7 +236,7 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
                       {/* Recommendations */}
                       {report.recommendations && report.recommendations.length > 0 && (
                         <div className="space-y-2">
-                          <h4 className="font-medium text-sm">Key Recommendations</h4>
+                          <h4 className="font-medium text-sm">{t("Key Recommendations")}</h4>
                           <ul className="space-y-1">
                             {report.recommendations.slice(0, 3).map((recommendation, index) => (
                               <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
@@ -245,9 +249,9 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
                       )}
 
                       <div className="flex justify-between items-center text-xs text-muted-foreground pt-2 border-t">
-                        <span>Generated by {report.generatedBy}</span>
+                        <span>{t("Generated by {generatedBy}", { generatedBy: report.generatedBy })}</span>
                         <span>
-                          Period: {format(report.dateRange.start, "MMM dd")} - {format(report.dateRange.end, "MMM dd, yyyy")}
+                          {t("Period: {start} - {end}", { start: fmt(report.dateRange.start, "MMM dd"), end: fmt(report.dateRange.end, "MMM dd, yyyy") })}
                         </span>
                       </div>
                     </div>
@@ -263,47 +267,47 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-blue-500" />
-                Generate Clinical Report
+                {t("Generate Clinical Report")}
               </CardTitle>
               <CardDescription>
-                Create a new clinical quality report
+                {t("Create a new clinical quality report")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={reportForm.handleSubmit(handleGenerateReport)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Report Type</Label>
+                    <Label>{t("Report Type")}</Label>
                     <Select onValueChange={(value) => reportForm.setValue("reportType", value as any)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select report type" />
+                        <SelectValue placeholder={t("Select report type")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="diagnostic">Diagnostic Report</SelectItem>
-                        <SelectItem value="treatment">Treatment Analysis</SelectItem>
-                        <SelectItem value="outcome">Outcome Assessment</SelectItem>
-                        <SelectItem value="quality">Quality Metrics</SelectItem>
-                        <SelectItem value="safety">Safety Analysis</SelectItem>
+                        <SelectItem value="diagnostic">{t("Diagnostic Report")}</SelectItem>
+                        <SelectItem value="treatment">{t("Treatment Analysis")}</SelectItem>
+                        <SelectItem value="outcome">{t("Outcome Assessment")}</SelectItem>
+                        <SelectItem value="quality">{t("Quality Metrics")}</SelectItem>
+                        <SelectItem value="safety">{t("Safety Analysis")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="title">Report Title</Label>
+                    <Label htmlFor="title">{t("Report Title")}</Label>
                     <Input
                       id="title"
                       {...reportForm.register("title")}
-                      placeholder="Monthly Quality Assessment Report"
+                      placeholder={t("Monthly Quality Assessment Report")}
                     />
                     {reportForm.formState.errors.title && (
-                      <p className="text-sm text-red-500">{reportForm.formState.errors.title.message}</p>
+                      <p className="text-sm text-red-500">{tAny(reportForm.formState.errors.title.message)}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Start Date</Label>
+                    <Label>{t("Start Date")}</Label>
                     <CalendarPicker
                       mode="single"
                       selected={reportForm.watch("dateRange.start")}
@@ -313,7 +317,7 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
                   </div>
 
                   <div className="space-y-2">
-                    <Label>End Date</Label>
+                    <Label>{t("End Date")}</Label>
                     <CalendarPicker
                       mode="single"
                       selected={reportForm.watch("dateRange.end")}
@@ -325,38 +329,38 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Department (Optional)</Label>
+                    <Label>{t("Department (Optional)")}</Label>
                     <Select onValueChange={(value) => reportForm.setValue("departmentId", value === "all" ? undefined : value)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="All departments" />
+                        <SelectValue placeholder={t("All departments")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Departments</SelectItem>
-                        <SelectItem value="DEPT001">Cardiology</SelectItem>
-                        <SelectItem value="DEPT002">Neurology</SelectItem>
-                        <SelectItem value="DEPT003">Emergency</SelectItem>
+                        <SelectItem value="all">{t("All Departments")}</SelectItem>
+                        <SelectItem value="DEPT001">{t("Cardiology")}</SelectItem>
+                        <SelectItem value="DEPT002">{t("Neurology")}</SelectItem>
+                        <SelectItem value="DEPT003">{t("Emergency")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Doctor (Optional)</Label>
+                    <Label>{t("Doctor (Optional)")}</Label>
                     <Select onValueChange={(value) => reportForm.setValue("doctorId", value === "all" ? undefined : value)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="All doctors" />
+                        <SelectValue placeholder={t("All doctors")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Doctors</SelectItem>
-                        <SelectItem value="DOC001">Dr. Sarah Johnson</SelectItem>
-                        <SelectItem value="DOC002">Dr. Michael Chen</SelectItem>
-                        <SelectItem value="DOC003">Dr. Emily Rodriguez</SelectItem>
+                        <SelectItem value="all">{t("All Doctors")}</SelectItem>
+                        <SelectItem value="DOC001">Dr. Nhem Rithy</SelectItem>
+                        <SelectItem value="DOC002">Dr. Lim Pisey</SelectItem>
+                        <SelectItem value="DOC003">Dr. Ouk Sreyneang</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <Label>Report Options</Label>
+                  <Label>{t("Report Options")}</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-center space-x-2">
                       <input
@@ -366,7 +370,7 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
                         className="rounded"
                       />
                       <Label htmlFor="includeRecommendations" className="text-sm">
-                        Include Recommendations
+                        {t("Include Recommendations")}
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -377,7 +381,7 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
                         className="rounded"
                       />
                       <Label htmlFor="includeBenchmarks" className="text-sm">
-                        Include Benchmarks
+                        {t("Include Benchmarks")}
                       </Label>
                     </div>
                   </div>
@@ -385,7 +389,7 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
 
                 <div className="flex justify-end">
                   <Button type="submit" disabled={isGenerating}>
-                    {isGenerating ? "Generating..." : "Generate Report"}
+                    {isGenerating ? t("Generating...") : t("Generate Report")}
                   </Button>
                 </div>
               </form>
@@ -403,7 +407,7 @@ export function ClinicalReports({ reports, onGenerateReport, onExportReport }: C
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">{report.title}</CardTitle>
                     <CardDescription className="text-sm">
-                      {format(report.dateRange.start, "MMM dd")} - {format(report.dateRange.end, "MMM dd")}
+                      {fmt(report.dateRange.start, "MMM dd")} - {fmt(report.dateRange.end, "MMM dd")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

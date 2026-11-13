@@ -15,7 +15,6 @@ import {
   Settings,
   FileText
 } from "lucide-react";
-import { format } from "date-fns";
 import type { 
   SterilizationPack, 
   SterilizationCycle, 
@@ -24,8 +23,13 @@ import type {
   CssdStats 
 } from "@/features/support/cssd/types";
 import { useTabParam } from "@/hooks/use-tab-param";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { CSSD_KM } from "@/features/support/cssd/km";
 
 export function CssdManagementDashboard() {
+  const t = useT(CSSD_KM);
+  const tAny = useTranslateAny(CSSD_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useTabParam("overview", ["overview", "cycles", "packs", "requests", "equipment"] as const);
 
   // Mock data
@@ -157,7 +161,7 @@ export function CssdManagementDashboard() {
       id: "1",
       requestNumber: "REQ-2025-001",
       department: "Surgery",
-      requestedBy: "Dr. Smith",
+      requestedBy: "Dr. Chea Sovann",
       requestDate: new Date(2025, 0, 15),
       requiredDate: new Date(2025, 0, 16),
       items: [
@@ -195,19 +199,19 @@ export function CssdManagementDashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">CSSD Management</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t("CSSD Management")}</h2>
           <p className="text-muted-foreground">
-            Central Sterile Supply Department - Sterilization & Instrument Management
+            {t("Central Sterile Supply Department - Sterilization & Instrument Management")}
           </p>
         </div>
         <div className="flex gap-2">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            New Cycle
+            {t("New Cycle")}
           </Button>
           <Button variant="outline">
             <FileText className="mr-2 h-4 w-4" />
-            Reports
+            {t("Reports")}
           </Button>
         </div>
       </div>
@@ -216,53 +220,49 @@ export function CssdManagementDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sterile Packs</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Sterile Packs")}</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.sterilePacksAvailable}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.packsProcessedToday} processed today
-            </p>
+              {t("{packsProcessedToday} processed today", { packsProcessedToday: stats.packsProcessedToday })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cycles Today</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Cycles Today")}</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.sterilizationCyclesToday}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.pendingProcessing} items pending
-            </p>
+              {t("{pendingProcessing} items pending", { pendingProcessing: stats.pendingProcessing })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Turnaround</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Avg Turnaround")}</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.averageTurnaroundTime}h</div>
             <p className="text-xs text-muted-foreground">
-              {stats.packsDispatchedToday} dispatched today
-            </p>
+              {t("{packsDispatchedToday} dispatched today", { packsDispatchedToday: stats.packsDispatchedToday })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Equipment Status</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Equipment Status")}</CardTitle>
             <Settings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.equipmentOperational}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.equipmentMaintenance} in maintenance
-            </p>
+              {t("{equipmentMaintenance} in maintenance", { equipmentMaintenance: stats.equipmentMaintenance })}</p>
           </CardContent>
         </Card>
       </div>
@@ -270,18 +270,18 @@ export function CssdManagementDashboard() {
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="cycles">Sterilization</TabsTrigger>
-          <TabsTrigger value="packs">Packs</TabsTrigger>
-          <TabsTrigger value="requests">Requests</TabsTrigger>
-          <TabsTrigger value="equipment">Equipment</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="cycles">{t("Sterilization")}</TabsTrigger>
+          <TabsTrigger value="packs">{t("Packs")}</TabsTrigger>
+          <TabsTrigger value="requests">{t("Requests")}</TabsTrigger>
+          <TabsTrigger value="equipment">{t("Equipment")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Sterilization Cycles</CardTitle>
+                <CardTitle>{t("Recent Sterilization Cycles")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -294,7 +294,7 @@ export function CssdManagementDashboard() {
                         <div>
                           <p className="font-medium">{cycle.cycleNumber}</p>
                           <p className="text-sm text-muted-foreground">
-                            {cycle.sterilizerName} • {cycle.sterilizationMethod}
+                            {cycle.sterilizerName} • {tAny(cycle.sterilizationMethod)}
                           </p>
                         </div>
                         <Badge
@@ -306,24 +306,24 @@ export function CssdManagementDashboard() {
                               : "secondary"
                           }
                         >
-                          {cycle.status}
+                          {tAny(cycle.status)}
                         </Badge>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Temp:</span>{" "}
+                          <span className="text-muted-foreground">{t("Temp:")}</span>{" "}
                           {cycle.parameters.temperature}°C
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Duration:</span>{" "}
-                          {cycle.parameters.duration} min
+                          <span className="text-muted-foreground">{t("Duration:")}</span>{" "}
+                          {cycle.parameters.duration} {t("min")}
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Load:</span>{" "}
-                          {cycle.loadItems.length} items
+                          <span className="text-muted-foreground">{t("Load:")}</span>{" "}
+                          {cycle.loadItems.length} {t("items")}
                         </div>
                         <div>
-                          <span className="text-muted-foreground">BI Test:</span>{" "}
+                          <span className="text-muted-foreground">{t("BI Test:")}</span>{" "}
                           <Badge variant="outline" className="text-xs">
                             {cycle.biologicalIndicator?.testResult}
                           </Badge>
@@ -339,7 +339,7 @@ export function CssdManagementDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                  Alerts & Notifications
+                  {t("Alerts & Notifications")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -347,19 +347,18 @@ export function CssdManagementDashboard() {
                   <div className="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium">Packs Expiring Soon</p>
+                      <p className="text-sm font-medium">{t("Packs Expiring Soon")}</p>
                       <p className="text-xs text-muted-foreground">
-                        {stats.expiringPacks7Days} packs expiring in next 7 days
-                      </p>
+                        {t("{expiringPacks7Days} packs expiring in next 7 days", { expiringPacks7Days: stats.expiringPacks7Days })}</p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <Clock className="h-5 w-5 text-blue-600 mt-0.5" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium">Equipment Maintenance Due</p>
+                      <p className="text-sm font-medium">{t("Equipment Maintenance Due")}</p>
                       <p className="text-xs text-muted-foreground">
-                        Autoclave-2 maintenance scheduled for tomorrow
+                        {t("Autoclave-2 maintenance scheduled for tomorrow")}
                       </p>
                     </div>
                   </div>
@@ -367,9 +366,9 @@ export function CssdManagementDashboard() {
                   <div className="flex items-start gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium">Quality Check Passed</p>
+                      <p className="text-sm font-medium">{t("Quality Check Passed")}</p>
                       <p className="text-xs text-muted-foreground">
-                        All packs in CYC-2025-001 passed inspection
+                        {t("All packs in CYC-2025-001 passed inspection")}
                       </p>
                     </div>
                   </div>
@@ -382,7 +381,7 @@ export function CssdManagementDashboard() {
         <TabsContent value="cycles" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Sterilization Cycles</CardTitle>
+              <CardTitle>{t("Sterilization Cycles")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -395,7 +394,7 @@ export function CssdManagementDashboard() {
                       <div>
                         <p className="font-medium text-lg">{cycle.cycleNumber}</p>
                         <p className="text-sm text-muted-foreground">
-                          {cycle.sterilizerName} • {format(cycle.startTime, "MMM dd, yyyy HH:mm")}
+                          {cycle.sterilizerName} • {fmt(cycle.startTime, "MMM dd, yyyy HH:mm")}
                         </p>
                       </div>
                       <Badge
@@ -407,41 +406,41 @@ export function CssdManagementDashboard() {
                             : "secondary"
                         }
                       >
-                        {cycle.status}
+                        {tAny(cycle.status)}
                       </Badge>
                     </div>
 
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Method:</span>{" "}
+                        <span className="text-muted-foreground">{t("Method:")}</span>{" "}
                         <span className="capitalize">
                           {cycle.sterilizationMethod.replace("-", " ")}
                         </span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Temperature:</span>{" "}
+                        <span className="text-muted-foreground">{t("Temperature:")}</span>{" "}
                         {cycle.parameters.temperature}°C
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Pressure:</span>{" "}
-                        {cycle.parameters.pressure} PSI
+                        <span className="text-muted-foreground">{t("Pressure:")}</span>{" "}
+                        {cycle.parameters.pressure} {t("PSI")}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Duration:</span>{" "}
-                        {cycle.parameters.duration} min
+                        <span className="text-muted-foreground">{t("Duration:")}</span>{" "}
+                        {cycle.parameters.duration} {t("min")}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Operator:</span>{" "}
+                        <span className="text-muted-foreground">{t("Operator:")}</span>{" "}
                         {cycle.operatedBy}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Verified:</span>{" "}
+                        <span className="text-muted-foreground">{t("Verified:")}</span>{" "}
                         {cycle.verifiedBy}
                       </div>
                     </div>
 
                     <div className="pt-2 border-t">
-                      <p className="text-sm font-medium mb-2">Load Items ({cycle.loadItems.length})</p>
+                      <p className="text-sm font-medium mb-2">{t("Load Items ({length})", { length: cycle.loadItems.length })}</p>
                       <div className="space-y-1">
                         {cycle.loadItems.map((item, idx) => (
                           <div key={idx} className="text-sm flex items-center justify-between">
@@ -449,7 +448,7 @@ export function CssdManagementDashboard() {
                               {item.itemName} ({item.packNumber})
                             </span>
                             <Badge variant="outline">
-                              Qty: {item.quantity} • {item.department}
+                              {t("Qty: {quantity} • {department}", { quantity: item.quantity, department: item.department })}
                             </Badge>
                           </div>
                         ))}
@@ -459,7 +458,7 @@ export function CssdManagementDashboard() {
                     <div className="pt-2 border-t">
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Biological Indicator:</span>
+                          <span className="text-muted-foreground">{t("Biological Indicator:")}</span>
                           <Badge
                             variant={
                               cycle.biologicalIndicator?.testResult === "negative"
@@ -471,7 +470,7 @@ export function CssdManagementDashboard() {
                           </Badge>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Chemical Indicator:</span>
+                          <span className="text-muted-foreground">{t("Chemical Indicator:")}</span>
                           <Badge
                             variant={
                               cycle.chemicalIndicator?.testResult === "pass"
@@ -487,10 +486,10 @@ export function CssdManagementDashboard() {
 
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline">
-                        View Details
+                        {t("View Details")}
                       </Button>
                       <Button size="sm" variant="outline">
-                        Print Report
+                        {t("Print Report")}
                       </Button>
                     </div>
                   </div>
@@ -503,7 +502,7 @@ export function CssdManagementDashboard() {
         <TabsContent value="packs" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Sterilization Packs</CardTitle>
+              <CardTitle>{t("Sterilization Packs")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -528,35 +527,35 @@ export function CssdManagementDashboard() {
                             : "secondary"
                         }
                       >
-                        {pack.status}
+                        {tAny(pack.status)}
                       </Badge>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Department:</span>{" "}
-                        {pack.department}
+                        <span className="text-muted-foreground">{t("Department:")}</span>{" "}
+                        {tAny(pack.department)}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Type:</span>{" "}
+                        <span className="text-muted-foreground">{t("Type:")}</span>{" "}
                         <span className="capitalize">{pack.itemType.replace("-", " ")}</span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Sterilized:</span>{" "}
+                        <span className="text-muted-foreground">{t("Sterilized:")}</span>{" "}
                         {pack.sterilizationDate
-                          ? format(pack.sterilizationDate, "MMM dd, yyyy")
+                          ? fmt(pack.sterilizationDate, "MMM dd, yyyy")
                           : "N/A"}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Expires:</span>{" "}
-                        {format(pack.expiryDate, "MMM dd, yyyy")}
+                        <span className="text-muted-foreground">{t("Expires:")}</span>{" "}
+                        {fmt(pack.expiryDate, "MMM dd, yyyy")}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Reprocessing Count:</span>{" "}
+                        <span className="text-muted-foreground">{t("Reprocessing Count:")}</span>{" "}
                         {pack.reprocessingCount}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Method:</span>{" "}
+                        <span className="text-muted-foreground">{t("Method:")}</span>{" "}
                         <span className="capitalize">
                           {pack.sterilizationMethod.replace("-", " ")}
                         </span>
@@ -564,7 +563,7 @@ export function CssdManagementDashboard() {
                     </div>
 
                     <div className="pt-2 border-t">
-                      <p className="text-sm font-medium mb-2">Contents</p>
+                      <p className="text-sm font-medium mb-2">{t("Contents")}</p>
                       <div className="flex flex-wrap gap-2">
                         {pack.contents.map((item, idx) => (
                           <Badge key={idx} variant="outline">
@@ -577,11 +576,11 @@ export function CssdManagementDashboard() {
                     <div className="pt-2 border-t">
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Chemical Indicator:</span>
+                          <span className="text-muted-foreground">{t("Chemical Indicator:")}</span>
                           <Badge variant="default">{pack.chemicalIndicatorResult}</Badge>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Biological Indicator:</span>
+                          <span className="text-muted-foreground">{t("Biological Indicator:")}</span>
                           <Badge variant="default">{pack.biologicalIndicatorResult}</Badge>
                         </div>
                       </div>
@@ -589,16 +588,16 @@ export function CssdManagementDashboard() {
 
                     {pack.qualityCheck && (
                       <div className="pt-2 border-t">
-                        <p className="text-sm font-medium mb-1">Quality Check</p>
+                        <p className="text-sm font-medium mb-1">{t("Quality Check")}</p>
                         <div className="text-sm space-y-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Pack Integrity:</span>
+                            <span className="text-muted-foreground">{t("Pack Integrity:")}</span>
                             <Badge variant="outline">{pack.qualityCheck.packIntegrity}</Badge>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Approved:</span>
+                            <span className="text-muted-foreground">{t("Approved:")}</span>
                             <Badge variant={pack.qualityCheck.approved ? "default" : "destructive"}>
-                              {pack.qualityCheck.approved ? "Yes" : "No"}
+                              {pack.qualityCheck.approved ? t("Yes") : t("No")}
                             </Badge>
                           </div>
                         </div>
@@ -607,13 +606,13 @@ export function CssdManagementDashboard() {
 
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline">
-                        Dispatch
+                        {t("Dispatch")}
                       </Button>
                       <Button size="sm" variant="outline">
-                        Print Label
+                        {t("Print Label")}
                       </Button>
                       <Button size="sm" variant="outline">
-                        View History
+                        {t("View History")}
                       </Button>
                     </div>
                   </div>
@@ -626,7 +625,7 @@ export function CssdManagementDashboard() {
         <TabsContent value="requests" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Department Requests</CardTitle>
+              <CardTitle>{t("Department Requests")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -639,7 +638,7 @@ export function CssdManagementDashboard() {
                       <div>
                         <p className="font-medium text-lg">{request.requestNumber}</p>
                         <p className="text-sm text-muted-foreground">
-                          {request.department} • {request.requestedBy}
+                          {tAny(request.department)} • {request.requestedBy}
                         </p>
                       </div>
                       <Badge
@@ -651,29 +650,29 @@ export function CssdManagementDashboard() {
                             : "outline"
                         }
                       >
-                        {request.status}
+                        {tAny(request.status)}
                       </Badge>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Requested:</span>{" "}
-                        {format(request.requestDate, "MMM dd, yyyy")}
+                        <span className="text-muted-foreground">{t("Requested:")}</span>{" "}
+                        {fmt(request.requestDate, "MMM dd, yyyy")}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Required By:</span>{" "}
-                        {format(request.requiredDate, "MMM dd, yyyy")}
+                        <span className="text-muted-foreground">{t("Required By:")}</span>{" "}
+                        {fmt(request.requiredDate, "MMM dd, yyyy")}
                       </div>
                       {request.approvedBy && (
                         <>
                           <div>
-                            <span className="text-muted-foreground">Approved By:</span>{" "}
+                            <span className="text-muted-foreground">{t("Approved By:")}</span>{" "}
                             {request.approvedBy}
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Approved:</span>{" "}
+                            <span className="text-muted-foreground">{t("Approved:")}</span>{" "}
                             {request.approvedDate
-                              ? format(request.approvedDate, "MMM dd, yyyy")
+                              ? fmt(request.approvedDate, "MMM dd, yyyy")
                               : "N/A"}
                           </div>
                         </>
@@ -681,13 +680,13 @@ export function CssdManagementDashboard() {
                     </div>
 
                     <div className="pt-2 border-t">
-                      <p className="text-sm font-medium mb-2">Items Requested</p>
+                      <p className="text-sm font-medium mb-2">{t("Items Requested")}</p>
                       <div className="space-y-2">
                         {request.items.map((item, idx) => (
                           <div key={idx} className="flex items-center justify-between text-sm">
                             <span>{item.itemName}</span>
                             <div className="flex items-center gap-2">
-                              <Badge variant="outline">Qty: {item.quantity}</Badge>
+                              <Badge variant="outline">{t("Qty: {quantity}", { quantity: item.quantity })}</Badge>
                               <Badge
                                 variant={
                                   item.urgency === "emergency"
@@ -697,7 +696,7 @@ export function CssdManagementDashboard() {
                                     : "outline"
                                 }
                               >
-                                {item.urgency}
+                                {tAny(item.urgency)}
                               </Badge>
                             </div>
                           </div>
@@ -706,9 +705,9 @@ export function CssdManagementDashboard() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button size="sm">Process Request</Button>
+                      <Button size="sm">{t("Process Request")}</Button>
                       <Button size="sm" variant="outline">
-                        View Details
+                        {t("View Details")}
                       </Button>
                     </div>
                   </div>
@@ -721,7 +720,7 @@ export function CssdManagementDashboard() {
         <TabsContent value="equipment" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Sterilization Equipment</CardTitle>
+              <CardTitle>{t("Sterilization Equipment")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -746,74 +745,74 @@ export function CssdManagementDashboard() {
                             : "secondary"
                         }
                       >
-                        {equip.status}
+                        {tAny(equip.status)}
                       </Badge>
                     </div>
 
                     <div className="grid grid-cols-3 gap-3 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Type:</span>{" "}
-                        <span className="capitalize">{equip.type.replace("-", " ")}</span>
+                        <span className="text-muted-foreground">{t("Type:")}</span>{" "}
+                        <span className="capitalize">{tAny(equip.type)}</span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Capacity:</span>{" "}
+                        <span className="text-muted-foreground">{t("Capacity:")}</span>{" "}
                         {equip.capacity}L
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Location:</span>{" "}
+                        <span className="text-muted-foreground">{t("Location:")}</span>{" "}
                         {equip.currentLocation}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Total Cycles:</span>{" "}
+                        <span className="text-muted-foreground">{t("Total Cycles:")}</span>{" "}
                         {equip.totalCycles.toLocaleString()}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">This Month:</span>{" "}
+                        <span className="text-muted-foreground">{t("This Month:")}</span>{" "}
                         {equip.cyclesThisMonth}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Serial:</span>{" "}
+                        <span className="text-muted-foreground">{t("Serial:")}</span>{" "}
                         {equip.serialNumber}
                       </div>
                     </div>
 
                     <div className="pt-2 border-t">
-                      <p className="text-sm font-medium mb-2">Maintenance</p>
+                      <p className="text-sm font-medium mb-2">{t("Maintenance")}</p>
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Frequency:</span>{" "}
+                          <span className="text-muted-foreground">{t("Frequency:")}</span>{" "}
                           <span className="capitalize">
-                            {equip.maintenanceSchedule.frequency}
+                            {tAny(equip.maintenanceSchedule.frequency)}
                           </span>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Last Service:</span>{" "}
-                          {format(equip.maintenanceSchedule.lastMaintenance, "MMM dd, yyyy")}
+                          <span className="text-muted-foreground">{t("Last Service:")}</span>{" "}
+                          {fmt(equip.maintenanceSchedule.lastMaintenance, "MMM dd, yyyy")}
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Next Service:</span>{" "}
-                          {format(equip.maintenanceSchedule.nextMaintenance, "MMM dd, yyyy")}
+                          <span className="text-muted-foreground">{t("Next Service:")}</span>{" "}
+                          {fmt(equip.maintenanceSchedule.nextMaintenance, "MMM dd, yyyy")}
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Service By:</span>{" "}
+                          <span className="text-muted-foreground">{t("Service By:")}</span>{" "}
                           {equip.maintenanceSchedule.maintenanceBy || "N/A"}
                         </div>
                       </div>
                     </div>
 
                     <div className="pt-2 border-t">
-                      <p className="text-sm font-medium mb-2">Calibration</p>
+                      <p className="text-sm font-medium mb-2">{t("Calibration")}</p>
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Last Calibration:</span>{" "}
-                          {format(equip.calibration.lastCalibration, "MMM dd, yyyy")}
+                          <span className="text-muted-foreground">{t("Last Calibration:")}</span>{" "}
+                          {fmt(equip.calibration.lastCalibration, "MMM dd, yyyy")}
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Next Due:</span>{" "}
-                          {format(equip.calibration.nextCalibration, "MMM dd, yyyy")}
+                          <span className="text-muted-foreground">{t("Next Due:")}</span>{" "}
+                          {fmt(equip.calibration.nextCalibration, "MMM dd, yyyy")}
                         </div>
                         <div className="col-span-2">
-                          <span className="text-muted-foreground">Certificate:</span>{" "}
+                          <span className="text-muted-foreground">{t("Certificate:")}</span>{" "}
                           {equip.calibration.certificateNumber || "N/A"}
                         </div>
                       </div>
@@ -821,13 +820,13 @@ export function CssdManagementDashboard() {
 
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline">
-                        View Details
+                        {t("View Details")}
                       </Button>
                       <Button size="sm" variant="outline">
-                        Schedule Maintenance
+                        {t("Schedule Maintenance")}
                       </Button>
                       <Button size="sm" variant="outline">
-                        Service History
+                        {t("Service History")}
                       </Button>
                     </div>
                   </div>

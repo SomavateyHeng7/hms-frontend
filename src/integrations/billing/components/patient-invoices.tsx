@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { format } from "date-fns";
 import { AlertTriangle, ExternalLink, FileText, Loader2, Receipt, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,20 +17,23 @@ import {
   formatUSD,
 } from "../format";
 import type { Invoice, InvoiceStatus } from "../types";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { BILLING_KM } from "@/integrations/billing/km";
 
 const STATUS_STYLES: Record<InvoiceStatus, string> = {
-  draft: "bg-gray-100 text-gray-700 border-gray-200",
+  draft: "bg-gray-100 text-muted-foreground border-border",
   unpaid: "bg-red-100 text-red-700 border-red-200",
   "partially-paid": "bg-amber-100 text-amber-800 border-amber-200",
   paid: "bg-green-100 text-green-700 border-green-200",
   "insurance-pending": "bg-blue-100 text-blue-700 border-blue-200",
-  cancelled: "bg-gray-100 text-gray-500 border-gray-200 line-through",
+  cancelled: "bg-gray-100 text-muted-foreground border-border line-through",
 };
 
 export function InvoiceStatusBadge({ status }: { status: InvoiceStatus }) {
+  const tAny = useTranslateAny(BILLING_KM);
   return (
     <Badge variant="outline" className={STATUS_STYLES[status]}>
-      {INVOICE_STATUS_LABELS[status]}
+      {tAny(INVOICE_STATUS_LABELS[status])}
     </Badge>
   );
 }
@@ -46,27 +48,30 @@ function Money({ usd, rate, className }: { usd: number; rate: number; className?
 }
 
 function InvoiceDetail({ invoice }: { invoice: Invoice }) {
+  const t = useT(BILLING_KM);
+  const tAny = useTranslateAny(BILLING_KM);
+  const fmt = useDateFormat();
   const rate = invoice.exchangeRate;
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
         <div>
-          <div className="text-muted-foreground">Issued</div>
-          <div className="font-medium">{format(new Date(invoice.issuedAt), "PP p")}</div>
+          <div className="text-muted-foreground">{t("Issued")}</div>
+          <div className="font-medium">{fmt(invoice.issuedAt, "PP p")}</div>
         </div>
         <div>
-          <div className="text-muted-foreground">Visit</div>
+          <div className="text-muted-foreground">{t("Visit")}</div>
           <div className="font-medium">
-            {VISIT_TYPE_LABELS[invoice.visitType]}
+            {tAny(VISIT_TYPE_LABELS[invoice.visitType])}
             {invoice.visitId ? ` · ${invoice.visitId}` : ""}
           </div>
         </div>
         <div>
-          <div className="text-muted-foreground">Department</div>
-          <div className="font-medium">{invoice.department}</div>
+          <div className="text-muted-foreground">{t("Department")}</div>
+          <div className="font-medium">{tAny(invoice.department)}</div>
         </div>
         <div>
-          <div className="text-muted-foreground">Exchange Rate</div>
+          <div className="text-muted-foreground">{t("Exchange Rate")}</div>
           <div className="font-medium">៛{rate.toLocaleString("en-US")} / $1</div>
         </div>
       </div>
@@ -75,10 +80,10 @@ function InvoiceDetail({ invoice }: { invoice: Invoice }) {
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-muted-foreground">
             <tr>
-              <th className="text-left font-medium px-3 py-2">Item</th>
-              <th className="text-right font-medium px-3 py-2">Qty</th>
-              <th className="text-right font-medium px-3 py-2">Unit Price</th>
-              <th className="text-right font-medium px-3 py-2">Amount</th>
+              <th className="text-left font-medium px-3 py-2">{t("Item")}</th>
+              <th className="text-right font-medium px-3 py-2">{t("Qty")}</th>
+              <th className="text-right font-medium px-3 py-2">{t("Unit Price")}</th>
+              <th className="text-right font-medium px-3 py-2">{t("Amount")}</th>
             </tr>
           </thead>
           <tbody>
@@ -99,12 +104,12 @@ function InvoiceDetail({ invoice }: { invoice: Invoice }) {
 
       <div className="ml-auto max-w-sm space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Subtotal</span>
+          <span className="text-muted-foreground">{t("Subtotal")}</span>
           <span>{formatUSD(invoice.subtotal)}</span>
         </div>
         {invoice.discount > 0 && (
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Discount</span>
+            <span className="text-muted-foreground">{t("Discount")}</span>
             <span>−{formatUSD(invoice.discount)}</span>
           </div>
         )}
@@ -118,33 +123,33 @@ function InvoiceDetail({ invoice }: { invoice: Invoice }) {
           </div>
         )}
         <div className="flex justify-between border-t pt-2 font-semibold">
-          <span>Patient Payable</span>
+          <span>{t("Patient Payable")}</span>
           <Money usd={invoice.patientPayable} rate={rate} />
         </div>
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Paid</span>
+          <span className="text-muted-foreground">{t("Paid")}</span>
           <span>{formatUSD(invoice.amountPaid)}</span>
         </div>
         <div className={cn("flex justify-between font-semibold", invoice.balance > 0 && "text-red-600")}>
-          <span>Balance Due</span>
+          <span>{t("Balance Due")}</span>
           <Money usd={invoice.balance} rate={rate} />
         </div>
       </div>
 
       <div className="space-y-2">
-        <h4 className="text-sm font-semibold">Payments</h4>
+        <h4 className="text-sm font-semibold">{t("Payments")}</h4>
         {invoice.payments.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No payments recorded.</p>
+          <p className="text-sm text-muted-foreground">{t("No payments recorded.")}</p>
         ) : (
           <ul className="space-y-2">
             {invoice.payments.map((p) => (
               <li key={p.id} className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
                 <div>
                   <div className="font-medium">
-                    {PAYMENT_METHOD_LABELS[p.method]} · {p.receiptNumber}
+                    {tAny(PAYMENT_METHOD_LABELS[p.method])} · {p.receiptNumber}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {format(new Date(p.paidAt), "PP p")} · {p.cashier}
+                    {fmt(p.paidAt, "PP p")} · {p.cashier}
                   </div>
                 </div>
                 <span className="font-medium">{formatUSD(p.amount)}</span>
@@ -156,19 +161,19 @@ function InvoiceDetail({ invoice }: { invoice: Invoice }) {
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between border-t pt-4">
         <p className="text-xs text-muted-foreground">
-          Read-only. Payments and changes are handled in the billing system.
+          {t("Read-only. Payments and changes are handled in the billing system.")}
         </p>
         {invoice.externalUrl ? (
           <Button variant="outline" size="sm" asChild>
             <a href={invoice.externalUrl} target="_blank" rel="noreferrer">
               <ExternalLink className="mr-2 h-4 w-4" />
-              Open in Billing
+              {t("Open in Billing")}
             </a>
           </Button>
         ) : (
-          <Button variant="outline" size="sm" disabled title="Available once the billing system is connected">
+          <Button variant="outline" size="sm" disabled title={t("Available once the billing system is connected")}>
             <ExternalLink className="mr-2 h-4 w-4" />
-            Open in Billing
+            {t("Open in Billing")}
           </Button>
         )}
       </div>
@@ -177,6 +182,8 @@ function InvoiceDetail({ invoice }: { invoice: Invoice }) {
 }
 
 export function PatientInvoices({ patientId }: { patientId: string }) {
+  const t = useT(BILLING_KM);
+  const tAny = useTranslateAny(BILLING_KM);
   const result = usePatientInvoices(patientId);
   const [selected, setSelected] = useState<Invoice | null>(null);
 
@@ -185,15 +192,15 @@ export function PatientInvoices({ patientId }: { patientId: string }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Receipt className="h-5 w-5" />
-          Invoices
+          {t("Invoices")}
         </CardTitle>
-        <CardDescription>From the billing system · view only</CardDescription>
+        <CardDescription>{t("From the billing system · view only")}</CardDescription>
       </CardHeader>
       <CardContent>
         {result.status === "loading" && (
           <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Loading invoices…
+            {t("Loading invoices…")}
           </div>
         )}
 
@@ -201,12 +208,12 @@ export function PatientInvoices({ patientId }: { patientId: string }) {
           <div className="flex flex-col items-center gap-3 py-10 text-center">
             <AlertTriangle className="h-8 w-8 text-amber-500" />
             <div>
-              <p className="font-medium">Invoices are unavailable</p>
-              <p className="text-sm text-muted-foreground">{result.message} Patient care is not affected.</p>
+              <p className="font-medium">{t("Invoices are unavailable")}</p>
+              <p className="text-sm text-muted-foreground">{t("{message} Patient care is not affected.", { message: tAny(result.message) })}</p>
             </div>
             <Button variant="outline" size="sm" onClick={result.retry}>
               <RefreshCw className="mr-2 h-4 w-4" />
-              Try again
+              {t("Try again")}
             </Button>
           </div>
         )}
@@ -214,7 +221,7 @@ export function PatientInvoices({ patientId }: { patientId: string }) {
         {result.status === "success" && result.invoices.length === 0 && (
           <div className="flex flex-col items-center gap-2 py-10 text-center text-sm text-muted-foreground">
             <FileText className="h-8 w-8" />
-            No invoices for this patient yet.
+            {t("No invoices for this patient yet.")}
           </div>
         )}
 
@@ -244,6 +251,9 @@ export function PatientInvoices({ patientId }: { patientId: string }) {
 }
 
 function InvoiceList({ invoices, onSelect }: { invoices: Invoice[]; onSelect: (inv: Invoice) => void }) {
+  const t = useT(BILLING_KM);
+  const tAny = useTranslateAny(BILLING_KM);
+  const fmt = useDateFormat();
   const outstanding = invoices
     .filter((inv) => inv.status !== "cancelled" && inv.status !== "insurance-pending")
     .reduce((sum, inv) => sum + inv.balance, 0);
@@ -256,12 +266,12 @@ function InvoiceList({ invoices, onSelect }: { invoices: Invoice[]; onSelect: (i
         <div className="flex flex-wrap gap-x-6 gap-y-1 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {outstanding > 0 && (
             <span>
-              Outstanding balance: <strong>{formatUSD(outstanding)}</strong> ({formatKHR(outstanding, rate)})
+              {t("Outstanding balance:")} <strong>{formatUSD(outstanding)}</strong> ({formatKHR(outstanding, rate)})
             </span>
           )}
           {pendingInsurance > 0 && (
             <span>
-              {pendingInsurance} invoice{pendingInsurance > 1 ? "s" : ""} awaiting insurance
+              {t("{count} invoice(s) awaiting insurance", { count: pendingInsurance })}
             </span>
           )}
         </div>
@@ -280,20 +290,20 @@ function InvoiceList({ invoices, onSelect }: { invoices: Invoice[]; onSelect: (i
                   <span className="font-medium">{inv.invoiceNumber}</span>
                   <InvoiceStatusBadge status={inv.status} />
                   {inv.coverage && (
-                    <Badge variant="secondary">{COVERAGE_LABELS[inv.coverage.scheme]}</Badge>
+                    <Badge variant="secondary">{tAny(COVERAGE_LABELS[inv.coverage.scheme])}</Badge>
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {format(new Date(inv.issuedAt), "PP")} · {VISIT_TYPE_LABELS[inv.visitType]} · {inv.department}
+                  {fmt(inv.issuedAt, "PP")} · {tAny(VISIT_TYPE_LABELS[inv.visitType])} · {tAny(inv.department)}
                 </div>
               </div>
               <div className="flex gap-6 sm:text-right">
                 <div>
-                  <div className="text-xs text-muted-foreground">Payable</div>
+                  <div className="text-xs text-muted-foreground">{t("Payable")}</div>
                   <div className="font-medium">{formatUSD(inv.patientPayable)}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground">Balance</div>
+                  <div className="text-xs text-muted-foreground">{t("Balance")}</div>
                   <div className={cn("font-medium", inv.balance > 0 && "text-red-600")}>
                     {formatUSD(inv.balance)}
                   </div>

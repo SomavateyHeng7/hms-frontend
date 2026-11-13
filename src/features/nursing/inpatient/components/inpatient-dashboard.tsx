@@ -10,12 +10,17 @@ import { VitalSignsMonitoring } from "./vital-signs-monitoring";
 import { Admission } from "@/features/nursing/inpatient/types";
 import { BedDouble, Users, Activity, TrendingUp, UserPlus, Clock, ArrowRight } from "lucide-react";
 import { useTabParam } from "@/hooks/use-tab-param";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { INPATIENT_KM } from "@/features/nursing/inpatient/km";
 
 interface InpatientDashboardProps {
   onSelectPatient?: (admission: Admission) => void;
 }
 
 export function InpatientDashboard({ onSelectPatient }: InpatientDashboardProps) {
+  const fmt = useDateFormat();
+  const t = useT(INPATIENT_KM);
+  const tAny = useTranslateAny(INPATIENT_KM);
   const [activeTab, setActiveTab] = useTabParam("overview", ["overview", "beds", "admission", "vitals"] as const);
 
   // Mock data
@@ -23,11 +28,11 @@ export function InpatientDashboard({ onSelectPatient }: InpatientDashboardProps)
     {
       id: "1",
       patientId: "PAT001",
-      patientName: "John Doe",
+      patientName: "Sok Dara",
       admissionNumber: "ADM-2025-001",
       admissionDate: new Date(2025, 11, 28),
       admittingDoctorId: "DOC001",
-      admittingDoctorName: "Dr. Smith",
+      admittingDoctorName: "Dr. Chea Sovann",
       department: "Cardiology",
       wardId: "ward-1",
       wardName: "ICU Ward",
@@ -42,11 +47,11 @@ export function InpatientDashboard({ onSelectPatient }: InpatientDashboardProps)
     {
       id: "2",
       patientId: "PAT002",
-      patientName: "Jane Smith",
+      patientName: "Chan Sreymom",
       admissionNumber: "ADM-2025-002",
       admissionDate: new Date(2025, 11, 29),
       admittingDoctorId: "DOC002",
-      admittingDoctorName: "Dr. Johnson",
+      admittingDoctorName: "Dr. Lim Pisey",
       department: "Surgery",
       wardId: "ward-2",
       wardName: "General Ward A",
@@ -74,16 +79,16 @@ export function InpatientDashboard({ onSelectPatient }: InpatientDashboardProps)
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Inpatient Management</h1>
-        <p className="text-muted-foreground">Manage hospital admissions, beds, and patient care</p>
+        <h1 className="text-3xl font-bold">{t("Inpatient Management")}</h1>
+        <p className="text-muted-foreground">{t("Manage hospital admissions, beds, and patient care")}</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="beds">Bed Management</TabsTrigger>
-          <TabsTrigger value="admission">New Admission</TabsTrigger>
-          <TabsTrigger value="vitals">Vital Signs</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="beds">{t("Bed Management")}</TabsTrigger>
+          <TabsTrigger value="admission">{t("New Admission")}</TabsTrigger>
+          <TabsTrigger value="vitals">{t("Vital Signs")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -91,25 +96,24 @@ export function InpatientDashboard({ onSelectPatient }: InpatientDashboardProps)
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Beds</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Total Beds")}</CardTitle>
                 <BedDouble className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalBeds}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.occupiedBeds} occupied · {stats.availableBeds} available
-                </p>
+                  {t("{occupiedBeds} occupied · {availableBeds} available", { occupiedBeds: stats.occupiedBeds, availableBeds: stats.availableBeds })}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Occupancy Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Occupancy Rate")}</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.occupancyRate}%</div>
-                <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
                   <div className="h-full bg-blue-500" style={{ width: `${stats.occupancyRate}%` }} />
                 </div>
               </CardContent>
@@ -117,25 +121,24 @@ export function InpatientDashboard({ onSelectPatient }: InpatientDashboardProps)
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Admissions</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Active Admissions")}</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.activeAdmissions}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.admissionsToday} new today
-                </p>
+                  {t("{admissionsToday} new today", { admissionsToday: stats.admissionsToday })}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Critical Patients</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Critical Patients")}</CardTitle>
                 <Activity className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-600">{stats.criticalPatients}</div>
-                <p className="text-xs text-muted-foreground">Require immediate attention</p>
+                <p className="text-xs text-muted-foreground">{t("Require immediate attention")}</p>
               </CardContent>
             </Card>
           </div>
@@ -145,12 +148,12 @@ export function InpatientDashboard({ onSelectPatient }: InpatientDashboardProps)
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Active Admissions</CardTitle>
-                  <CardDescription>Currently admitted patients</CardDescription>
+                  <CardTitle>{t("Active Admissions")}</CardTitle>
+                  <CardDescription>{t("Currently admitted patients")}</CardDescription>
                 </div>
                 <Button onClick={() => setActiveTab("admission")}>
                   <UserPlus className="mr-2 h-4 w-4" />
-                  New Admission
+                  {t("New Admission")}
                 </Button>
               </div>
             </CardHeader>
@@ -179,26 +182,26 @@ export function InpatientDashboard({ onSelectPatient }: InpatientDashboardProps)
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
-                              <div className="text-muted-foreground">Department</div>
-                              <div className="font-medium">{admission.department}</div>
+                              <div className="text-muted-foreground">{t("Department")}</div>
+                              <div className="font-medium">{tAny(admission.department)}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Ward/Bed</div>
+                              <div className="text-muted-foreground">{t("Ward/Bed")}</div>
                               <div className="font-medium">{admission.bedNumber}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Attending Doctor</div>
+                              <div className="text-muted-foreground">{t("Attending Doctor")}</div>
                               <div className="font-medium">{admission.admittingDoctorName}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Admitted</div>
+                              <div className="text-muted-foreground">{t("Admitted")}</div>
                               <div className="font-medium">
-                                {new Date(admission.admissionDate).toLocaleDateString()}
+                                {fmt(admission.admissionDate, "PP")}
                               </div>
                             </div>
                           </div>
                           <div className="text-sm">
-                            <div className="text-muted-foreground">Diagnosis</div>
+                            <div className="text-muted-foreground">{t("Diagnosis")}</div>
                             <div>{admission.diagnosis}</div>
                           </div>
                         </div>
@@ -216,13 +219,13 @@ export function InpatientDashboard({ onSelectPatient }: InpatientDashboardProps)
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5" />
-                Expected Discharges Today
+                {t("Expected Discharges Today")}
               </CardTitle>
-              <CardDescription>{stats.dischargesExpected} patients expected to be discharged</CardDescription>
+              <CardDescription>{t("{dischargesExpected} patients expected to be discharged", { dischargesExpected: stats.dischargesExpected })}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8 text-muted-foreground">
-                <p>No pending discharges for today</p>
+                <p>{t("No pending discharges for today")}</p>
               </div>
             </CardContent>
           </Card>

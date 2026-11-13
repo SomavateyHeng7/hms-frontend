@@ -17,6 +17,8 @@ import type { ImagingStudy, QCStatus, StudyStatus } from "@/features/diagnostics
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { studyQualityControlSchema, type StudyQualityControlFormData } from "@/features/diagnostics/radiology/validations";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { RADIOLOGY_KM } from "@/features/diagnostics/radiology/km";
 
 interface StudyManagementProps {
   studies: ImagingStudy[];
@@ -61,6 +63,9 @@ export function StudyManagement({
   onShareStudy,
   onArchiveStudy,
 }: StudyManagementProps) {
+  const fmt = useDateFormat();
+  const t = useT(RADIOLOGY_KM);
+  const tAny = useTranslateAny(RADIOLOGY_KM);
   const [qcDialogOpen, setQcDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState<ImagingStudy | null>(null);
@@ -175,42 +180,42 @@ export function StudyManagement({
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Study Management</h1>
-        <p className="text-gray-600">Manage imaging studies and quality control</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("Study Management")}</h1>
+        <p className="text-muted-foreground">{t("Manage imaging studies and quality control")}</p>
       </div>
 
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1">
           <Input
-            placeholder="Search studies, patients, or descriptions..."
+            placeholder={t("Search studies, patients, or descriptions...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t("Status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="all">{t("All Status")}</SelectItem>
+            <SelectItem value="pending">{t("Pending")}</SelectItem>
+            <SelectItem value="in_progress">{t("In Progress")}</SelectItem>
+            <SelectItem value="completed">{t("Completed")}</SelectItem>
+            <SelectItem value="cancelled">{t("Cancelled")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={modalityFilter} onValueChange={setModalityFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Modality" />
+            <SelectValue placeholder={t("Modality")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Modalities</SelectItem>
-            <SelectItem value="XR">X-Ray</SelectItem>
-            <SelectItem value="CT">CT</SelectItem>
-            <SelectItem value="MR">MRI</SelectItem>
-            <SelectItem value="US">Ultrasound</SelectItem>
-            <SelectItem value="MG">Mammography</SelectItem>
-            <SelectItem value="NM">Nuclear Medicine</SelectItem>
+            <SelectItem value="all">{t("All Modalities")}</SelectItem>
+            <SelectItem value="XR">{t("X-Ray")}</SelectItem>
+            <SelectItem value="CT">{t("CT")}</SelectItem>
+            <SelectItem value="MR">{t("MRI")}</SelectItem>
+            <SelectItem value="US">{t("Ultrasound")}</SelectItem>
+            <SelectItem value="MG">{t("Mammography")}</SelectItem>
+            <SelectItem value="NM">{t("Nuclear Medicine")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -225,20 +230,19 @@ export function StudyManagement({
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <StatusIcon className="h-5 w-5 text-gray-500" />
+                    <StatusIcon className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         {study.studyDescription}
                         <Badge className={STUDY_STATUS_CONFIG[study.status].color}>
-                          {study.status.replace('_', ' ')}
+                          {tAny(study.status)}
                         </Badge>
                         <Badge className={QC_STATUS_CONFIG[qcStatus].color}>
                           {QC_STATUS_CONFIG[qcStatus].label}
                         </Badge>
                       </CardTitle>
                       <CardDescription>
-                        Patient: {study.patientName} • Study UID: {study.studyInstanceUID} • 
-                        Date: {new Date(study.studyDate).toLocaleDateString()}
+                        {t("Patient: {patientName} • Study UID: {studyInstanceUID} • Date: {toLocaleDateString}", { patientName: study.patientName, studyInstanceUID: study.studyInstanceUID, toLocaleDateString: fmt(study.studyDate, "PP") })}
                       </CardDescription>
                     </div>
                   </div>
@@ -249,14 +253,14 @@ export function StudyManagement({
                       onClick={() => onViewStudy(study.id)}
                     >
                       <Eye className="mr-2 h-4 w-4" />
-                      View
+                      {t("View")}
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => openQcDialog(study)}
                     >
-                      QC Review
+                      {t("QC Review")}
                     </Button>
                     <Button
                       variant="outline"
@@ -264,7 +268,7 @@ export function StudyManagement({
                       onClick={() => openShareDialog(study)}
                     >
                       <Share2 className="mr-2 h-4 w-4" />
-                      Share
+                      {t("Share")}
                     </Button>
                     <Button
                       variant="outline"
@@ -272,7 +276,7 @@ export function StudyManagement({
                       onClick={() => onDownloadStudy(study.id)}
                     >
                       <Download className="mr-2 h-4 w-4" />
-                      Download
+                      {t("Download")}
                     </Button>
                   </div>
                 </div>
@@ -280,49 +284,49 @@ export function StudyManagement({
               <CardContent>
                 <Tabs defaultValue="details" className="w-full">
                   <TabsList>
-                    <TabsTrigger value="details">Study Details</TabsTrigger>
-                    <TabsTrigger value="series">Series ({study.series.length})</TabsTrigger>
-                    <TabsTrigger value="upload">Upload Images</TabsTrigger>
+                    <TabsTrigger value="details">{t("Study Details")}</TabsTrigger>
+                    <TabsTrigger value="series">{t("Series ({length})", { length: study.series.length })}</TabsTrigger>
+                    <TabsTrigger value="upload">{t("Upload Images")}</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="details" className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <p className="font-medium text-gray-900">Modality</p>
-                        <p className="text-gray-600">{study.modality}</p>
+                        <p className="font-medium text-foreground">{t("Modality")}</p>
+                        <p className="text-muted-foreground">{tAny(study.modality)}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Institution</p>
-                        <p className="text-gray-600">{study.institutionName}</p>
+                        <p className="font-medium text-foreground">{t("Institution")}</p>
+                        <p className="text-muted-foreground">{study.institutionName}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Equipment</p>
-                        <p className="text-gray-600">{study.equipment?.name}</p>
+                        <p className="font-medium text-foreground">{t("Equipment")}</p>
+                        <p className="text-muted-foreground">{study.equipment?.name}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Referring Physician</p>
-                        <p className="text-gray-600">{study.referringPhysician}</p>
+                        <p className="font-medium text-foreground">{t("Referring Physician")}</p>
+                        <p className="text-muted-foreground">{study.referringPhysician}</p>
                       </div>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Study Description</p>
-                      <p className="text-gray-600">{study.studyDescription}</p>
+                      <p className="font-medium text-foreground">{t("Study Description")}</p>
+                      <p className="text-muted-foreground">{study.studyDescription}</p>
                     </div>
                     {study.qualityControl && (
-                      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                        <h4 className="font-medium mb-2">Quality Control Results</h4>
+                      <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                        <h4 className="font-medium mb-2">{t("Quality Control Results")}</h4>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <p><strong>Overall Quality:</strong> {study.qualityControl.overallQuality}</p>
-                            <p><strong>Technical Adequacy:</strong> {study.qualityControl.technicalAdequacy}</p>
+                            <p><strong>{t("Overall Quality:")}</strong> {study.qualityControl.overallQuality}</p>
+                            <p><strong>{t("Technical Adequacy:")}</strong> {study.qualityControl.technicalAdequacy}</p>
                           </div>
                           <div>
-                            <p><strong>Artifacts Present:</strong> {study.qualityControl.artifactsPresent ? "Yes" : "No"}</p>
-                            <p><strong>Reviewed By:</strong> {study.qualityControl.reviewedBy ?? "—"}</p>
+                            <p><strong>{t("Artifacts Present:")}</strong> {study.qualityControl.artifactsPresent ? t("Yes") : t("No")}</p>
+                            <p><strong>{t("Reviewed By:")}</strong> {study.qualityControl.reviewedBy ?? "—"}</p>
                           </div>
                         </div>
                         {study.qualityControl.comments && (
-                          <p className="mt-2"><strong>Comments:</strong> {study.qualityControl.comments}</p>
+                          <p className="mt-2"><strong>{t("Comments:")}</strong> {study.qualityControl.comments}</p>
                         )}
                       </div>
                     )}
@@ -334,16 +338,15 @@ export function StudyManagement({
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-medium">{series.seriesDescription}</h4>
-                            <p className="text-sm text-gray-600">
-                              Series {series.seriesNumber} • {series.instanceCount} images
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              UID: {series.seriesInstanceUID}
+                            <p className="text-sm text-muted-foreground">
+                              {t("Series {seriesNumber} • {instanceCount} images", { seriesNumber: series.seriesNumber, instanceCount: series.instanceCount })}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {t("UID: {seriesInstanceUID}", { seriesInstanceUID: series.seriesInstanceUID })}
                             </p>
                           </div>
                           <div className="text-right text-sm">
                             <p className="font-medium">{formatFileSize(series.imageSize * series.instanceCount)}</p>
-                            <p className="text-gray-600">{series.bodyPartExamined}</p>
+                            <p className="text-muted-foreground">{series.bodyPartExamined}</p>
                           </div>
                         </div>
                       </div>
@@ -351,15 +354,15 @@ export function StudyManagement({
                   </TabsContent>
 
                   <TabsContent value="upload" className="space-y-4">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                    <div className="border-2 border-dashed border-border rounded-lg p-6">
                       <div className="text-center">
-                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                        <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
                         <div className="mt-4">
                           <Label htmlFor={`file-upload-${study.id}`} className="cursor-pointer">
                             <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                              Upload DICOM files
+                              {t("Upload DICOM files")}
                             </span>
-                            <span className="text-sm text-gray-500"> or drag and drop</span>
+                            <span className="text-sm text-muted-foreground"> {t("or drag and drop")}</span>
                           </Label>
                           <Input
                             id={`file-upload-${study.id}`}
@@ -374,15 +377,15 @@ export function StudyManagement({
                             }}
                           />
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                          DICOM files only. Maximum 100MB per file.
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {t("DICOM files only. Maximum 100MB per file.")}
                         </p>
                       </div>
                     </div>
                     {uploadProgress[study.id] !== undefined && (
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span>Uploading...</span>
+                          <span>{t("Uploading...")}</span>
                           <span>{uploadProgress[study.id]}%</span>
                         </div>
                         <Progress value={uploadProgress[study.id]} />
@@ -400,14 +403,14 @@ export function StudyManagement({
       <Dialog open={qcDialogOpen} onOpenChange={setQcDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Quality Control Review</DialogTitle>
+            <DialogTitle>{t("Quality Control Review")}</DialogTitle>
             <DialogDescription>
-              Review and assess the quality of the imaging study
+              {t("Review and assess the quality of the imaging study")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={qcForm.handleSubmit(handleQualityControl)} className="space-y-4">
             <div className="space-y-2">
-              <Label>QC Result *</Label>
+              <Label>{t("QC Result *")}</Label>
               <Controller
                 control={qcForm.control}
                 name="status"
@@ -417,9 +420,9 @@ export function StudyManagement({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="passed">Passed</SelectItem>
-                      <SelectItem value="needs_repeat">Needs Repeat</SelectItem>
-                      <SelectItem value="failed">Failed</SelectItem>
+                      <SelectItem value="passed">{t("Passed")}</SelectItem>
+                      <SelectItem value="needs_repeat">{t("Needs Repeat")}</SelectItem>
+                      <SelectItem value="failed">{t("Failed")}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -428,7 +431,7 @@ export function StudyManagement({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Overall Quality</Label>
+                <Label>{t("Overall Quality")}</Label>
                 <Controller
                   control={qcForm.control}
                   name="overallQuality"
@@ -438,11 +441,11 @@ export function StudyManagement({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="excellent">Excellent</SelectItem>
-                        <SelectItem value="good">Good</SelectItem>
-                        <SelectItem value="acceptable">Acceptable</SelectItem>
-                        <SelectItem value="poor">Poor</SelectItem>
-                        <SelectItem value="unacceptable">Unacceptable</SelectItem>
+                        <SelectItem value="excellent">{t("Excellent")}</SelectItem>
+                        <SelectItem value="good">{t("Good")}</SelectItem>
+                        <SelectItem value="acceptable">{t("Acceptable")}</SelectItem>
+                        <SelectItem value="poor">{t("Poor")}</SelectItem>
+                        <SelectItem value="unacceptable">{t("Unacceptable")}</SelectItem>
                       </SelectContent>
                     </Select>
                   )}
@@ -450,7 +453,7 @@ export function StudyManagement({
               </div>
 
               <div className="space-y-2">
-                <Label>Technical Adequacy</Label>
+                <Label>{t("Technical Adequacy")}</Label>
                 <Controller
                   control={qcForm.control}
                   name="technicalAdequacy"
@@ -460,9 +463,9 @@ export function StudyManagement({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="adequate">Adequate</SelectItem>
-                        <SelectItem value="suboptimal">Suboptimal</SelectItem>
-                        <SelectItem value="inadequate">Inadequate</SelectItem>
+                        <SelectItem value="adequate">{t("Adequate")}</SelectItem>
+                        <SelectItem value="suboptimal">{t("Suboptimal")}</SelectItem>
+                        <SelectItem value="inadequate">{t("Inadequate")}</SelectItem>
                       </SelectContent>
                     </Select>
                   )}
@@ -477,35 +480,35 @@ export function StudyManagement({
                 <div className="flex items-center gap-2">
                   <Checkbox id="artifactsPresent" checked={field.value} onCheckedChange={(v) => field.onChange(v === true)} />
                   <Label htmlFor="artifactsPresent" className="font-normal">
-                    Artifacts present
+                    {t("Artifacts present")}
                   </Label>
                 </div>
               )}
             />
 
             <div className="space-y-2">
-              <Label htmlFor="reviewer">Reviewer *</Label>
-              <Input id="reviewer" {...qcForm.register("reviewer")} placeholder="Your name" />
+              <Label htmlFor="reviewer">{t("Reviewer *")}</Label>
+              <Input id="reviewer" {...qcForm.register("reviewer")} placeholder={t("Your name")} />
               {qcForm.formState.errors.reviewer && (
-                <p className="text-sm text-red-500">{qcForm.formState.errors.reviewer.message}</p>
+                <p className="text-sm text-red-500">{tAny(qcForm.formState.errors.reviewer.message)}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="comments">Comments</Label>
+              <Label htmlFor="comments">{t("Comments")}</Label>
               <Textarea
                 id="comments"
                 {...qcForm.register("comments")}
-                placeholder="Quality control notes and observations..."
+                placeholder={t("Quality control notes and observations...")}
                 rows={3}
               />
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setQcDialogOpen(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
-              <Button type="submit">Submit Review</Button>
+              <Button type="submit">{t("Submit Review")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -515,16 +518,16 @@ export function StudyManagement({
       <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Share Study</DialogTitle>
+            <DialogTitle>{t("Share Study")}</DialogTitle>
             <DialogDescription>
-              Share this study with other healthcare providers
+              {t("Share this study with other healthcare providers")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Recipients (Email addresses)</Label>
+              <Label>{t("Recipients (Email addresses)")}</Label>
               <Textarea
-                placeholder="Enter email addresses, separated by commas"
+                placeholder={t("Enter email addresses, separated by commas")}
                 value={shareRecipients.join(", ")}
                 onChange={(e) => setShareRecipients(e.target.value.split(",").map(email => email.trim()))}
                 rows={3}
@@ -533,9 +536,9 @@ export function StudyManagement({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShareDialogOpen(false)}>
-              Cancel
+              {t("Cancel")}
             </Button>
-            <Button onClick={handleShare}>Share Study</Button>
+            <Button onClick={handleShare}>{t("Share Study")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

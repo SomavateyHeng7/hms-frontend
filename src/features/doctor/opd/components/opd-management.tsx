@@ -10,8 +10,11 @@ import { DiagnosisTreatment } from "@/features/doctor/opd/components/diagnosis-t
 import { PrescriptionGeneration } from "@/features/doctor/opd/components/prescription-generation";
 import { OPDPatient, ConsultationNote, Diagnosis, TreatmentPlan, Prescription } from "@/features/doctor/opd/types";
 import { useTabParam } from "@/hooks/use-tab-param";
+import { useT } from "@/lib/i18n/messages";
+import { OPD_KM } from "@/features/doctor/opd/km";
 
 export function OPDManagement() {
+  const t = useT(OPD_KM);
   const [activeTab, setActiveTab] = useTabParam("dashboard", ["dashboard", "registration", "consultation", "diagnosis", "prescription"] as const);
   
   // Mock data - in real app, this would come from API/database
@@ -32,21 +35,21 @@ export function OPDManagement() {
     registrationNumber: "REG-001",
     visitNumber: "V-001",
     personalInfo: {
-      firstName: "John",
-      lastName: "Doe",
+      firstName: "Dara",
+      lastName: "Sok",
       dateOfBirth: new Date("1990-01-01"),
       gender: "male",
       phoneNumber: "+1234567890",
       email: "john.doe@example.com",
       emergencyContact: {
-        name: "Jane Doe",
+        name: "Chan Sreymom",
         relationship: "spouse",
         phoneNumber: "+1234567891"
       }
     },
     address: {
       street: "123 Main St",
-      city: "Anytown",
+      city: "Phnom Penh",
       state: "State",
       zipCode: "12345",
       country: "Country"
@@ -69,15 +72,15 @@ export function OPDManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted/50">
       <div className="container mx-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="registration">Registration</TabsTrigger>
-            <TabsTrigger value="consultation">Consultation</TabsTrigger>
-            <TabsTrigger value="diagnosis">Diagnosis</TabsTrigger>
-            <TabsTrigger value="prescription">Prescription</TabsTrigger>
+            <TabsTrigger value="dashboard">{t("Dashboard")}</TabsTrigger>
+            <TabsTrigger value="registration">{t("Registration")}</TabsTrigger>
+            <TabsTrigger value="consultation">{t("Consultation")}</TabsTrigger>
+            <TabsTrigger value="diagnosis">{t("Diagnosis")}</TabsTrigger>
+            <TabsTrigger value="prescription">{t("Prescription")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
@@ -98,7 +101,7 @@ export function OPDManagement() {
             <OPDRegistration 
               onSubmit={async (data) => {
                 console.log("Registration data:", data);
-                alert("Patient registration functionality would be implemented here");
+                alert(t("Patient registration functionality would be implemented here"));
               }}
               onCancel={() => handleNavigateToTab("dashboard")}
               departments={[
@@ -108,9 +111,9 @@ export function OPDManagement() {
                 { id: "4", name: "Pediatrics" }
               ]}
               doctors={[
-                { id: "1", name: "Dr. Smith", department: "General Medicine" },
-                { id: "2", name: "Dr. Johnson", department: "Cardiology" },
-                { id: "3", name: "Dr. Brown", department: "Emergency" }
+                { id: "1", name: "Dr. Chea Sovann", department: "General Medicine" },
+                { id: "2", name: "Dr. Lim Pisey", department: "Cardiology" },
+                { id: "3", name: "Dr. Seng Malis", department: "Emergency" }
               ]}
             />
           </TabsContent>
@@ -120,12 +123,12 @@ export function OPDManagement() {
               patient={mockPatient}
               onSave={async (data) => {
                 console.log("Consultation data:", data);
-                alert("Consultation save functionality would be implemented here");
+                alert(t("Consultation save functionality would be implemented here"));
               }}
               onCancel={() => handleNavigateToTab("dashboard")}
               doctorInfo={{
                 id: "doc-1",
-                name: "Dr. Smith",
+                name: "Dr. Chea Sovann",
                 department: "General Medicine",
                 license: "MD12345"
               }}
@@ -140,27 +143,27 @@ export function OPDManagement() {
               treatmentPlans={mockTreatments}
               onAddDiagnosis={async (data) => {
                 console.log("Add diagnosis:", data);
-                alert("Diagnosis addition functionality would be implemented here");
+                alert(t("Diagnosis addition functionality would be implemented here"));
               }}
               onUpdateDiagnosis={async (id, data) => {
                 console.log("Update diagnosis:", id, data);
-                alert("Diagnosis update functionality would be implemented here");
+                alert(t("Diagnosis update functionality would be implemented here"));
               }}
               onDeleteDiagnosis={async (id) => {
                 console.log("Delete diagnosis:", id);
-                alert("Diagnosis deletion functionality would be implemented here");
+                alert(t("Diagnosis deletion functionality would be implemented here"));
               }}
               onAddTreatmentPlan={async (data) => {
                 console.log("Add treatment:", data);
-                alert("Treatment plan addition functionality would be implemented here");
+                alert(t("Treatment plan addition functionality would be implemented here"));
               }}
               onUpdateTreatmentPlan={async (id, data) => {
                 console.log("Update treatment:", id, data);
-                alert("Treatment plan update functionality would be implemented here");
+                alert(t("Treatment plan update functionality would be implemented here"));
               }}
               onDeleteTreatmentPlan={async (id) => {
                 console.log("Delete treatment:", id);
-                alert("Treatment plan deletion functionality would be implemented here");
+                alert(t("Treatment plan deletion functionality would be implemented here"));
               }}
             />
           </TabsContent>
@@ -172,19 +175,19 @@ export function OPDManagement() {
               prescriptions={mockPrescriptions}
               onCreatePrescription={async (data) => {
                 console.log("Create prescription:", data);
-                alert("Prescription creation functionality would be implemented here");
+                alert(t("Prescription creation functionality would be implemented here"));
               }}
               onUpdatePrescription={async (id, data) => {
                 console.log("Update prescription:", id, data);
-                alert("Prescription update functionality would be implemented here");
+                alert(t("Prescription update functionality would be implemented here"));
               }}
               onDeletePrescription={async (id) => {
                 console.log("Delete prescription:", id);
-                alert("Prescription deletion functionality would be implemented here");
+                alert(t("Prescription deletion functionality would be implemented here"));
               }}
               onPrintPrescription={(id) => {
                 console.log("Print prescription:", id);
-                alert("Prescription printing functionality would be implemented here");
+                alert(t("Prescription printing functionality would be implemented here"));
               }}
             />
           </TabsContent>

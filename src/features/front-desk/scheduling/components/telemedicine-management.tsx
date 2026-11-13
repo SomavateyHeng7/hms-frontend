@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
 import { 
   Video, 
   Phone, 
@@ -34,6 +33,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { SCHEDULING_KM } from "@/features/front-desk/scheduling/km";
 
 interface TelemedicineManagementProps {
   telemedicineSessions: TelemedicineSession[];
@@ -52,6 +53,9 @@ export function TelemedicineManagement({
   onEndSession,
   onJoinSession
 }: TelemedicineManagementProps) {
+  const t = useT(SCHEDULING_KM);
+  const tAny = useTranslateAny(SCHEDULING_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useState("sessions");
   const [selectedSession, setSelectedSession] = useState<TelemedicineSession | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -124,29 +128,29 @@ export function TelemedicineManagement({
   };
 
   const mockPatients = [
-    { id: "PAT001", name: "John Smith" },
-    { id: "PAT002", name: "Mary Johnson" },
-    { id: "PAT003", name: "Robert Davis" },
+    { id: "PAT001", name: "Sok Dara" },
+    { id: "PAT002", name: "Heng Sopheap" },
+    { id: "PAT003", name: "Kim Sokha" },
   ];
 
   const mockDoctors = [
-    { id: "DOC001", name: "Dr. Sarah Johnson" },
-    { id: "DOC002", name: "Dr. Michael Chen" },
-    { id: "DOC003", name: "Dr. Emily Rodriguez" },
+    { id: "DOC001", name: "Dr. Nhem Rithy" },
+    { id: "DOC002", name: "Dr. Lim Pisey" },
+    { id: "DOC003", name: "Dr. Ouk Sreyneang" },
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-purple-600">Telemedicine Center</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-purple-600">{t("Telemedicine Center")}</h1>
           <p className="text-muted-foreground">
-            Virtual consultations and remote patient care management
+            {t("Virtual consultations and remote patient care management")}
           </p>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-sm">
-            <span className="font-medium">Active Sessions: </span>
+            <span className="font-medium">{t("Active Sessions:")} </span>
             <span className="text-2xl font-bold text-green-600">{getActiveSessions().length}</span>
           </div>
         </div>
@@ -159,7 +163,7 @@ export function TelemedicineManagement({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{getUpcomingSessions().length}</p>
-                <p className="text-xs text-muted-foreground">Upcoming Sessions</p>
+                <p className="text-xs text-muted-foreground">{t("Upcoming Sessions")}</p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
             </div>
@@ -170,7 +174,7 @@ export function TelemedicineManagement({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{getActiveSessions().length}</p>
-                <p className="text-xs text-muted-foreground">Active Sessions</p>
+                <p className="text-xs text-muted-foreground">{t("Active Sessions")}</p>
               </div>
               <Video className="h-8 w-8 text-green-500" />
             </div>
@@ -183,7 +187,7 @@ export function TelemedicineManagement({
                 <p className="text-2xl font-bold">
                   {telemedicineSessions.filter(s => s.status === "completed").length}
                 </p>
-                <p className="text-xs text-muted-foreground">Completed Today</p>
+                <p className="text-xs text-muted-foreground">{t("Completed Today")}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-purple-500" />
             </div>
@@ -196,7 +200,7 @@ export function TelemedicineManagement({
                 <p className="text-2xl font-bold">
                   {telemedicineAppointments.length}
                 </p>
-                <p className="text-xs text-muted-foreground">Total Appointments</p>
+                <p className="text-xs text-muted-foreground">{t("Total Appointments")}</p>
               </div>
               <Monitor className="h-8 w-8 text-orange-500" />
             </div>
@@ -206,10 +210,10 @@ export function TelemedicineManagement({
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="sessions">Active Sessions</TabsTrigger>
-          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-          <TabsTrigger value="schedule">Schedule New</TabsTrigger>
-          <TabsTrigger value="history">Session History</TabsTrigger>
+          <TabsTrigger value="sessions">{t("Active Sessions")}</TabsTrigger>
+          <TabsTrigger value="upcoming">{t("Upcoming")}</TabsTrigger>
+          <TabsTrigger value="schedule">{t("Schedule New")}</TabsTrigger>
+          <TabsTrigger value="history">{t("Session History")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="sessions" className="space-y-4">
@@ -218,9 +222,9 @@ export function TelemedicineManagement({
               <CardContent className="pt-6">
                 <div className="text-center py-8">
                   <Video className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Active Sessions</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t("No Active Sessions")}</h3>
                   <p className="text-muted-foreground">
-                    There are currently no ongoing telemedicine sessions
+                    {t("There are currently no ongoing telemedicine sessions")}
                   </p>
                 </div>
               </CardContent>
@@ -234,25 +238,24 @@ export function TelemedicineManagement({
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center gap-3">
                           <h3 className="text-lg font-semibold">
-                            Session {session.id.slice(-6)}
+                            {t("Session {slice}", { slice: session.id.slice(-6) })}
                           </h3>
                           <Badge className="bg-green-500 text-white">
                             <Video className="mr-1 h-3 w-3" />
-                            LIVE
+                            {t("LIVE")}
                           </Badge>
                           <Badge variant="outline">
-                            Duration: {session.actualStart ? 
+                            {t("Duration: {value} min", { value: session.actualStart ? 
                               Math.floor((new Date().getTime() - new Date(session.actualStart).getTime()) / 60000)
-                              : 0} min
-                          </Badge>
+                              : 0 })}</Badge>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                           <div className="space-y-1">
-                            <div><span className="font-medium">Patient:</span> {session.patientId}</div>
-                            <div><span className="font-medium">Doctor:</span> {session.doctorId}</div>
-                            <div><span className="font-medium">Started:</span> {
-                              session.actualStart ? format(session.actualStart, "HH:mm") : "N/A"
+                            <div><span className="font-medium">{t("Patient:")}</span> {session.patientId}</div>
+                            <div><span className="font-medium">{t("Doctor:")}</span> {session.doctorId}</div>
+                            <div><span className="font-medium">{t("Started:")}</span> {
+                              session.actualStart ? fmt(session.actualStart, "HH:mm") : "N/A"
                             }</div>
                           </div>
                           <div className="space-y-1">
@@ -260,19 +263,19 @@ export function TelemedicineManagement({
                               {session.recordingEnabled && (
                                 <Badge variant="outline">
                                   <CircleDot className="mr-1 h-3 w-3 text-red-500" />
-                                  Recording
+                                  {t("Recording")}
                                 </Badge>
                               )}
                               {session.chatEnabled && (
                                 <Badge variant="outline">
                                   <MessageSquare className="mr-1 h-3 w-3" />
-                                  Chat
+                                  {t("Chat")}
                                 </Badge>
                               )}
                               {session.screenSharingEnabled && (
                                 <Badge variant="outline">
                                   <Share className="mr-1 h-3 w-3" />
-                                  Screen Share
+                                  {t("Screen Share")}
                                 </Badge>
                               )}
                             </div>
@@ -280,7 +283,7 @@ export function TelemedicineManagement({
                         </div>
 
                         {/* Session Controls */}
-                        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
                           <Button
                             size="sm"
                             variant={activeSessionControls.video ? "default" : "outline"}
@@ -330,13 +333,13 @@ export function TelemedicineManagement({
                           className="bg-green-600 hover:bg-green-700"
                         >
                           <Video className="mr-2 h-4 w-4" />
-                          Join Session
+                          {t("Join Session")}
                         </Button>
                         <Button
                           variant="outline"
                           onClick={() => onEndSession(session.id)}
                         >
-                          End Session
+                          {t("End Session")}
                         </Button>
                       </div>
                     </div>
@@ -353,9 +356,9 @@ export function TelemedicineManagement({
               <CardContent className="pt-6">
                 <div className="text-center py-8">
                   <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Upcoming Sessions</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t("No Upcoming Sessions")}</h3>
                   <p className="text-muted-foreground">
-                    No telemedicine sessions scheduled for today
+                    {t("No telemedicine sessions scheduled for today")}
                   </p>
                 </div>
               </CardContent>
@@ -369,10 +372,10 @@ export function TelemedicineManagement({
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center gap-3">
                           <h3 className="text-lg font-semibold">
-                            Session {session.id.slice(-6)}
+                            {t("Session {slice}", { slice: session.id.slice(-6) })}
                           </h3>
                           <Badge className={getSessionStatusColor(session.status)}>
-                            {session.status}
+                            {tAny(session.status)}
                           </Badge>
                         </div>
 
@@ -380,15 +383,15 @@ export function TelemedicineManagement({
                           <div className="space-y-1">
                             <div className="flex items-center gap-1">
                               <User className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">Patient:</span> {session.patientId}
+                              <span className="font-medium">{t("Patient:")}</span> {session.patientId}
                             </div>
                             <div className="flex items-center gap-1">
                               <User className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">Doctor:</span> {session.doctorId}
+                              <span className="font-medium">{t("Doctor:")}</span> {session.doctorId}
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">Scheduled:</span> {format(session.scheduledStart, "MMM dd, HH:mm")}
+                              <span className="font-medium">{t("Scheduled:")}</span> {fmt(session.scheduledStart, "MMM dd, HH:mm")}
                             </div>
                           </div>
                           <div className="space-y-1">
@@ -396,19 +399,19 @@ export function TelemedicineManagement({
                               {session.recordingEnabled && (
                                 <Badge variant="outline">
                                   <CircleDot className="mr-1 h-3 w-3" />
-                                  Recording
+                                  {t("Recording")}
                                 </Badge>
                               )}
                               {session.chatEnabled && (
                                 <Badge variant="outline">
                                   <MessageSquare className="mr-1 h-3 w-3" />
-                                  Chat
+                                  {t("Chat")}
                                 </Badge>
                               )}
                               {session.screenSharingEnabled && (
                                 <Badge variant="outline">
                                   <Share className="mr-1 h-3 w-3" />
-                                  Screen Share
+                                  {t("Screen Share")}
                                 </Badge>
                               )}
                             </div>
@@ -417,8 +420,7 @@ export function TelemedicineManagement({
 
                         {/* Time until session */}
                         <div className="text-sm text-muted-foreground">
-                          Starts in {Math.max(0, Math.floor((new Date(session.scheduledStart).getTime() - new Date().getTime()) / 60000))} minutes
-                        </div>
+                          {t("Starts in {max} minutes", { max: Math.max(0, Math.floor((new Date(session.scheduledStart).getTime() - new Date().getTime()) / 60000)) })}</div>
                       </div>
 
                       <div className="flex flex-col gap-2 ml-4">
@@ -428,14 +430,14 @@ export function TelemedicineManagement({
                             className="bg-green-600 hover:bg-green-700"
                           >
                             <Play className="mr-2 h-4 w-4" />
-                            Start Early
+                            {t("Start Early")}
                           </Button>
                         )}
                         <Button
                           variant="outline"
                           onClick={() => setSelectedSession(session)}
                         >
-                          View Details
+                          {t("View Details")}
                         </Button>
                       </div>
                     </div>
@@ -451,10 +453,10 @@ export function TelemedicineManagement({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Video className="h-5 w-5 text-purple-500" />
-                Schedule Telemedicine Session
+                {t("Schedule Telemedicine Session")}
               </CardTitle>
               <CardDescription>
-                Create a new virtual consultation session
+                {t("Create a new virtual consultation session")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -462,63 +464,63 @@ export function TelemedicineManagement({
                 {/* Appointment and Participants */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Appointment *</Label>
+                    <Label>{t("Appointment *")}</Label>
                     <Select onValueChange={(value) => setValue("appointmentId", value)}>
                       <SelectTrigger className={errors.appointmentId ? "border-red-500" : ""}>
-                        <SelectValue placeholder="Select appointment" />
+                        <SelectValue placeholder={t("Select appointment")} />
                       </SelectTrigger>
                       <SelectContent>
                         {telemedicineAppointments.map((appointment) => (
                           <SelectItem key={appointment.id} value={appointment.id}>
-                            {appointment.patientId} - {format(appointment.appointmentDate, "MMM dd, HH:mm")}
+                            {appointment.patientId} - {fmt(appointment.appointmentDate, "MMM dd, HH:mm")}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     {errors.appointmentId && (
-                      <p className="text-sm text-red-500">{errors.appointmentId.message}</p>
+                      <p className="text-sm text-red-500">{tAny(errors.appointmentId.message)}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Session Type *</Label>
+                    <Label>{t("Session Type *")}</Label>
                     <Select onValueChange={(value) => setValue("sessionType", value as any)}>
                       <SelectTrigger className={errors.sessionType ? "border-red-500" : ""}>
-                        <SelectValue placeholder="Select session type" />
+                        <SelectValue placeholder={t("Select session type")} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="video">
                           <div className="flex items-center gap-2">
                             <Video className="h-4 w-4" />
-                            Video Call
+                            {t("Video Call")}
                           </div>
                         </SelectItem>
                         <SelectItem value="audio">
                           <div className="flex items-center gap-2">
                             <Phone className="h-4 w-4" />
-                            Audio Call
+                            {t("Audio Call")}
                           </div>
                         </SelectItem>
                         <SelectItem value="chat">
                           <div className="flex items-center gap-2">
                             <MessageSquare className="h-4 w-4" />
-                            Text Chat
+                            {t("Text Chat")}
                           </div>
                         </SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.sessionType && (
-                      <p className="text-sm text-red-500">{errors.sessionType.message}</p>
+                      <p className="text-sm text-red-500">{tAny(errors.sessionType.message)}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="patientId">Patient *</Label>
+                    <Label htmlFor="patientId">{t("Patient *")}</Label>
                     <Select onValueChange={(value) => setValue("patientId", value)}>
                       <SelectTrigger className={errors.patientId ? "border-red-500" : ""}>
-                        <SelectValue placeholder="Select patient" />
+                        <SelectValue placeholder={t("Select patient")} />
                       </SelectTrigger>
                       <SelectContent>
                         {mockPatients.map((patient) => (
@@ -529,15 +531,15 @@ export function TelemedicineManagement({
                       </SelectContent>
                     </Select>
                     {errors.patientId && (
-                      <p className="text-sm text-red-500">{errors.patientId.message}</p>
+                      <p className="text-sm text-red-500">{tAny(errors.patientId.message)}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="doctorId">Doctor *</Label>
+                    <Label htmlFor="doctorId">{t("Doctor *")}</Label>
                     <Select onValueChange={(value) => setValue("doctorId", value)}>
                       <SelectTrigger className={errors.doctorId ? "border-red-500" : ""}>
-                        <SelectValue placeholder="Select doctor" />
+                        <SelectValue placeholder={t("Select doctor")} />
                       </SelectTrigger>
                       <SelectContent>
                         {mockDoctors.map((doctor) => (
@@ -548,14 +550,14 @@ export function TelemedicineManagement({
                       </SelectContent>
                     </Select>
                     {errors.doctorId && (
-                      <p className="text-sm text-red-500">{errors.doctorId.message}</p>
+                      <p className="text-sm text-red-500">{tAny(errors.doctorId.message)}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Session Configuration */}
                 <div className="space-y-4">
-                  <Label className="text-base font-medium">Session Features</Label>
+                  <Label className="text-base font-medium">{t("Session Features")}</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-3">
                       <div className="flex items-center space-x-2">
@@ -565,7 +567,7 @@ export function TelemedicineManagement({
                         />
                         <Label htmlFor="recordingEnabled" className="flex items-center gap-2">
                           <CircleDot className="h-4 w-4 text-red-500" />
-                          Enable Recording
+                          {t("Enable Recording")}
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -575,7 +577,7 @@ export function TelemedicineManagement({
                         />
                         <Label htmlFor="chatEnabled" className="flex items-center gap-2">
                           <MessageSquare className="h-4 w-4" />
-                          Enable Chat
+                          {t("Enable Chat")}
                         </Label>
                       </div>
                     </div>
@@ -587,7 +589,7 @@ export function TelemedicineManagement({
                         />
                         <Label htmlFor="screenSharingEnabled" className="flex items-center gap-2">
                           <Share className="h-4 w-4" />
-                          Enable Screen Sharing
+                          {t("Enable Screen Sharing")}
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -597,7 +599,7 @@ export function TelemedicineManagement({
                         />
                         <Label htmlFor="requiresSpecialEquipment" className="flex items-center gap-2">
                           <Monitor className="h-4 w-4" />
-                          Special Equipment Required
+                          {t("Special Equipment Required")}
                         </Label>
                       </div>
                     </div>
@@ -606,7 +608,7 @@ export function TelemedicineManagement({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="estimatedDuration">Duration (minutes) *</Label>
+                    <Label htmlFor="estimatedDuration">{t("Duration (minutes) *")}</Label>
                     <Input
                       id="estimatedDuration"
                       type="number"
@@ -616,7 +618,7 @@ export function TelemedicineManagement({
                       className={errors.estimatedDuration ? "border-red-500" : ""}
                     />
                     {errors.estimatedDuration && (
-                      <p className="text-sm text-red-500">{errors.estimatedDuration.message}</p>
+                      <p className="text-sm text-red-500">{tAny(errors.estimatedDuration.message)}</p>
                     )}
                   </div>
                 </div>
@@ -624,21 +626,21 @@ export function TelemedicineManagement({
                 {/* Additional Information */}
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="equipmentNotes">Equipment Notes</Label>
+                    <Label htmlFor="equipmentNotes">{t("Equipment Notes")}</Label>
                     <Textarea
                       id="equipmentNotes"
                       {...register("equipmentNotes")}
-                      placeholder="Special equipment or setup requirements"
+                      placeholder={t("Special equipment or setup requirements")}
                       rows={2}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="patientInstructions">Patient Instructions</Label>
+                    <Label htmlFor="patientInstructions">{t("Patient Instructions")}</Label>
                     <Textarea
                       id="patientInstructions"
                       {...register("patientInstructions")}
-                      placeholder="Instructions for the patient to prepare for the session"
+                      placeholder={t("Instructions for the patient to prepare for the session")}
                       rows={3}
                     />
                   </div>
@@ -647,10 +649,10 @@ export function TelemedicineManagement({
                 {/* Submit Button */}
                 <div className="flex justify-end space-x-4 pt-4">
                   <Button type="button" variant="outline" onClick={() => reset()}>
-                    Clear Form
+                    {t("Clear Form")}
                   </Button>
                   <Button type="submit" disabled={isSubmitting} className="bg-purple-600 hover:bg-purple-700">
-                    {isSubmitting ? "Creating..." : "Schedule Session"}
+                    {isSubmitting ? t("Creating...") : t("Schedule Session")}
                   </Button>
                 </div>
               </form>
@@ -661,9 +663,9 @@ export function TelemedicineManagement({
         <TabsContent value="history" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Session History</CardTitle>
+              <CardTitle>{t("Session History")}</CardTitle>
               <CardDescription>
-                View completed and cancelled telemedicine sessions
+                {t("View completed and cancelled telemedicine sessions")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -673,7 +675,7 @@ export function TelemedicineManagement({
                   .length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Video className="mx-auto h-12 w-12 mb-4" />
-                    <p>No session history available</p>
+                    <p>{t("No session history available")}</p>
                   </div>
                 ) : (
                   telemedicineSessions
@@ -685,17 +687,16 @@ export function TelemedicineManagement({
                       >
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">Session {session.id.slice(-6)}</span>
+                            <span className="font-medium">{t("Session {slice}", { slice: session.id.slice(-6) })}</span>
                             <Badge className={getSessionStatusColor(session.status)}>
-                              {session.status}
+                              {tAny(session.status)}
                             </Badge>
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            <div>Patient: {session.patientId} • Doctor: {session.doctorId}</div>
+                            <div>{t("Patient: {patientId} • Doctor: {doctorId}", { patientId: session.patientId, doctorId: session.doctorId })}</div>
                             <div>
                               {session.actualStart && session.actualEnd && (
-                                <>Started: {format(session.actualStart, "MMM dd, HH:mm")} • 
-                                Duration: {Math.floor((new Date(session.actualEnd).getTime() - new Date(session.actualStart).getTime()) / 60000)} min</>
+                                <>{t("Started: {actualStart} • Duration: {floor} min", { actualStart: fmt(session.actualStart, "MMM dd, HH:mm"), floor: Math.floor((new Date(session.actualEnd).getTime() - new Date(session.actualStart).getTime()) / 60000) })}</>
                               )}
                             </div>
                           </div>
@@ -703,11 +704,11 @@ export function TelemedicineManagement({
                         <div className="flex gap-2">
                           {session.recordingUrl && (
                             <Button size="sm" variant="outline">
-                              View Recording
+                              {t("View Recording")}
                             </Button>
                           )}
                           <Button size="sm" variant="outline">
-                            View Details
+                            {t("View Details")}
                           </Button>
                         </div>
                       </div>

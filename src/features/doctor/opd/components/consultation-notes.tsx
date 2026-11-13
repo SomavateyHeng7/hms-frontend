@@ -24,7 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { consultationNoteSchema, ConsultationNoteFormData } from "@/features/doctor/opd/validations";
 import { OPDPatient } from "@/features/doctor/opd/types";
-import { format } from "date-fns";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { OPD_KM } from "@/features/doctor/opd/km";
 
 interface ConsultationNotesProps {
   patient: OPDPatient;
@@ -39,6 +40,9 @@ interface ConsultationNotesProps {
 }
 
 export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: ConsultationNotesProps) {
+  const t = useT(OPD_KM);
+  const tAny = useTranslateAny(OPD_KM);
+  const fmt = useDateFormat();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentTab, setCurrentTab] = useState("history");
 
@@ -67,7 +71,7 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
       },
       physicalExamination: {
         vitalSigns: {
-          temperature: 98.6,
+          temperature: 37.0,
           bloodPressure: "",
           heartRate: 72,
           respiratoryRate: 16,
@@ -130,23 +134,23 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
                 {patient.personalInfo.firstName} {patient.personalInfo.lastName}
               </h2>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>ID: {patient.registrationNumber}</span>
-                <span>Age: {new Date().getFullYear() - new Date(patient.personalInfo.dateOfBirth).getFullYear()}</span>
-                <span>Gender: {patient.personalInfo.gender}</span>
-                <span>Visit: {patient.visitNumber}</span>
+                <span>{t("ID: {registrationNumber}", { registrationNumber: patient.registrationNumber })}</span>
+                <span>{t("Age: {value}", { value: new Date().getFullYear() - new Date(patient.personalInfo.dateOfBirth).getFullYear() })}</span>
+                <span>{t("Gender: {gender}", { gender: tAny(patient.personalInfo.gender) })}</span>
+                <span>{t("Visit: {visitNumber}", { visitNumber: patient.visitNumber })}</span>
               </div>
             </div>
           </div>
           <div className="text-right">
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
               <Calendar className="h-4 w-4" />
-              {format(new Date(), "MMMM dd, yyyy")}
+              {fmt(new Date(), "MMMM dd, yyyy")}
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Stethoscope className="h-4 w-4 text-blue-600" />
               Dr. {doctorInfo.name}
             </div>
-            <div className="text-xs text-muted-foreground">{doctorInfo.department}</div>
+            <div className="text-xs text-muted-foreground">{tAny(doctorInfo.department)}</div>
           </div>
         </div>
       </CardContent>
@@ -159,34 +163,34 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-blue-600" />
-            Chief Complaint & History
+            {t("Chief Complaint & History")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="chiefComplaint">Chief Complaint *</Label>
+            <Label htmlFor="chiefComplaint">{t("Chief Complaint *")}</Label>
             <Textarea
               id="chiefComplaint"
-              placeholder="Patient's main complaint in their own words"
+              placeholder={t("Patient's main complaint in their own words")}
               {...register("chiefComplaint")}
               className={errors.chiefComplaint ? "border-red-500" : ""}
             />
             {errors.chiefComplaint && (
-              <p className="text-sm text-red-500">{errors.chiefComplaint.message}</p>
+              <p className="text-sm text-red-500">{tAny(errors.chiefComplaint.message)}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="historyOfPresentIllness">History of Present Illness *</Label>
+            <Label htmlFor="historyOfPresentIllness">{t("History of Present Illness *")}</Label>
             <Textarea
               id="historyOfPresentIllness"
-              placeholder="Detailed description of current symptoms, onset, duration, severity, associated symptoms, etc."
+              placeholder={t("Detailed description of current symptoms, onset, duration, severity, associated symptoms, etc.")}
               rows={4}
               {...register("historyOfPresentIllness")}
               className={errors.historyOfPresentIllness ? "border-red-500" : ""}
             />
             {errors.historyOfPresentIllness && (
-              <p className="text-sm text-red-500">{errors.historyOfPresentIllness.message}</p>
+              <p className="text-sm text-red-500">{tAny(errors.historyOfPresentIllness.message)}</p>
             )}
           </div>
         </CardContent>
@@ -194,81 +198,81 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
 
       <Card>
         <CardHeader>
-          <CardTitle>Review of Systems</CardTitle>
+          <CardTitle>{t("Review of Systems")}</CardTitle>
           <CardDescription>
-            Systematic review of body systems
+            {t("Systematic review of body systems")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="constitutional">Constitutional</Label>
+              <Label htmlFor="constitutional">{t("Constitutional")}</Label>
               <Textarea
                 id="constitutional"
-                placeholder="Fever, chills, weight changes, fatigue"
+                placeholder={t("Fever, chills, weight changes, fatigue")}
                 {...register("reviewOfSystems.constitutional")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cardiovascular">Cardiovascular</Label>
+              <Label htmlFor="cardiovascular">{t("Cardiovascular")}</Label>
               <Textarea
                 id="cardiovascular"
-                placeholder="Chest pain, palpitations, shortness of breath"
+                placeholder={t("Chest pain, palpitations, shortness of breath")}
                 {...register("reviewOfSystems.cardiovascular")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="respiratory">Respiratory</Label>
+              <Label htmlFor="respiratory">{t("Respiratory")}</Label>
               <Textarea
                 id="respiratory"
-                placeholder="Cough, dyspnea, wheezing"
+                placeholder={t("Cough, dyspnea, wheezing")}
                 {...register("reviewOfSystems.respiratory")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="gastrointestinal">Gastrointestinal</Label>
+              <Label htmlFor="gastrointestinal">{t("Gastrointestinal")}</Label>
               <Textarea
                 id="gastrointestinal"
-                placeholder="Nausea, vomiting, diarrhea, constipation"
+                placeholder={t("Nausea, vomiting, diarrhea, constipation")}
                 {...register("reviewOfSystems.gastrointestinal")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="genitourinary">Genitourinary</Label>
+              <Label htmlFor="genitourinary">{t("Genitourinary")}</Label>
               <Textarea
                 id="genitourinary"
-                placeholder="Urinary frequency, urgency, dysuria"
+                placeholder={t("Urinary frequency, urgency, dysuria")}
                 {...register("reviewOfSystems.genitourinary")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="musculoskeletal">Musculoskeletal</Label>
+              <Label htmlFor="musculoskeletal">{t("Musculoskeletal")}</Label>
               <Textarea
                 id="musculoskeletal"
-                placeholder="Joint pain, muscle weakness, swelling"
+                placeholder={t("Joint pain, muscle weakness, swelling")}
                 {...register("reviewOfSystems.musculoskeletal")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="neurological">Neurological</Label>
+              <Label htmlFor="neurological">{t("Neurological")}</Label>
               <Textarea
                 id="neurological"
-                placeholder="Headache, dizziness, seizures"
+                placeholder={t("Headache, dizziness, seizures")}
                 {...register("reviewOfSystems.neurological")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="psychiatric">Psychiatric</Label>
+              <Label htmlFor="psychiatric">{t("Psychiatric")}</Label>
               <Textarea
                 id="psychiatric"
-                placeholder="Mood changes, anxiety, depression"
+                placeholder={t("Mood changes, anxiety, depression")}
                 {...register("reviewOfSystems.psychiatric")}
               />
             </div>
@@ -284,13 +288,13 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-red-600" />
-            Vital Signs
+            {t("Vital Signs")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="temperature">Temperature (°F) *</Label>
+              <Label htmlFor="temperature">{t("Temperature (°C) *")}</Label>
               <Input
                 id="temperature"
                 type="number"
@@ -303,7 +307,7 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bloodPressure">Blood Pressure *</Label>
+              <Label htmlFor="bloodPressure">{t("Blood Pressure *")}</Label>
               <Input
                 id="bloodPressure"
                 placeholder="120/80"
@@ -313,7 +317,7 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="heartRate">Heart Rate (bpm) *</Label>
+              <Label htmlFor="heartRate">{t("Heart Rate (bpm) *")}</Label>
               <Input
                 id="heartRate"
                 type="number"
@@ -325,7 +329,7 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="respiratoryRate">Respiratory Rate *</Label>
+              <Label htmlFor="respiratoryRate">{t("Respiratory Rate *")}</Label>
               <Input
                 id="respiratoryRate"
                 type="number"
@@ -337,7 +341,7 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="oxygenSaturation">O2 Saturation (%) *</Label>
+              <Label htmlFor="oxygenSaturation">{t("O2 Saturation (%) *")}</Label>
               <Input
                 id="oxygenSaturation"
                 type="number"
@@ -349,7 +353,7 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="height">Height (cm) *</Label>
+              <Label htmlFor="height">{t("Height (cm) *")}</Label>
               <Input
                 id="height"
                 type="number"
@@ -361,7 +365,7 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="weight">Weight (kg) *</Label>
+              <Label htmlFor="weight">{t("Weight (kg) *")}</Label>
               <Input
                 id="weight"
                 type="number"
@@ -374,7 +378,7 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bmi">BMI</Label>
+              <Label htmlFor="bmi">{t("BMI")}</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="bmi"
@@ -385,7 +389,7 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
                 />
                 {watch("physicalExamination.vitalSigns.bmi") > 0 && (
                   <Badge className={getBMIStatus(watch("physicalExamination.vitalSigns.bmi")).color}>
-                    {getBMIStatus(watch("physicalExamination.vitalSigns.bmi")).status}
+                    {tAny(getBMIStatus(watch("physicalExamination.vitalSigns.bmi")).status)}
                   </Badge>
                 )}
               </div>
@@ -398,79 +402,79 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Eye className="h-5 w-5 text-purple-600" />
-            Physical Examination
+            {t("Physical Examination")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="generalAppearance">General Appearance</Label>
+              <Label htmlFor="generalAppearance">{t("General Appearance")}</Label>
               <Textarea
                 id="generalAppearance"
-                placeholder="Well-appearing, alert, oriented, no acute distress"
+                placeholder={t("Well-appearing, alert, oriented, no acute distress")}
                 {...register("physicalExamination.generalAppearance")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="heent">HEENT</Label>
+              <Label htmlFor="heent">{t("HEENT")}</Label>
               <Textarea
                 id="heent"
-                placeholder="Head, Eyes, Ears, Nose, Throat examination"
+                placeholder={t("Head, Eyes, Ears, Nose, Throat examination")}
                 {...register("physicalExamination.heent")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cardiovascularExam">Cardiovascular</Label>
+              <Label htmlFor="cardiovascularExam">{t("Cardiovascular")}</Label>
               <Textarea
                 id="cardiovascularExam"
-                placeholder="Regular rate and rhythm, no murmurs"
+                placeholder={t("Regular rate and rhythm, no murmurs")}
                 {...register("physicalExamination.cardiovascular")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="pulmonaryExam">Pulmonary</Label>
+              <Label htmlFor="pulmonaryExam">{t("Pulmonary")}</Label>
               <Textarea
                 id="pulmonaryExam"
-                placeholder="Clear to auscultation bilaterally"
+                placeholder={t("Clear to auscultation bilaterally")}
                 {...register("physicalExamination.pulmonary")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="abdominalExam">Abdominal</Label>
+              <Label htmlFor="abdominalExam">{t("Abdominal")}</Label>
               <Textarea
                 id="abdominalExam"
-                placeholder="Soft, non-tender, non-distended"
+                placeholder={t("Soft, non-tender, non-distended")}
                 {...register("physicalExamination.abdominal")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="musculoskeletalExam">Musculoskeletal</Label>
+              <Label htmlFor="musculoskeletalExam">{t("Musculoskeletal")}</Label>
               <Textarea
                 id="musculoskeletalExam"
-                placeholder="Normal range of motion, no deformities"
+                placeholder={t("Normal range of motion, no deformities")}
                 {...register("physicalExamination.musculoskeletal")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="neurologicalExam">Neurological</Label>
+              <Label htmlFor="neurologicalExam">{t("Neurological")}</Label>
               <Textarea
                 id="neurologicalExam"
-                placeholder="Alert and oriented, normal reflexes"
+                placeholder={t("Alert and oriented, normal reflexes")}
                 {...register("physicalExamination.neurological")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="skinExam">Skin</Label>
+              <Label htmlFor="skinExam">{t("Skin")}</Label>
               <Textarea
                 id="skinExam"
-                placeholder="Warm, dry, intact, no rashes"
+                placeholder={t("Warm, dry, intact, no rashes")}
                 {...register("physicalExamination.skin")}
               />
             </div>
@@ -486,50 +490,50 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Heart className="h-5 w-5 text-green-600" />
-            Assessment & Plan
+            {t("Assessment & Plan")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="assessment">Assessment *</Label>
+            <Label htmlFor="assessment">{t("Assessment *")}</Label>
             <Textarea
               id="assessment"
-              placeholder="Clinical assessment based on history and physical examination"
+              placeholder={t("Clinical assessment based on history and physical examination")}
               rows={3}
               {...register("assessment")}
               className={errors.assessment ? "border-red-500" : ""}
             />
             {errors.assessment && (
-              <p className="text-sm text-red-500">{errors.assessment.message}</p>
+              <p className="text-sm text-red-500">{tAny(errors.assessment.message)}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="plan">Plan *</Label>
+            <Label htmlFor="plan">{t("Plan *")}</Label>
             <Textarea
               id="plan"
-              placeholder="Treatment plan including medications, procedures, follow-up, etc."
+              placeholder={t("Treatment plan including medications, procedures, follow-up, etc.")}
               rows={4}
               {...register("plan")}
               className={errors.plan ? "border-red-500" : ""}
             />
             {errors.plan && (
-              <p className="text-sm text-red-500">{errors.plan.message}</p>
+              <p className="text-sm text-red-500">{tAny(errors.plan.message)}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="followUpInstructions">Follow-up Instructions</Label>
+            <Label htmlFor="followUpInstructions">{t("Follow-up Instructions")}</Label>
             <Textarea
               id="followUpInstructions"
-              placeholder="Instructions for patient care, follow-up appointments, return precautions"
+              placeholder={t("Instructions for patient care, follow-up appointments, return precautions")}
               rows={3}
               {...register("followUpInstructions")}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="nextAppointment">Next Appointment</Label>
+            <Label htmlFor="nextAppointment">{t("Next Appointment")}</Label>
             <Input
               id="nextAppointment"
               type="datetime-local"
@@ -544,8 +548,8 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Consultation Notes</h1>
-        <p className="text-gray-600">Complete consultation documentation</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("Consultation Notes")}</h1>
+        <p className="text-muted-foreground">{t("Complete consultation documentation")}</p>
       </div>
 
       {renderPatientHeader()}
@@ -553,9 +557,9 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         <Tabs value={currentTab} onValueChange={setCurrentTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="history">History & ROS</TabsTrigger>
-            <TabsTrigger value="physical">Physical Exam</TabsTrigger>
-            <TabsTrigger value="assessment">Assessment & Plan</TabsTrigger>
+            <TabsTrigger value="history">{t("History & ROS")}</TabsTrigger>
+            <TabsTrigger value="physical">{t("Physical Exam")}</TabsTrigger>
+            <TabsTrigger value="assessment">{t("Assessment & Plan")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="history">{renderHistory()}</TabsContent>
@@ -569,7 +573,7 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
             variant="outline"
             onClick={onCancel}
           >
-            Cancel
+            {t("Cancel")}
           </Button>
 
           <div className="flex gap-2">
@@ -580,7 +584,7 @@ export function ConsultationNotes({ patient, onSave, onCancel, doctorInfo }: Con
             >
               {isSubmitting && <Clock className="h-4 w-4 animate-spin" />}
               <Save className="h-4 w-4" />
-              {isSubmitting ? "Saving..." : "Save Consultation"}
+              {isSubmitting ? t("Saving...") : t("Save Consultation")}
             </Button>
           </div>
         </div>

@@ -16,6 +16,8 @@ import { LabOrder, LabTest } from "@/features/diagnostics/laboratory/types";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { labOrderSchema, LabOrderFormData } from "@/features/diagnostics/laboratory/validations";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { LAB_KM } from "@/features/diagnostics/laboratory/km";
 
 interface LabOrdersProps {
   orders: LabOrder[];
@@ -68,6 +70,9 @@ export function LabOrders({
   onCancelOrder,
   onCollectSample,
 }: LabOrdersProps) {
+  const fmt = useDateFormat();
+  const t = useT(LAB_KM);
+  const tAny = useTranslateAny(LAB_KM);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<LabOrder | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -154,15 +159,15 @@ export function LabOrders({
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Lab Orders</h1>
-        <p className="text-gray-600">Manage laboratory test orders and requests</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("Lab Orders")}</h1>
+        <p className="text-muted-foreground">{t("Manage laboratory test orders and requests")}</p>
       </div>
 
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search orders, patients, or order numbers..."
+            placeholder={t("Search orders, patients, or order numbers...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -170,52 +175,52 @@ export function LabOrders({
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t("Status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="ordered">Ordered</SelectItem>
-            <SelectItem value="collected">Collected</SelectItem>
-            <SelectItem value="processing">Processing</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="all">{t("All Status")}</SelectItem>
+            <SelectItem value="ordered">{t("Ordered")}</SelectItem>
+            <SelectItem value="collected">{t("Collected")}</SelectItem>
+            <SelectItem value="processing">{t("Processing")}</SelectItem>
+            <SelectItem value="completed">{t("Completed")}</SelectItem>
+            <SelectItem value="cancelled">{t("Cancelled")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={priorityFilter} onValueChange={setPriorityFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Priority" />
+            <SelectValue placeholder={t("Priority")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Priority</SelectItem>
-            <SelectItem value="routine">Routine</SelectItem>
-            <SelectItem value="urgent">Urgent</SelectItem>
-            <SelectItem value="stat">STAT</SelectItem>
-            <SelectItem value="asap">ASAP</SelectItem>
+            <SelectItem value="all">{t("All Priority")}</SelectItem>
+            <SelectItem value="routine">{t("Routine")}</SelectItem>
+            <SelectItem value="urgent">{t("Urgent")}</SelectItem>
+            <SelectItem value="stat">{t("STAT")}</SelectItem>
+            <SelectItem value="asap">{t("ASAP")}</SelectItem>
           </SelectContent>
         </Select>
         <Dialog open={orderDialogOpen} onOpenChange={setOrderDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => openOrderDialog()}>
               <Plus className="mr-2 h-4 w-4" />
-              New Lab Order
+              {t("New Lab Order")}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {editingOrder ? "Edit Lab Order" : "Create New Lab Order"}
+                {editingOrder ? t("Edit Lab Order") : t("Create New Lab Order")}
               </DialogTitle>
               <DialogDescription>
-                Select tests and enter order details
+                {t("Select tests and enter order details")}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Patient *</Label>
+                  <Label>{t("Patient *")}</Label>
                   <Select onValueChange={(value) => form.setValue("patientId", value)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select patient" />
+                      <SelectValue placeholder={t("Select patient")} />
                     </SelectTrigger>
                     <SelectContent>
                       {patients.map((patient) => (
@@ -226,50 +231,50 @@ export function LabOrders({
                     </SelectContent>
                   </Select>
                   {form.formState.errors.patientId && (
-                    <p className="text-sm text-red-500">{form.formState.errors.patientId.message}</p>
+                    <p className="text-sm text-red-500">{tAny(form.formState.errors.patientId.message)}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Priority *</Label>
+                  <Label>{t("Priority *")}</Label>
                   <Select onValueChange={(value) => form.setValue("priority", value as any)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
+                      <SelectValue placeholder={t("Select priority")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="routine">Routine</SelectItem>
-                      <SelectItem value="urgent">Urgent</SelectItem>
-                      <SelectItem value="stat">STAT</SelectItem>
-                      <SelectItem value="asap">ASAP</SelectItem>
+                      <SelectItem value="routine">{t("Routine")}</SelectItem>
+                      <SelectItem value="urgent">{t("Urgent")}</SelectItem>
+                      <SelectItem value="stat">{t("STAT")}</SelectItem>
+                      <SelectItem value="asap">{t("ASAP")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="clinicalIndication">Clinical Indication *</Label>
+                <Label htmlFor="clinicalIndication">{t("Clinical Indication *")}</Label>
                 <Textarea
                   id="clinicalIndication"
                   {...form.register("clinicalIndication")}
-                  placeholder="Reason for testing, symptoms, suspected diagnosis..."
+                  placeholder={t("Reason for testing, symptoms, suspected diagnosis...")}
                   rows={3}
                 />
                 {form.formState.errors.clinicalIndication && (
-                  <p className="text-sm text-red-500">{form.formState.errors.clinicalIndication.message}</p>
+                  <p className="text-sm text-red-500">{tAny(form.formState.errors.clinicalIndication.message)}</p>
                 )}
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label>Lab Tests *</Label>
+                  <Label>{t("Lab Tests *")}</Label>
                   <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                     <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by category" />
+                      <SelectValue placeholder={t("Filter by category")} />
                     </SelectTrigger>
                     <SelectContent>
                       {TEST_CATEGORIES.map((category) => (
                         <SelectItem key={category.value} value={category.value}>
-                          {category.label}
+                          {tAny(category.label)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -279,7 +284,7 @@ export function LabOrders({
                 <div className="max-h-60 overflow-y-auto border rounded-lg p-4">
                   <div className="grid gap-3">
                     {filteredTests.map((test) => (
-                      <div key={test.id} className="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                      <div key={test.id} className="flex items-center justify-between p-3 border rounded hover:bg-muted">
                         <div className="flex items-center space-x-3">
                           <Checkbox
                             id={test.id}
@@ -290,22 +295,22 @@ export function LabOrders({
                             <Label htmlFor={test.id} className="font-medium cursor-pointer">
                               {test.name} ({test.code})
                             </Label>
-                            <p className="text-sm text-gray-600">{test.category} • {test.sampleType}</p>
+                            <p className="text-sm text-muted-foreground">{tAny(test.category)} • {tAny(test.sampleType)}</p>
                             {test.fastingRequired && (
-                              <Badge variant="outline" className="text-xs">Fasting Required</Badge>
+                              <Badge variant="outline" className="text-xs">{t("Fasting Required")}</Badge>
                             )}
                           </div>
                         </div>
                         <div className="text-right">
                           <p className="font-medium">${test.price}</p>
-                          <p className="text-sm text-gray-600">{test.turnaroundTime}h TAT</p>
+                          <p className="text-sm text-muted-foreground">{t("{turnaroundTime}h TAT", { turnaroundTime: test.turnaroundTime })}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
                 {form.formState.errors.tests && (
-                  <p className="text-sm text-red-500">{form.formState.errors.tests.message}</p>
+                  <p className="text-sm text-red-500">{tAny(form.formState.errors.tests.message)}</p>
                 )}
               </div>
 
@@ -317,26 +322,25 @@ export function LabOrders({
                       checked={form.watch("fastingRequired")}
                       onCheckedChange={(checked) => form.setValue("fastingRequired", checked as boolean)}
                     />
-                    <Label htmlFor="fastingRequired">Fasting Required</Label>
+                    <Label htmlFor="fastingRequired">{t("Fasting Required")}</Label>
                   </div>
                 </div>
 
                 <div className="text-right">
                   <p className="text-lg font-semibold">
-                    Total Amount: ${calculateTotalAmount().toFixed(2)}
+                    {t("Total Amount: ${number}", { number: calculateTotalAmount().toFixed(2) })}
                   </p>
-                  <p className="text-sm text-gray-600">
-                    {selectedTests.length} test{selectedTests.length !== 1 ? 's' : ''} selected
-                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("{length} test(s) selected", { length: selectedTests.length })}</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">{t("Notes")}</Label>
                 <Textarea
                   id="notes"
                   {...form.register("notes")}
-                  placeholder="Additional instructions or notes..."
+                  placeholder={t("Additional instructions or notes...")}
                   rows={3}
                 />
               </div>
@@ -347,11 +351,10 @@ export function LabOrders({
                   variant="outline"
                   onClick={() => setOrderDialogOpen(false)}
                 >
-                  Cancel
+                  {t("Cancel")}
                 </Button>
                 <Button type="submit">
-                  {editingOrder ? "Update" : "Create"} Order
-                </Button>
+                  {t(editingOrder ? "Update Order" : "Create Order")}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -365,21 +368,19 @@ export function LabOrders({
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    Order #{order.orderNumber}
+                    {t("Order #")}{order.orderNumber}
                     <Badge className={STATUS_COLORS[order.status]}>
-                      {order.status.replace('_', ' ')}
+                      {tAny(order.status)}
                     </Badge>
                     <Badge className={PRIORITY_COLORS[order.priority]}>
                       {order.priority.toUpperCase()}
                     </Badge>
                     {order.fastingRequired && (
-                      <Badge variant="outline">Fasting Required</Badge>
+                      <Badge variant="outline">{t("Fasting Required")}</Badge>
                     )}
                   </CardTitle>
                   <CardDescription>
-                    Patient: {order.patientName} (MRN: {order.patientMRN}) • 
-                    Ordered: {new Date(order.orderDate).toLocaleDateString()} • 
-                    Physician: {order.orderingPhysician.name}
+                    {t("Patient: {patientName} (MRN: {patientMRN}) • Ordered: {toLocaleDateString} • Physician: {name}", { patientName: order.patientName, patientMRN: order.patientMRN, toLocaleDateString: fmt(order.orderDate, "PP"), name: order.orderingPhysician.name })}
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
@@ -390,7 +391,7 @@ export function LabOrders({
                       onClick={() => onCollectSample(order.id)}
                     >
                       <TestTube className="mr-2 h-4 w-4" />
-                      Collect Sample
+                      {t("Collect Sample")}
                     </Button>
                   )}
                   <Button
@@ -398,7 +399,7 @@ export function LabOrders({
                     size="sm"
                     onClick={() => openOrderDialog(order)}
                   >
-                    Edit
+                    {t("Edit")}
                   </Button>
                   {order.status === "ordered" && (
                     <Button
@@ -406,7 +407,7 @@ export function LabOrders({
                       size="sm"
                       onClick={() => onCancelOrder(order.id, "Physician request")}
                     >
-                      Cancel
+                      {t("Cancel")}
                     </Button>
                   )}
                 </div>
@@ -415,51 +416,50 @@ export function LabOrders({
             <CardContent>
               <Tabs defaultValue="details" className="w-full">
                 <TabsList>
-                  <TabsTrigger value="details">Order Details</TabsTrigger>
-                  <TabsTrigger value="tests">Tests ({order.tests.length})</TabsTrigger>
-                  <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                  <TabsTrigger value="details">{t("Order Details")}</TabsTrigger>
+                  <TabsTrigger value="tests">{t("Tests ({length})", { length: order.tests.length })}</TabsTrigger>
+                  <TabsTrigger value="timeline">{t("Timeline")}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="font-medium text-gray-900">Clinical Indication</p>
-                      <p className="text-gray-600">{order.clinicalIndication}</p>
+                      <p className="font-medium text-foreground">{t("Clinical Indication")}</p>
+                      <p className="text-muted-foreground">{order.clinicalIndication}</p>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Total Amount</p>
-                      <p className="text-gray-600">${order.totalAmount.toFixed(2)}</p>
+                      <p className="font-medium text-foreground">{t("Total Amount")}</p>
+                      <p className="text-muted-foreground">${order.totalAmount.toFixed(2)}</p>
                     </div>
                     {order.collectionDate && (
                       <div>
-                        <p className="font-medium text-gray-900">Collection Date</p>
-                        <p className="text-gray-600">
+                        <p className="font-medium text-foreground">{t("Collection Date")}</p>
+                        <p className="text-muted-foreground">
                           <Clock className="inline h-4 w-4 mr-1" />
-                          {new Date(order.collectionDate).toLocaleString()}
+                          {fmt(order.collectionDate, "PP p")}
                         </p>
                       </div>
                     )}
                     {order.completionDate && (
                       <div>
-                        <p className="font-medium text-gray-900">Completion Date</p>
-                        <p className="text-gray-600">
-                          {new Date(order.completionDate).toLocaleString()}
+                        <p className="font-medium text-foreground">{t("Completion Date")}</p>
+                        <p className="text-muted-foreground">
+                          {fmt(order.completionDate, "PP p")}
                         </p>
                       </div>
                     )}
                   </div>
                   {order.notes && (
                     <div>
-                      <p className="font-medium text-gray-900">Notes</p>
-                      <p className="text-gray-600">{order.notes}</p>
+                      <p className="font-medium text-foreground">{t("Notes")}</p>
+                      <p className="text-muted-foreground">{order.notes}</p>
                     </div>
                   )}
                   {order.insurance && (
                     <div className="p-3 bg-blue-50 rounded-lg">
-                      <p className="font-medium text-blue-900">Insurance Information</p>
+                      <p className="font-medium text-blue-900">{t("Insurance Information")}</p>
                       <p className="text-blue-800 text-sm">
-                        {order.insurance.provider} - Policy: {order.insurance.policyNumber}
-                        {order.insurance.groupNumber && ` - Group: ${order.insurance.groupNumber}`}
+                        {t("{provider} - Policy: {policyNumber}{value}", { provider: order.insurance.provider, policyNumber: order.insurance.policyNumber, value: order.insurance.groupNumber ? t(" - Group: {group}", { group: order.insurance.groupNumber }) : "" })}
                       </p>
                     </div>
                   )}
@@ -471,25 +471,25 @@ export function LabOrders({
                       <div className="flex justify-between items-start">
                         <div>
                           <h4 className="font-medium">{test.testName}</h4>
-                          <p className="text-sm text-gray-600">Code: {test.testCode}</p>
+                          <p className="text-sm text-muted-foreground">{t("Code: {testCode}", { testCode: test.testCode })}</p>
                           {test.sampleId && (
-                            <p className="text-sm text-gray-600">Sample: {test.sampleId}</p>
+                            <p className="text-sm text-muted-foreground">{t("Sample: {sampleId}", { sampleId: test.sampleId })}</p>
                           )}
                         </div>
                         <div className="text-right">
                           <Badge className={STATUS_COLORS[test.status]}>
-                            {test.status.replace('_', ' ')}
+                            {tAny(test.status)}
                           </Badge>
                           {test.collectedAt && (
-                            <p className="text-sm text-gray-600 mt-1">
-                              Collected: {new Date(test.collectedAt).toLocaleString()}
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {t("Collected: {amount}", { amount: fmt(test.collectedAt, "PP p") })}
                             </p>
                           )}
                         </div>
                       </div>
                       {test.results && test.results.length > 0 && (
                         <div className="mt-3 space-y-2">
-                          <h5 className="font-medium text-sm">Results:</h5>
+                          <h5 className="font-medium text-sm">{t("Results:")}</h5>
                           {test.results.map((result, resultIndex) => (
                             <div key={resultIndex} className="flex justify-between text-sm">
                               <span>{result.componentName}</span>
@@ -498,7 +498,7 @@ export function LabOrders({
                                 result.flag === "critical_high" || result.flag === "critical_low" ? "text-red-600" :
                                 "text-orange-600"
                               }`}>
-                                {result.value} {result.unit} ({result.flag})
+                                {result.value} {tAny(result.unit)} ({tAny(result.flag)})
                               </span>
                             </div>
                           ))}
@@ -510,35 +510,35 @@ export function LabOrders({
 
                 <TabsContent value="timeline" className="space-y-4">
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded">
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium">Order created</p>
-                        <p className="text-xs text-gray-600">
-                          {new Date(order.orderDate).toLocaleString()} by {order.orderingPhysician.name}
+                        <p className="text-sm font-medium">{t("Order created")}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t("{amount} by {name}", { amount: fmt(order.orderDate, "PP p"), name: order.orderingPhysician.name })}
                         </p>
                       </div>
                     </div>
                     
                     {order.collectionDate && (
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded">
+                      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium">Sample collected</p>
-                          <p className="text-xs text-gray-600">
-                            {new Date(order.collectionDate).toLocaleString()}
+                          <p className="text-sm font-medium">{t("Sample collected")}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {fmt(order.collectionDate, "PP p")}
                           </p>
                         </div>
                       </div>
                     )}
 
                     {order.completionDate && (
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded">
+                      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded">
                         <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium">Tests completed</p>
-                          <p className="text-xs text-gray-600">
-                            {new Date(order.completionDate).toLocaleString()}
+                          <p className="text-sm font-medium">{t("Tests completed")}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {fmt(order.completionDate, "PP p")}
                           </p>
                         </div>
                       </div>
@@ -554,10 +554,10 @@ export function LabOrders({
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-8">
-                <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-muted-foreground">No lab orders found</p>
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">{t("No lab orders found")}</p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Create a new lab order to get started
+                  {t("Create a new lab order to get started")}
                 </p>
               </div>
             </CardContent>

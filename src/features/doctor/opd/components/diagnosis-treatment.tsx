@@ -15,6 +15,8 @@ import { Diagnosis, TreatmentPlan } from "@/features/doctor/opd/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { diagnosisSchema, treatmentPlanSchema, DiagnosisFormData, TreatmentPlanFormData } from "@/features/doctor/opd/validations";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { OPD_KM } from "@/features/doctor/opd/km";
 
 interface DiagnosisTreatmentProps {
   patientId: string;
@@ -41,6 +43,9 @@ export function DiagnosisTreatment({
   onUpdateTreatmentPlan,
   onDeleteTreatmentPlan,
 }: DiagnosisTreatmentProps) {
+  const fmt = useDateFormat();
+  const t = useT(OPD_KM);
+  const tAny = useTranslateAny(OPD_KM);
   const [diagnosisDialogOpen, setDiagnosisDialogOpen] = useState(false);
   const [treatmentDialogOpen, setTreatmentDialogOpen] = useState(false);
   const [editingDiagnosis, setEditingDiagnosis] = useState<Diagnosis | null>(null);
@@ -144,7 +149,7 @@ export function DiagnosisTreatment({
       case "severe": return "bg-orange-100 text-orange-800 border-orange-300";
       case "moderate": return "bg-yellow-100 text-yellow-800 border-yellow-300";
       case "mild": return "bg-blue-100 text-blue-800 border-blue-300";
-      default: return "bg-gray-100 text-gray-800 border-gray-300";
+      default: return "bg-gray-100 text-gray-800 border-border";
     }
   };
 
@@ -190,15 +195,15 @@ export function DiagnosisTreatment({
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Diagnosis & Treatment Planning</h1>
-        <p className="text-gray-600">Manage patient diagnoses and treatment plans</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("Diagnosis & Treatment Planning")}</h1>
+        <p className="text-muted-foreground">{t("Manage patient diagnoses and treatment plans")}</p>
       </div>
 
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search diagnoses and treatments..."
+            placeholder={t("Search diagnoses and treatments...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -206,138 +211,138 @@ export function DiagnosisTreatment({
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-48">
-            <SelectValue placeholder="Filter by status" />
+            <SelectValue placeholder={t("Filter by status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="resolved">Resolved</SelectItem>
-            <SelectItem value="chronic">Chronic</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-            <SelectItem value="planned">Planned</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="all">{t("All Status")}</SelectItem>
+            <SelectItem value="active">{t("Active")}</SelectItem>
+            <SelectItem value="resolved">{t("Resolved")}</SelectItem>
+            <SelectItem value="chronic">{t("Chronic")}</SelectItem>
+            <SelectItem value="inactive">{t("Inactive")}</SelectItem>
+            <SelectItem value="planned">{t("Planned")}</SelectItem>
+            <SelectItem value="in_progress">{t("In Progress")}</SelectItem>
+            <SelectItem value="completed">{t("Completed")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <Tabs defaultValue="diagnoses" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="diagnoses">Diagnoses ({diagnoses.length})</TabsTrigger>
-          <TabsTrigger value="treatments">Treatment Plans ({treatmentPlans.length})</TabsTrigger>
+          <TabsTrigger value="diagnoses">{t("Diagnoses ({length})", { length: diagnoses.length })}</TabsTrigger>
+          <TabsTrigger value="treatments">{t("Treatment Plans ({length})", { length: treatmentPlans.length })}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="diagnoses" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Patient Diagnoses</h2>
+            <h2 className="text-xl font-semibold">{t("Patient Diagnoses")}</h2>
             <Dialog open={diagnosisDialogOpen} onOpenChange={setDiagnosisDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={() => openDiagnosisDialog()}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Diagnosis
+                  {t("Add Diagnosis")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingDiagnosis ? "Edit Diagnosis" : "Add New Diagnosis"}
+                    {editingDiagnosis ? t("Edit Diagnosis") : t("Add New Diagnosis")}
                   </DialogTitle>
                   <DialogDescription>
-                    Enter the diagnosis details below
+                    {t("Enter the diagnosis details below")}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={diagnosisForm.handleSubmit(handleDiagnosisSubmit)} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="icdCode">ICD Code *</Label>
+                      <Label htmlFor="icdCode">{t("ICD Code *")}</Label>
                       <Input
                         id="icdCode"
                         {...diagnosisForm.register("icdCode")}
                         placeholder="e.g., J45.9"
                       />
                       {diagnosisForm.formState.errors.icdCode && (
-                        <p className="text-sm text-red-500">{diagnosisForm.formState.errors.icdCode.message}</p>
+                        <p className="text-sm text-red-500">{tAny(diagnosisForm.formState.errors.icdCode.message)}</p>
                       )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="onsetDate">Onset Date *</Label>
+                      <Label htmlFor="onsetDate">{t("Onset Date *")}</Label>
                       <Input
                         id="onsetDate"
                         type="date"
                         {...diagnosisForm.register("onsetDate")}
                       />
                       {diagnosisForm.formState.errors.onsetDate && (
-                        <p className="text-sm text-red-500">{diagnosisForm.formState.errors.onsetDate.message}</p>
+                        <p className="text-sm text-red-500">{tAny(diagnosisForm.formState.errors.onsetDate.message)}</p>
                       )}
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="description">Description *</Label>
+                    <Label htmlFor="description">{t("Description *")}</Label>
                     <Textarea
                       id="description"
                       {...diagnosisForm.register("description")}
-                      placeholder="Enter diagnosis description"
+                      placeholder={t("Enter diagnosis description")}
                     />
                     {diagnosisForm.formState.errors.description && (
-                      <p className="text-sm text-red-500">{diagnosisForm.formState.errors.description.message}</p>
+                      <p className="text-sm text-red-500">{tAny(diagnosisForm.formState.errors.description.message)}</p>
                     )}
                   </div>
 
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label>Type</Label>
+                      <Label>{t("Type")}</Label>
                       <Select onValueChange={(value) => diagnosisForm.setValue("type", value as any)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
+                          <SelectValue placeholder={t("Select type")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="primary">Primary</SelectItem>
-                          <SelectItem value="secondary">Secondary</SelectItem>
-                          <SelectItem value="rule_out">Rule Out</SelectItem>
-                          <SelectItem value="differential">Differential</SelectItem>
+                          <SelectItem value="primary">{t("Primary")}</SelectItem>
+                          <SelectItem value="secondary">{t("Secondary")}</SelectItem>
+                          <SelectItem value="rule_out">{t("Rule Out")}</SelectItem>
+                          <SelectItem value="differential">{t("Differential")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Severity</Label>
+                      <Label>{t("Severity")}</Label>
                       <Select onValueChange={(value) => diagnosisForm.setValue("severity", value as any)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select severity" />
+                          <SelectValue placeholder={t("Select severity")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="mild">Mild</SelectItem>
-                          <SelectItem value="moderate">Moderate</SelectItem>
-                          <SelectItem value="severe">Severe</SelectItem>
-                          <SelectItem value="critical">Critical</SelectItem>
+                          <SelectItem value="mild">{t("Mild")}</SelectItem>
+                          <SelectItem value="moderate">{t("Moderate")}</SelectItem>
+                          <SelectItem value="severe">{t("Severe")}</SelectItem>
+                          <SelectItem value="critical">{t("Critical")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Status</Label>
+                      <Label>{t("Status")}</Label>
                       <Select onValueChange={(value) => diagnosisForm.setValue("status", value as any)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder={t("Select status")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="resolved">Resolved</SelectItem>
-                          <SelectItem value="chronic">Chronic</SelectItem>
-                          <SelectItem value="inactive">Inactive</SelectItem>
+                          <SelectItem value="active">{t("Active")}</SelectItem>
+                          <SelectItem value="resolved">{t("Resolved")}</SelectItem>
+                          <SelectItem value="chronic">{t("Chronic")}</SelectItem>
+                          <SelectItem value="inactive">{t("Inactive")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="notes">Notes</Label>
+                    <Label htmlFor="notes">{t("Notes")}</Label>
                     <Textarea
                       id="notes"
                       {...diagnosisForm.register("notes")}
-                      placeholder="Additional notes about the diagnosis"
+                      placeholder={t("Additional notes about the diagnosis")}
                     />
                   </div>
 
@@ -347,11 +352,10 @@ export function DiagnosisTreatment({
                       variant="outline"
                       onClick={() => setDiagnosisDialogOpen(false)}
                     >
-                      Cancel
+                      {t("Cancel")}
                     </Button>
                     <Button type="submit">
-                      {editingDiagnosis ? "Update" : "Add"} Diagnosis
-                    </Button>
+                      {t(editingDiagnosis ? "Update Diagnosis" : "Add Diagnosis")}</Button>
                   </DialogFooter>
                 </form>
               </DialogContent>
@@ -368,17 +372,17 @@ export function DiagnosisTreatment({
                         <h3 className="font-medium">{diagnosis.description}</h3>
                         <Badge variant="outline">{diagnosis.icdCode}</Badge>
                         <Badge className={getSeverityColor(diagnosis.severity)}>
-                          {diagnosis.severity}
+                          {tAny(diagnosis.severity)}
                         </Badge>
                         <Badge className={getStatusColor(diagnosis.status)}>
-                          {diagnosis.status}
+                          {tAny(diagnosis.status)}
                         </Badge>
                       </div>
                       <div className="text-sm text-muted-foreground space-y-1">
-                        <p>Type: {diagnosis.type.replace('_', ' ')}</p>
-                        <p>Onset: {new Date(diagnosis.onsetDate).toLocaleDateString()}</p>
-                        <p>Diagnosed by: {diagnosis.diagnosedBy}</p>
-                        {diagnosis.notes && <p>Notes: {diagnosis.notes}</p>}
+                        <p>{t("Type: {type}", { type: tAny(diagnosis.type) })}</p>
+                        <p>{t("Onset: {toLocaleDateString}", { toLocaleDateString: fmt(diagnosis.onsetDate, "PP") })}</p>
+                        <p>{t("Diagnosed by: {diagnosedBy}", { diagnosedBy: diagnosis.diagnosedBy })}</p>
+                        {diagnosis.notes && <p>{t("Notes: {notes}", { notes: diagnosis.notes })}</p>}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -406,7 +410,7 @@ export function DiagnosisTreatment({
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-center py-8">
-                    <p className="text-muted-foreground">No diagnoses found</p>
+                    <p className="text-muted-foreground">{t("No diagnoses found")}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -416,105 +420,105 @@ export function DiagnosisTreatment({
 
         <TabsContent value="treatments" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Treatment Plans</h2>
+            <h2 className="text-xl font-semibold">{t("Treatment Plans")}</h2>
             <Dialog open={treatmentDialogOpen} onOpenChange={setTreatmentDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={() => openTreatmentDialog()}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Treatment Plan
+                  {t("Add Treatment Plan")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-3xl">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingTreatment ? "Edit Treatment Plan" : "Add New Treatment Plan"}
+                    {editingTreatment ? t("Edit Treatment Plan") : t("Add New Treatment Plan")}
                   </DialogTitle>
                   <DialogDescription>
-                    Enter the treatment plan details below
+                    {t("Enter the treatment plan details below")}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={treatmentForm.handleSubmit(handleTreatmentSubmit)} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="title">Title *</Label>
+                      <Label htmlFor="title">{t("Title *")}</Label>
                       <Input
                         id="title"
                         {...treatmentForm.register("title")}
-                        placeholder="Treatment plan title"
+                        placeholder={t("Treatment plan title")}
                       />
                       {treatmentForm.formState.errors.title && (
-                        <p className="text-sm text-red-500">{treatmentForm.formState.errors.title.message}</p>
+                        <p className="text-sm text-red-500">{tAny(treatmentForm.formState.errors.title.message)}</p>
                       )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Plan Type</Label>
+                      <Label>{t("Plan Type")}</Label>
                       <Select onValueChange={(value) => treatmentForm.setValue("planType", value as any)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
+                          <SelectValue placeholder={t("Select type")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="medication">Medication</SelectItem>
-                          <SelectItem value="procedure">Procedure</SelectItem>
-                          <SelectItem value="therapy">Therapy</SelectItem>
-                          <SelectItem value="surgery">Surgery</SelectItem>
-                          <SelectItem value="observation">Observation</SelectItem>
-                          <SelectItem value="referral">Referral</SelectItem>
+                          <SelectItem value="medication">{t("Medication")}</SelectItem>
+                          <SelectItem value="procedure">{t("Procedure")}</SelectItem>
+                          <SelectItem value="therapy">{t("Therapy")}</SelectItem>
+                          <SelectItem value="surgery">{t("Surgery")}</SelectItem>
+                          <SelectItem value="observation">{t("Observation")}</SelectItem>
+                          <SelectItem value="referral">{t("Referral")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="description">Description *</Label>
+                    <Label htmlFor="description">{t("Description *")}</Label>
                     <Textarea
                       id="description"
                       {...treatmentForm.register("description")}
-                      placeholder="Detailed description of the treatment plan"
+                      placeholder={t("Detailed description of the treatment plan")}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="instructions">Instructions *</Label>
+                    <Label htmlFor="instructions">{t("Instructions *")}</Label>
                     <Textarea
                       id="instructions"
                       {...treatmentForm.register("instructions")}
-                      placeholder="Specific instructions for the treatment"
+                      placeholder={t("Specific instructions for the treatment")}
                     />
                   </div>
 
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="duration">Duration</Label>
+                      <Label htmlFor="duration">{t("Duration")}</Label>
                       <Input
                         id="duration"
                         {...treatmentForm.register("duration")}
-                        placeholder="e.g., 2 weeks"
+                        placeholder={t("e.g., 2 weeks")}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="frequency">Frequency</Label>
+                      <Label htmlFor="frequency">{t("Frequency")}</Label>
                       <Input
                         id="frequency"
                         {...treatmentForm.register("frequency")}
-                        placeholder="e.g., twice daily"
+                        placeholder={t("e.g., twice daily")}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="dosage">Dosage</Label>
+                      <Label htmlFor="dosage">{t("Dosage")}</Label>
                       <Input
                         id="dosage"
                         {...treatmentForm.register("dosage")}
-                        placeholder="e.g., 500mg"
+                        placeholder={t("e.g., 500mg")}
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="startDate">Start Date *</Label>
+                      <Label htmlFor="startDate">{t("Start Date *")}</Label>
                       <Input
                         id="startDate"
                         type="date"
@@ -523,7 +527,7 @@ export function DiagnosisTreatment({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="endDate">End Date</Label>
+                      <Label htmlFor="endDate">{t("End Date")}</Label>
                       <Input
                         id="endDate"
                         type="date"
@@ -532,16 +536,16 @@ export function DiagnosisTreatment({
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Priority</Label>
+                      <Label>{t("Priority")}</Label>
                       <Select onValueChange={(value) => treatmentForm.setValue("priority", value as any)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select priority" />
+                          <SelectValue placeholder={t("Select priority")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="low">Low</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="high">High</SelectItem>
-                          <SelectItem value="urgent">Urgent</SelectItem>
+                          <SelectItem value="low">{t("Low")}</SelectItem>
+                          <SelectItem value="medium">{t("Medium")}</SelectItem>
+                          <SelectItem value="high">{t("High")}</SelectItem>
+                          <SelectItem value="urgent">{t("Urgent")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -549,21 +553,21 @@ export function DiagnosisTreatment({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="assignedTo">Assigned To</Label>
+                      <Label htmlFor="assignedTo">{t("Assigned To")}</Label>
                       <Input
                         id="assignedTo"
                         {...treatmentForm.register("assignedTo")}
-                        placeholder="Healthcare provider or specialist"
+                        placeholder={t("Healthcare provider or specialist")}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="notes">Notes</Label>
+                    <Label htmlFor="notes">{t("Notes")}</Label>
                     <Textarea
                       id="notes"
                       {...treatmentForm.register("notes")}
-                      placeholder="Additional notes about the treatment plan"
+                      placeholder={t("Additional notes about the treatment plan")}
                     />
                   </div>
 
@@ -573,11 +577,10 @@ export function DiagnosisTreatment({
                       variant="outline"
                       onClick={() => setTreatmentDialogOpen(false)}
                     >
-                      Cancel
+                      {t("Cancel")}
                     </Button>
                     <Button type="submit">
-                      {editingTreatment ? "Update" : "Add"} Treatment Plan
-                    </Button>
+                      {t(editingTreatment ? "Update Treatment Plan" : "Add Treatment Plan")}</Button>
                   </DialogFooter>
                 </form>
               </DialogContent>
@@ -592,24 +595,24 @@ export function DiagnosisTreatment({
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-medium">{treatment.title}</h3>
-                        <Badge variant="outline">{treatment.planType.replace('_', ' ')}</Badge>
+                        <Badge variant="outline">{tAny(treatment.planType)}</Badge>
                         <Badge className={getPriorityColor(treatment.priority)}>
-                          {treatment.priority}
+                          {tAny(treatment.priority)}
                         </Badge>
                         <Badge className={getStatusColor(treatment.status)}>
-                          {treatment.status.replace('_', ' ')}
+                          {tAny(treatment.status)}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">{treatment.description}</p>
                       <div className="text-sm text-muted-foreground space-y-1">
-                        <p>Instructions: {treatment.instructions}</p>
-                        {treatment.duration && <p>Duration: {treatment.duration}</p>}
-                        {treatment.frequency && <p>Frequency: {treatment.frequency}</p>}
-                        {treatment.dosage && <p>Dosage: {treatment.dosage}</p>}
-                        <p>Start Date: {new Date(treatment.startDate).toLocaleDateString()}</p>
-                        {treatment.endDate && <p>End Date: {new Date(treatment.endDate).toLocaleDateString()}</p>}
-                        {treatment.assignedTo && <p>Assigned to: {treatment.assignedTo}</p>}
-                        {treatment.notes && <p>Notes: {treatment.notes}</p>}
+                        <p>{t("Instructions: {instructions}", { instructions: treatment.instructions })}</p>
+                        {treatment.duration && <p>{t("Duration: {duration}", { duration: treatment.duration })}</p>}
+                        {treatment.frequency && <p>{t("Frequency: {frequency}", { frequency: treatment.frequency })}</p>}
+                        {treatment.dosage && <p>{t("Dosage: {dosage}", { dosage: treatment.dosage })}</p>}
+                        <p>{t("Start Date: {toLocaleDateString}", { toLocaleDateString: fmt(treatment.startDate, "PP") })}</p>
+                        {treatment.endDate && <p>{t("End Date: {toLocaleDateString}", { toLocaleDateString: fmt(treatment.endDate, "PP") })}</p>}
+                        {treatment.assignedTo && <p>{t("Assigned to: {assignedTo}", { assignedTo: treatment.assignedTo })}</p>}
+                        {treatment.notes && <p>{t("Notes: {notes}", { notes: treatment.notes })}</p>}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -637,7 +640,7 @@ export function DiagnosisTreatment({
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-center py-8">
-                    <p className="text-muted-foreground">No treatment plans found</p>
+                    <p className="text-muted-foreground">{t("No treatment plans found")}</p>
                   </div>
                 </CardContent>
               </Card>

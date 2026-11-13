@@ -14,6 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { LabTestResult, LabReport } from "@/features/diagnostics/laboratory/types";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { LAB_KM } from "@/features/diagnostics/laboratory/km";
 
 interface NotificationRule {
   id: string;
@@ -99,6 +101,9 @@ export function AutomatedNotifications({
   onAcknowledgeNotification,
   onRetryNotification,
 }: AutomatedNotificationsProps) {
+  const fmt = useDateFormat();
+  const t = useT(LAB_KM);
+  const tAny = useTranslateAny(LAB_KM);
   const [ruleDialogOpen, setRuleDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<NotificationRule | null>(null);
   const [notificationFilter, setNotificationFilter] = useState("all");
@@ -181,7 +186,7 @@ export function AutomatedNotifications({
   };
 
   const handleDeleteRule = async (ruleId: string) => {
-    if (confirm("Are you sure you want to delete this notification rule?")) {
+    if (confirm(t("Are you sure you want to delete this notification rule?"))) {
       try {
         await onDeleteRule(ruleId);
       } catch (error) {
@@ -238,8 +243,8 @@ export function AutomatedNotifications({
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Automated Notifications</h1>
-        <p className="text-gray-600">Manage notification rules and monitor delivery status</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("Automated Notifications")}</h1>
+        <p className="text-muted-foreground">{t("Manage notification rules and monitor delivery status")}</p>
       </div>
 
       {/* Alert Summary */}
@@ -250,23 +255,21 @@ export function AutomatedNotifications({
               <div className="flex items-center gap-4">
                 <Bell className="h-8 w-8 text-orange-600" />
                 <div>
-                  <h3 className="font-semibold text-orange-900">Notification Alerts</h3>
+                  <h3 className="font-semibold text-orange-900">{t("Notification Alerts")}</h3>
                   <p className="text-orange-700">
-                    {pendingNotifications} pending notifications
+                    {pendingNotifications} {t("pending notifications")}
                     {criticalNotifications > 0 && (
-                      <span className="font-semibold"> • {criticalNotifications} critical</span>
+                      <span className="font-semibold"> {t("• {criticalNotifications} critical", { criticalNotifications: criticalNotifications })}</span>
                     )}
                   </p>
                 </div>
               </div>
               <div className="flex gap-2">
                 <Badge variant="outline" className="text-orange-800">
-                  {pendingNotifications} pending
-                </Badge>
+                  {t("{pendingNotifications} pending", { pendingNotifications: pendingNotifications })}</Badge>
                 {criticalNotifications > 0 && (
                   <Badge variant="destructive">
-                    {criticalNotifications} critical
-                  </Badge>
+                    {t("{criticalNotifications} critical", { criticalNotifications: criticalNotifications })}</Badge>
                 )}
               </div>
             </div>
@@ -276,54 +279,54 @@ export function AutomatedNotifications({
 
       <Tabs defaultValue="notifications" className="w-full">
         <TabsList>
-          <TabsTrigger value="notifications">Active Notifications</TabsTrigger>
-          <TabsTrigger value="rules">Notification Rules</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="notifications">{t("Active Notifications")}</TabsTrigger>
+          <TabsTrigger value="rules">{t("Notification Rules")}</TabsTrigger>
+          <TabsTrigger value="analytics">{t("Analytics")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="notifications" className="space-y-4">
           <div className="flex items-center gap-4 mb-6">
             <div className="relative flex-1">
               <Input
-                placeholder="Search notifications by title, message, or recipient..."
+                placeholder={t("Search notifications by title, message, or recipient...")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Select value={notificationFilter} onValueChange={setNotificationFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Type" />
+                <SelectValue placeholder={t("Type")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="all">{t("All Types")}</SelectItem>
                 {NOTIFICATION_TYPES.map((type) => (
                   <SelectItem key={type.value} value={type.value}>
-                    {type.label}
+                    {tAny(type.label)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="Priority" />
+                <SelectValue placeholder={t("Priority")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Priority</SelectItem>
-                <SelectItem value="immediate">Immediate</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
-                <SelectItem value="routine">Routine</SelectItem>
+                <SelectItem value="all">{t("All Priority")}</SelectItem>
+                <SelectItem value="immediate">{t("Immediate")}</SelectItem>
+                <SelectItem value="urgent">{t("Urgent")}</SelectItem>
+                <SelectItem value="routine">{t("Routine")}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("Status")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="sent">Sent</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
-                <SelectItem value="acknowledged">Acknowledged</SelectItem>
+                <SelectItem value="all">{t("All Status")}</SelectItem>
+                <SelectItem value="pending">{t("Pending")}</SelectItem>
+                <SelectItem value="sent">{t("Sent")}</SelectItem>
+                <SelectItem value="failed">{t("Failed")}</SelectItem>
+                <SelectItem value="acknowledged">{t("Acknowledged")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -342,18 +345,16 @@ export function AutomatedNotifications({
                         <CardTitle className="flex items-center gap-2">
                           {notification.title}
                           <Badge className={getPriorityColor(notification.priority)}>
-                            {notification.priority}
+                            {tAny(notification.priority)}
                           </Badge>
                           <Badge className={getStatusColor(notification.status)}>
-                            {notification.status}
+                            {tAny(notification.status)}
                           </Badge>
                         </CardTitle>
                         <CardDescription>
-                          To: {notification.recipient} • Via: {notification.method} • 
-                          {notification.sentAt 
-                            ? ` Sent: ${new Date(notification.sentAt).toLocaleString()}`
-                            : ` Created: ${new Date(notification.createdAt).toLocaleString()}`
-                          }
+                          {t("To: {recipient} • Via: {method} • {value}", { recipient: notification.recipient, method: tAny(notification.method), value: notification.sentAt 
+                            ? ` Sent: ${fmt(notification.sentAt, "PP p")}`
+                            : ` Created: ${fmt(notification.createdAt, "PP p")}` })}
                         </CardDescription>
                       </div>
                     </div>
@@ -365,7 +366,7 @@ export function AutomatedNotifications({
                           onClick={() => onSendNotification(notification)}
                         >
                           <Send className="mr-2 h-4 w-4" />
-                          Send Now
+                          {t("Send Now")}
                         </Button>
                       )}
                       {notification.status === 'failed' && (
@@ -375,7 +376,7 @@ export function AutomatedNotifications({
                           onClick={() => onRetryNotification(notification.id)}
                         >
                           <Clock className="mr-2 h-4 w-4" />
-                          Retry
+                          {t("Retry")}
                         </Button>
                       )}
                       {notification.status === 'sent' && !notification.acknowledgedAt && (
@@ -385,7 +386,7 @@ export function AutomatedNotifications({
                           onClick={() => onAcknowledgeNotification(notification.id)}
                         >
                           <CheckCircle className="mr-2 h-4 w-4" />
-                          Acknowledge
+                          {t("Acknowledge")}
                         </Button>
                       )}
                     </div>
@@ -393,40 +394,38 @@ export function AutomatedNotifications({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <p className="text-gray-700">{notification.message}</p>
+                    <p className="text-muted-foreground">{notification.message}</p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
-                        <p className="font-medium text-gray-900">Related ID</p>
-                        <p className="text-gray-600">{notification.relatedId}</p>
+                        <p className="font-medium text-foreground">{t("Related ID")}</p>
+                        <p className="text-muted-foreground">{notification.relatedId}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Attempts</p>
-                        <p className="text-gray-600">
+                        <p className="font-medium text-foreground">{t("Attempts")}</p>
+                        <p className="text-muted-foreground">
                           {notification.attempts} / {notification.maxAttempts}
                         </p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Type</p>
-                        <p className="text-gray-600">{typeConfig?.label || notification.type}</p>
+                        <p className="font-medium text-foreground">{t("Type")}</p>
+                        <p className="text-muted-foreground">{typeConfig?.label || notification.type}</p>
                       </div>
                     </div>
 
                     {notification.status === 'failed' && (
                       <div className="p-3 bg-red-50 border border-red-200 rounded">
-                        <p className="font-medium text-red-900">Delivery Failed</p>
+                        <p className="font-medium text-red-900">{t("Delivery Failed")}</p>
                         <p className="text-red-700">
-                          Failed to deliver after {notification.attempts} attempts. 
-                          Check recipient information and retry.
-                        </p>
+                          {t("Failed to deliver after {attempts} attempts. Check recipient information and retry.", { attempts: notification.attempts })}</p>
                       </div>
                     )}
 
                     {notification.acknowledgedAt && (
                       <div className="p-3 bg-green-50 border border-green-200 rounded">
-                        <p className="font-medium text-green-900">Acknowledged</p>
+                        <p className="font-medium text-green-900">{t("Acknowledged")}</p>
                         <p className="text-green-700">
-                          Acknowledged on {new Date(notification.acknowledgedAt).toLocaleString()}
+                          {t("Acknowledged on {amount}", { amount: fmt(notification.acknowledgedAt, "PP p") })}
                         </p>
                       </div>
                     )}
@@ -439,9 +438,9 @@ export function AutomatedNotifications({
 
         <TabsContent value="rules" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Notification Rules</h3>
+            <h3 className="text-lg font-semibold">{t("Notification Rules")}</h3>
             <Button onClick={() => setRuleDialogOpen(true)}>
-              Create Rule
+              {t("Create Rule")}
             </Button>
           </div>
 
@@ -451,18 +450,16 @@ export function AutomatedNotifications({
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      {rule.testCode} - {rule.condition.replace('_', ' ')}
+                      {rule.testCode} - {tAny(rule.condition)}
                       {!rule.enabled && (
-                        <Badge variant="secondary">Disabled</Badge>
+                        <Badge variant="secondary">{t("Disabled")}</Badge>
                       )}
                       <Badge className={getPriorityColor(rule.priority)}>
-                        {rule.priority}
+                        {tAny(rule.priority)}
                       </Badge>
                     </CardTitle>
                     <CardDescription>
-                      {rule.thresholdValue && `Threshold: ${rule.thresholdValue} • `}
-                      Methods: {rule.notificationMethods.join(', ')} • 
-                      Recipients: {rule.recipients.length}
+                      {t("{value} Methods: {list} • Recipients: {length}", { value: rule.thresholdValue ? t("Threshold: {value} • ", { value: rule.thresholdValue }) : "", list: rule.notificationMethods.map((m) => tAny(m)).join(', '), length: rule.recipients.length })}
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
@@ -475,14 +472,14 @@ export function AutomatedNotifications({
                       size="sm"
                       onClick={() => handleEditRule(rule)}
                     >
-                      Edit
+                      {t("Edit")}
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleDeleteRule(rule.id)}
                     >
-                      Delete
+                      {t("Delete")}
                     </Button>
                   </div>
                 </div>
@@ -490,7 +487,7 @@ export function AutomatedNotifications({
               <CardContent>
                 <div className="space-y-3">
                   <div>
-                    <p className="font-medium text-gray-900">Recipients</p>
+                    <p className="font-medium text-foreground">{t("Recipients")}</p>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {rule.recipients.map((recipient, index) => (
                         <Badge key={index} variant="outline">
@@ -501,13 +498,13 @@ export function AutomatedNotifications({
                   </div>
                   
                   <div>
-                    <p className="font-medium text-gray-900">Notification Methods</p>
+                    <p className="font-medium text-foreground">{t("Notification Methods")}</p>
                     <div className="flex gap-2 mt-1">
                       {rule.notificationMethods.map((method) => {
                         const methodConfig = NOTIFICATION_METHODS.find(m => m.value === method);
                         const MethodIcon = methodConfig?.icon || Bell;
                         return (
-                          <div key={method} className="flex items-center gap-1 text-sm text-gray-600">
+                          <div key={method} className="flex items-center gap-1 text-sm text-muted-foreground">
                             <MethodIcon className="h-4 w-4" />
                             {methodConfig?.label}
                           </div>
@@ -516,9 +513,8 @@ export function AutomatedNotifications({
                     </div>
                   </div>
 
-                  <div className="text-sm text-gray-500">
-                    Created: {new Date(rule.createdAt).toLocaleDateString()} • 
-                    Updated: {new Date(rule.updatedAt).toLocaleDateString()}
+                  <div className="text-sm text-muted-foreground">
+                    {t("Created: {toLocaleDateString} • Updated: {toLocaleDateString2}", { toLocaleDateString: fmt(rule.createdAt, "PP"), toLocaleDateString2: fmt(rule.updatedAt, "PP") })}
                   </div>
                 </div>
               </CardContent>
@@ -532,10 +528,10 @@ export function AutomatedNotifications({
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Notifications</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t("Total Notifications")}</p>
                     <p className="text-2xl font-bold">{notifications.length}</p>
                   </div>
-                  <Bell className="h-8 w-8 text-gray-400" />
+                  <Bell className="h-8 w-8 text-muted-foreground" />
                 </div>
               </CardContent>
             </Card>
@@ -544,7 +540,7 @@ export function AutomatedNotifications({
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Pending</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t("Pending")}</p>
                     <p className="text-2xl font-bold text-yellow-600">{pendingNotifications}</p>
                   </div>
                   <Clock className="h-8 w-8 text-yellow-400" />
@@ -556,7 +552,7 @@ export function AutomatedNotifications({
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Delivery Rate</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t("Delivery Rate")}</p>
                     <p className="text-2xl font-bold text-green-600">
                       {notifications.length > 0 
                         ? Math.round((notifications.filter(n => n.status === 'sent').length / notifications.length) * 100)
@@ -572,7 +568,7 @@ export function AutomatedNotifications({
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Active Rules</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t("Active Rules")}</p>
                     <p className="text-2xl font-bold">{rules.filter(r => r.enabled).length}</p>
                   </div>
                   <Bell className="h-8 w-8 text-blue-400" />
@@ -583,7 +579,7 @@ export function AutomatedNotifications({
 
           <Card>
             <CardHeader>
-              <CardTitle>Notification Performance by Type</CardTitle>
+              <CardTitle>{t("Notification Performance by Type")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -600,7 +596,7 @@ export function AutomatedNotifications({
                           <type.icon className={`h-4 w-4 ${type.color}`} />
                           <span className="font-medium">{type.label}</span>
                         </div>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-muted-foreground">
                           {sent}/{total} ({Math.round(percentage)}%)
                         </span>
                       </div>
@@ -623,24 +619,24 @@ export function AutomatedNotifications({
       }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingRule ? 'Edit' : 'Create'} Notification Rule</DialogTitle>
+            <DialogTitle>{(editingRule ? t("Edit Notification Rule") : t("Create Notification Rule"))}</DialogTitle>
             <DialogDescription>
-              Set up automated notifications for specific test conditions
+              {t("Set up automated notifications for specific test conditions")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="testCode">Test Code</Label>
+              <Label htmlFor="testCode">{t("Test Code")}</Label>
               <Input
                 id="testCode"
                 value={ruleForm.testCode}
                 onChange={(e) => setRuleForm({ ...ruleForm, testCode: e.target.value })}
-                placeholder="e.g., GLUCOSE, TROP"
+                placeholder={t("e.g., GLUCOSE, TROP")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Condition</Label>
+              <Label>{t("Condition")}</Label>
               <Select 
                 value={ruleForm.condition} 
                 onValueChange={(value: any) => setRuleForm({ ...ruleForm, condition: value })}
@@ -649,30 +645,30 @@ export function AutomatedNotifications({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="critical_high">Critical High</SelectItem>
-                  <SelectItem value="critical_low">Critical Low</SelectItem>
-                  <SelectItem value="abnormal">Abnormal</SelectItem>
-                  <SelectItem value="completed">Test Completed</SelectItem>
+                  <SelectItem value="critical_high">{t("Critical High")}</SelectItem>
+                  <SelectItem value="critical_low">{t("Critical Low")}</SelectItem>
+                  <SelectItem value="abnormal">{t("Abnormal")}</SelectItem>
+                  <SelectItem value="completed">{t("Test Completed")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {(ruleForm.condition === 'critical_high' || ruleForm.condition === 'critical_low') && (
               <div className="space-y-2">
-                <Label htmlFor="threshold">Threshold Value</Label>
+                <Label htmlFor="threshold">{t("Threshold Value")}</Label>
                 <Input
                   id="threshold"
                   type="number"
                   step="0.01"
                   value={ruleForm.thresholdValue}
                   onChange={(e) => setRuleForm({ ...ruleForm, thresholdValue: e.target.value })}
-                  placeholder="Threshold value"
+                  placeholder={t("Threshold value")}
                 />
               </div>
             )}
 
             <div className="space-y-2">
-              <Label>Priority</Label>
+              <Label>{t("Priority")}</Label>
               <Select 
                 value={ruleForm.priority} 
                 onValueChange={(value: any) => setRuleForm({ ...ruleForm, priority: value })}
@@ -681,15 +677,15 @@ export function AutomatedNotifications({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="immediate">Immediate</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
-                  <SelectItem value="routine">Routine</SelectItem>
+                  <SelectItem value="immediate">{t("Immediate")}</SelectItem>
+                  <SelectItem value="urgent">{t("Urgent")}</SelectItem>
+                  <SelectItem value="routine">{t("Routine")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Notification Methods</Label>
+              <Label>{t("Notification Methods")}</Label>
               <div className="space-y-2">
                 {NOTIFICATION_METHODS.map((method) => (
                   <div key={method.value} className="flex items-center space-x-2">
@@ -721,14 +717,14 @@ export function AutomatedNotifications({
             </div>
 
             <div className="space-y-2">
-              <Label>Recipients</Label>
+              <Label>{t("Recipients")}</Label>
               <div className="space-y-2">
                 {ruleForm.recipients.map((recipient, index) => (
                   <div key={index} className="flex gap-2">
                     <Input
                       value={recipient}
                       onChange={(e) => updateRecipient(index, e.target.value)}
-                      placeholder="Email, phone, or username"
+                      placeholder={t("Email, phone, or username")}
                     />
                     {ruleForm.recipients.length > 1 && (
                       <Button
@@ -737,7 +733,7 @@ export function AutomatedNotifications({
                         size="sm"
                         onClick={() => removeRecipient(index)}
                       >
-                        Remove
+                        {t("Remove")}
                       </Button>
                     )}
                   </div>
@@ -748,7 +744,7 @@ export function AutomatedNotifications({
                   size="sm"
                   onClick={addRecipient}
                 >
-                  Add Recipient
+                  {t("Add Recipient")}
                 </Button>
               </div>
             </div>
@@ -759,16 +755,15 @@ export function AutomatedNotifications({
                 checked={ruleForm.enabled}
                 onCheckedChange={(checked) => setRuleForm({ ...ruleForm, enabled: checked })}
               />
-              <Label htmlFor="enabled">Enable this rule</Label>
+              <Label htmlFor="enabled">{t("Enable this rule")}</Label>
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setRuleDialogOpen(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button onClick={handleCreateRule}>
-                {editingRule ? 'Update' : 'Create'} Rule
-              </Button>
+                {(editingRule ? t("Update Rule") : t("Create Rule"))}</Button>
             </DialogFooter>
           </div>
         </DialogContent>

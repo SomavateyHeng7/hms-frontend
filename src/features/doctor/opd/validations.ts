@@ -134,32 +134,8 @@ export const prescriptionSchema = z.object({
   pharmacyNotes: z.string().optional(),
 });
 
-export const opdBillingSchema = z.object({
-  items: z.array(z.object({
-    type: z.enum(["consultation", "procedure", "medication", "lab_test", "imaging", "room_charge", "equipment", "other"]),
-    code: z.string().min(1, "Item code is required"),
-    description: z.string().min(1, "Description is required"),
-    quantity: z.number().min(1),
-    unitPrice: z.number().min(0),
-    doctorId: z.string().optional(),
-    departmentId: z.string().optional(),
-    isInsuranceCovered: z.boolean(),
-    insuranceCoverage: z.number().min(0).max(100).optional(),
-  })).min(1, "At least one billing item is required"),
-  discounts: z.array(z.object({
-    type: z.enum(["percentage", "fixed_amount", "insurance", "employee", "senior_citizen", "student"]),
-    description: z.string().min(1),
-    amount: z.number().min(0),
-    percentage: z.number().min(0).max(100).optional(),
-    reason: z.string().optional(),
-  })),
-  paymentMethod: z.enum(["cash", "card", "insurance", "bank_transfer", "check"]).optional(),
-  notes: z.string().optional(),
-});
-
 export type OPDRegistrationFormData = z.infer<typeof opdRegistrationSchema>;
 export type ConsultationNoteFormData = z.infer<typeof consultationNoteSchema>;
 export type DiagnosisFormData = z.infer<typeof diagnosisSchema>;
 export type TreatmentPlanFormData = z.infer<typeof treatmentPlanSchema>;
 export type PrescriptionFormData = z.infer<typeof prescriptionSchema>;
-export type OPDBillingFormData = z.infer<typeof opdBillingSchema>;

@@ -10,13 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Plus } from "lucide-react";
-import { format } from "date-fns";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { INPATIENT_KM } from "@/features/nursing/inpatient/km";
 
 interface PatientAdmissionProps {
   onAdmissionComplete?: (admission: any) => void;
 }
 
 export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps) {
+  const tAny = useTranslateAny(INPATIENT_KM);
+  const t = useT(INPATIENT_KM);
+  const fmt = useDateFormat();
   const [admissionDate, setAdmissionDate] = useState<Date>(new Date());
   const [formData, setFormData] = useState({
     patientId: "",
@@ -47,8 +51,8 @@ export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps)
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Patient Admission</h2>
-        <p className="text-muted-foreground">Register new patient admission</p>
+        <h2 className="text-2xl font-bold">{t("Patient Admission")}</h2>
+        <p className="text-muted-foreground">{t("Register new patient admission")}</p>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -56,29 +60,29 @@ export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps)
           {/* Patient Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Patient Information</CardTitle>
-              <CardDescription>Select patient and admission details</CardDescription>
+              <CardTitle>{t("Patient Information")}</CardTitle>
+              <CardDescription>{t("Select patient and admission details")}</CardDescription>
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="patientId">Patient *</Label>
+                <Label htmlFor="patientId">{t("Patient *")}</Label>
                 <Select
                   value={formData.patientId}
                   onValueChange={(value) => handleChange("patientId", value)}
                 >
                   <SelectTrigger id="patientId">
-                    <SelectValue placeholder="Select patient" />
+                    <SelectValue placeholder={t("Select patient")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="PAT001">John Doe (PAT001)</SelectItem>
-                    <SelectItem value="PAT002">Jane Smith (PAT002)</SelectItem>
-                    <SelectItem value="PAT003">Mike Johnson (PAT003)</SelectItem>
+                    <SelectItem value="PT-000001">សុខ ដារ៉ា · SOK Dara (PT-000001)</SelectItem>
+                    <SelectItem value="PT-000002">ចាន់ ស្រីមុំ · CHAN Sreymom (PT-000002)</SelectItem>
+                    <SelectItem value="PT-000003">គីម សុខា · KIM Sokha (PT-000003)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="admissionDate">Admission Date *</Label>
+                <Label htmlFor="admissionDate">{t("Admission Date *")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -87,7 +91,7 @@ export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps)
                       className="w-full justify-start text-left font-normal"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {admissionDate ? format(admissionDate, "PPP") : "Select date"}
+                      {admissionDate ? fmt(admissionDate, "PPP") : t("Select date")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -97,25 +101,25 @@ export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps)
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="admissionType">Admission Type *</Label>
+                <Label htmlFor="admissionType">{t("Admission Type *")}</Label>
                 <Select
                   value={formData.admissionType}
                   onValueChange={(value) => handleChange("admissionType", value)}
                 >
                   <SelectTrigger id="admissionType">
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("Select type")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="emergency">Emergency</SelectItem>
-                    <SelectItem value="elective">Elective</SelectItem>
-                    <SelectItem value="transfer">Transfer</SelectItem>
-                    <SelectItem value="delivery">Delivery</SelectItem>
+                    <SelectItem value="emergency">{t("Emergency")}</SelectItem>
+                    <SelectItem value="elective">{t("Elective")}</SelectItem>
+                    <SelectItem value="transfer">{t("Transfer")}</SelectItem>
+                    <SelectItem value="delivery">{t("Delivery")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="estimatedDuration">Estimated Duration (days)</Label>
+                <Label htmlFor="estimatedDuration">{t("Estimated Duration (days)")}</Label>
                 <Input
                   id="estimatedDuration"
                   type="number"
@@ -130,15 +134,15 @@ export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps)
           {/* Medical Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Medical Information</CardTitle>
-              <CardDescription>Diagnosis and medical details</CardDescription>
+              <CardTitle>{t("Medical Information")}</CardTitle>
+              <CardDescription>{t("Diagnosis and medical details")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="chiefComplaint">Chief Complaint *</Label>
+                <Label htmlFor="chiefComplaint">{t("Chief Complaint *")}</Label>
                 <Textarea
                   id="chiefComplaint"
-                  placeholder="Primary reason for admission"
+                  placeholder={t("Primary reason for admission")}
                   value={formData.chiefComplaint}
                   onChange={(e) => handleChange("chiefComplaint", e.target.value)}
                   rows={2}
@@ -146,10 +150,10 @@ export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps)
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="diagnosis">Provisional Diagnosis *</Label>
+                <Label htmlFor="diagnosis">{t("Provisional Diagnosis *")}</Label>
                 <Textarea
                   id="diagnosis"
-                  placeholder="Enter diagnosis"
+                  placeholder={t("Enter diagnosis")}
                   value={formData.diagnosis}
                   onChange={(e) => handleChange("diagnosis", e.target.value)}
                   rows={3}
@@ -158,36 +162,36 @@ export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps)
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="admittingDoctor">Admitting Doctor *</Label>
+                  <Label htmlFor="admittingDoctor">{t("Admitting Doctor *")}</Label>
                   <Select
                     value={formData.admittingDoctorId}
                     onValueChange={(value) => handleChange("admittingDoctorId", value)}
                   >
                     <SelectTrigger id="admittingDoctor">
-                      <SelectValue placeholder="Select doctor" />
+                      <SelectValue placeholder={t("Select doctor")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="DOC001">Dr. Smith (Cardiology)</SelectItem>
-                      <SelectItem value="DOC002">Dr. Johnson (Surgery)</SelectItem>
-                      <SelectItem value="DOC003">Dr. Williams (Internal Medicine)</SelectItem>
+                      <SelectItem value="DOC001">Dr. Nhem Rithy ({tAny("Cardiology")})</SelectItem>
+                      <SelectItem value="DOC002">Dr. Chea Sovann ({tAny("General Surgery")})</SelectItem>
+                      <SelectItem value="DOC003">Dr. Lim Pisey ({tAny("Internal Medicine")})</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="department">Department *</Label>
+                  <Label htmlFor="department">{t("Department *")}</Label>
                   <Select
                     value={formData.department}
                     onValueChange={(value) => handleChange("department", value)}
                   >
                     <SelectTrigger id="department">
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder={t("Select department")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="cardiology">Cardiology</SelectItem>
-                      <SelectItem value="surgery">Surgery</SelectItem>
-                      <SelectItem value="internal-medicine">Internal Medicine</SelectItem>
-                      <SelectItem value="orthopedics">Orthopedics</SelectItem>
+                      <SelectItem value="cardiology">{t("Cardiology")}</SelectItem>
+                      <SelectItem value="surgery">{t("Surgery")}</SelectItem>
+                      <SelectItem value="internal-medicine">{t("Internal Medicine")}</SelectItem>
+                      <SelectItem value="orthopedics">{t("Orthopedics")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -198,34 +202,34 @@ export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps)
           {/* Bed Assignment */}
           <Card>
             <CardHeader>
-              <CardTitle>Bed Assignment</CardTitle>
-              <CardDescription>Assign ward and bed</CardDescription>
+              <CardTitle>{t("Bed Assignment")}</CardTitle>
+              <CardDescription>{t("Assign ward and bed")}</CardDescription>
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="ward">Ward *</Label>
+                <Label htmlFor="ward">{t("Ward *")}</Label>
                 <Select value={formData.wardId} onValueChange={(value) => handleChange("wardId", value)}>
                   <SelectTrigger id="ward">
-                    <SelectValue placeholder="Select ward" />
+                    <SelectValue placeholder={t("Select ward")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ward-1">ICU Ward (2nd Floor)</SelectItem>
-                    <SelectItem value="ward-2">General Ward A (3rd Floor)</SelectItem>
-                    <SelectItem value="ward-3">Private Wing (4th Floor)</SelectItem>
+                    <SelectItem value="ward-1">{t("ICU Ward (2nd Floor)")}</SelectItem>
+                    <SelectItem value="ward-2">{t("General Ward A (3rd Floor)")}</SelectItem>
+                    <SelectItem value="ward-3">{t("Private Wing (4th Floor)")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bed">Bed *</Label>
+                <Label htmlFor="bed">{t("Bed *")}</Label>
                 <Select value={formData.bedId} onValueChange={(value) => handleChange("bedId", value)}>
                   <SelectTrigger id="bed">
-                    <SelectValue placeholder="Select bed" />
+                    <SelectValue placeholder={t("Select bed")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="bed-1">ICU-101 (Available)</SelectItem>
-                    <SelectItem value="bed-2">GEN-201 (Available)</SelectItem>
-                    <SelectItem value="bed-3">PVT-301 (Available)</SelectItem>
+                    <SelectItem value="bed-1">{t("ICU-101 (Available)")}</SelectItem>
+                    <SelectItem value="bed-2">{t("GEN-201 (Available)")}</SelectItem>
+                    <SelectItem value="bed-3">{t("PVT-301 (Available)")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -235,36 +239,36 @@ export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps)
           {/* Insurance Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Insurance Information</CardTitle>
-              <CardDescription>Patient insurance details (optional)</CardDescription>
+              <CardTitle>{t("Insurance Information")}</CardTitle>
+              <CardDescription>{t("Patient insurance details (optional)")}</CardDescription>
             </CardHeader>
             <CardContent className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="insuranceProvider">Insurance Provider</Label>
+                <Label htmlFor="insuranceProvider">{t("Insurance Provider")}</Label>
                 <Input
                   id="insuranceProvider"
-                  placeholder="Provider name"
+                  placeholder={t("Provider name")}
                   value={formData.insuranceProvider}
                   onChange={(e) => handleChange("insuranceProvider", e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="policyNumber">Policy Number</Label>
+                <Label htmlFor="policyNumber">{t("Policy Number")}</Label>
                 <Input
                   id="policyNumber"
-                  placeholder="Policy number"
+                  placeholder={t("Policy number")}
                   value={formData.policyNumber}
                   onChange={(e) => handleChange("policyNumber", e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="coverage">Coverage Amount</Label>
+                <Label htmlFor="coverage">{t("Coverage Amount")}</Label>
                 <Input
                   id="coverage"
                   type="number"
-                  placeholder="Amount"
+                  placeholder={t("Amount")}
                   value={formData.coverage}
                   onChange={(e) => handleChange("coverage", e.target.value)}
                 />
@@ -275,12 +279,12 @@ export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps)
           {/* Additional Notes */}
           <Card>
             <CardHeader>
-              <CardTitle>Additional Notes</CardTitle>
+              <CardTitle>{t("Additional Notes")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Textarea
                 id="notes"
-                placeholder="Any additional information..."
+                placeholder={t("Any additional information...")}
                 value={formData.notes}
                 onChange={(e) => handleChange("notes", e.target.value)}
                 rows={3}
@@ -291,11 +295,11 @@ export function PatientAdmission({ onAdmissionComplete }: PatientAdmissionProps)
           {/* Actions */}
           <div className="flex gap-4 justify-end">
             <Button type="button" variant="outline">
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button type="submit">
               <Plus className="mr-2 h-4 w-4" />
-              Admit Patient
+              {t("Admit Patient")}
             </Button>
           </div>
         </div>

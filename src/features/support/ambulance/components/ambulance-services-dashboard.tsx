@@ -14,7 +14,6 @@ import {
   Navigation,
   Activity
 } from "lucide-react";
-import { format } from "date-fns";
 import type { 
   AmbulanceVehicle, 
   AmbulanceTrip, 
@@ -22,8 +21,13 @@ import type {
   AmbulanceStats 
 } from "@/features/support/ambulance/types";
 import { useTabParam } from "@/hooks/use-tab-param";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { AMBULANCE_KM } from "@/features/support/ambulance/km";
 
 export function AmbulanceServicesDashboard() {
+  const t = useT(AMBULANCE_KM);
+  const tAny = useTranslateAny(AMBULANCE_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useTabParam("overview", ["overview", "trips", "requests", "fleet"] as const);
 
   // Mock data
@@ -80,16 +84,16 @@ export function AmbulanceServicesDashboard() {
       requestedBy: "Emergency Call 108",
       requestTime: new Date(2025, 0, 15, 10, 30),
       requestSource: "emergency-call",
-      callerName: "Sarah Johnson",
+      callerName: "Mao Chenda",
       callerContact: "+1234567892",
-      patientName: "Robert Williams",
+      patientName: "Touch Bunthoeun",
       patientAge: 45,
       patientGender: "male",
       chiefComplaint: "Chest pain, difficulty breathing",
       pickupLocation: {
         address: "456 Oak Street, Downtown",
         landmark: "Near City Mall",
-        contactPerson: "Sarah Johnson",
+        contactPerson: "Mao Chenda",
         contactNumber: "+1234567892",
         latitude: 19.0896,
         longitude: 72.8656,
@@ -182,19 +186,19 @@ export function AmbulanceServicesDashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Ambulance Services</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t("Ambulance Services")}</h2>
           <p className="text-muted-foreground">
-            Manage fleet, trips, and emergency response
+            {t("Manage fleet, trips, and emergency response")}
           </p>
         </div>
         <div className="flex gap-2">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            New Request
+            {t("New Request")}
           </Button>
           <Button variant="outline">
             <MapPin className="mr-2 h-4 w-4" />
-            Track Fleet
+            {t("Track Fleet")}
           </Button>
         </div>
       </div>
@@ -203,53 +207,49 @@ export function AmbulanceServicesDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Vehicles</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Available Vehicles")}</CardTitle>
             <Ambulance className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.availableVehicles}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.onDutyVehicles} on duty, {stats.maintenanceVehicles} in maintenance
-            </p>
+              {t("{onDutyVehicles} on duty, {maintenanceVehicles} in maintenance", { onDutyVehicles: stats.onDutyVehicles, maintenanceVehicles: stats.maintenanceVehicles })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Trips</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Active Trips")}</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.activeTrips}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.completedTripsToday} completed today
-            </p>
+              {t("{completedTripsToday} completed today", { completedTripsToday: stats.completedTripsToday })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Avg Response Time")}</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageResponseTime} min</div>
+            <div className="text-2xl font-bold">{t("{averageResponseTime} min", { averageResponseTime: stats.averageResponseTime })}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.emergencyTripsToday} emergency trips today
-            </p>
+              {t("{emergencyTripsToday} emergency trips today", { emergencyTripsToday: stats.emergencyTripsToday })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Pending Requests")}</CardTitle>
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pendingRequests}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.tripsToday} total trips today
-            </p>
+              {t("{tripsToday} total trips today", { tripsToday: stats.tripsToday })}</p>
           </CardContent>
         </Card>
       </div>
@@ -257,17 +257,17 @@ export function AmbulanceServicesDashboard() {
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="trips">Active Trips</TabsTrigger>
-          <TabsTrigger value="requests">Requests</TabsTrigger>
-          <TabsTrigger value="fleet">Fleet</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="trips">{t("Active Trips")}</TabsTrigger>
+          <TabsTrigger value="requests">{t("Requests")}</TabsTrigger>
+          <TabsTrigger value="fleet">{t("Fleet")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Active Trips</CardTitle>
+                <CardTitle>{t("Active Trips")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -292,25 +292,25 @@ export function AmbulanceServicesDashboard() {
                               : "outline"
                           }
                         >
-                          {trip.priority}
+                          {tAny(trip.priority)}
                         </Badge>
                       </div>
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">From:</span>
+                          <span className="text-muted-foreground">{t("From:")}</span>
                           <span>{trip.pickupLocation.address}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Navigation className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">To:</span>
+                          <span className="text-muted-foreground">{t("To:")}</span>
                           <span>{trip.destination.facilityName}</span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <Badge>{trip.status}</Badge>
+                        <Badge>{tAny(trip.status)}</Badge>
                         <Button size="sm" variant="outline">
-                          Track
+                          {t("Track")}
                         </Button>
                       </div>
                     </div>
@@ -321,7 +321,7 @@ export function AmbulanceServicesDashboard() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Pending Requests</CardTitle>
+                <CardTitle>{t("Pending Requests")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -334,7 +334,7 @@ export function AmbulanceServicesDashboard() {
                         <div>
                           <p className="font-medium">{request.requestNumber}</p>
                           <p className="text-sm text-muted-foreground">
-                            {request.patientInfo.name || "Unknown Patient"}
+                            {request.patientInfo.name || t("Unknown Patient")}
                           </p>
                         </div>
                         <Badge
@@ -346,12 +346,12 @@ export function AmbulanceServicesDashboard() {
                               : "outline"
                           }
                         >
-                          {request.priority}
+                          {tAny(request.priority)}
                         </Badge>
                       </div>
                       <div className="space-y-1 text-sm">
                         <p>
-                          <span className="text-muted-foreground">Complaint:</span>{" "}
+                          <span className="text-muted-foreground">{t("Complaint:")}</span>{" "}
                           {request.patientInfo.chiefComplaint}
                         </p>
                         <div className="flex items-center gap-2">
@@ -364,9 +364,9 @@ export function AmbulanceServicesDashboard() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm">Assign Ambulance</Button>
+                        <Button size="sm">{t("Assign Ambulance")}</Button>
                         <Button size="sm" variant="outline">
-                          View Details
+                          {t("View Details")}
                         </Button>
                       </div>
                     </div>
@@ -380,7 +380,7 @@ export function AmbulanceServicesDashboard() {
         <TabsContent value="trips" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Active Trips</CardTitle>
+              <CardTitle>{t("Active Trips")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -405,21 +405,21 @@ export function AmbulanceServicesDashboard() {
                             : "outline"
                         }
                       >
-                        {trip.priority}
+                        {tAny(trip.priority)}
                       </Badge>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Patient:</span>{" "}
+                        <span className="text-muted-foreground">{t("Patient:")}</span>{" "}
                         {trip.patientName}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Age/Gender:</span>{" "}
+                        <span className="text-muted-foreground">{t("Age/Gender:")}</span>{" "}
                         {trip.patientAge}Y / {trip.patientGender}
                       </div>
                       <div className="col-span-2">
-                        <span className="text-muted-foreground">Complaint:</span>{" "}
+                        <span className="text-muted-foreground">{t("Complaint:")}</span>{" "}
                         {trip.chiefComplaint}
                       </div>
                     </div>
@@ -428,7 +428,7 @@ export function AmbulanceServicesDashboard() {
                       <div className="flex items-start gap-2">
                         <MapPin className="h-4 w-4 text-green-600 mt-1" />
                         <div className="flex-1">
-                          <p className="text-sm font-medium">Pickup Location</p>
+                          <p className="text-sm font-medium">{t("Pickup Location")}</p>
                           <p className="text-sm text-muted-foreground">
                             {trip.pickupLocation.address}
                           </p>
@@ -437,7 +437,7 @@ export function AmbulanceServicesDashboard() {
                       <div className="flex items-start gap-2">
                         <Navigation className="h-4 w-4 text-red-600 mt-1" />
                         <div className="flex-1">
-                          <p className="text-sm font-medium">Destination</p>
+                          <p className="text-sm font-medium">{t("Destination")}</p>
                           <p className="text-sm text-muted-foreground">
                             {trip.destination.facilityName}
                           </p>
@@ -447,31 +447,29 @@ export function AmbulanceServicesDashboard() {
 
                     <div className="flex items-center justify-between pt-2 border-t">
                       <div className="flex items-center gap-4 text-sm">
-                        <Badge variant="secondary">{trip.status}</Badge>
+                        <Badge variant="secondary">{tAny(trip.status)}</Badge>
                         <span className="text-muted-foreground">
-                          ETA: {trip.estimatedDuration} min
-                        </span>
+                          {t("ETA: {estimatedDuration} min", { estimatedDuration: trip.estimatedDuration })}</span>
                         <span className="text-muted-foreground">
-                          {trip.estimatedDistance} km
-                        </span>
+                          {t("{estimatedDistance} km", { estimatedDistance: trip.estimatedDistance })}</span>
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline">
                           <MapPin className="mr-1 h-3 w-3" />
-                          Track
+                          {t("Track")}
                         </Button>
                         <Button size="sm" variant="outline">
-                          Details
+                          {t("Details")}
                         </Button>
                       </div>
                     </div>
 
                     <div className="pt-2 border-t">
-                      <p className="text-sm font-medium mb-2">Crew</p>
+                      <p className="text-sm font-medium mb-2">{t("Crew")}</p>
                       <div className="flex gap-2">
                         {trip.crew.map((member, idx) => (
                           <Badge key={idx} variant="outline">
-                            {member.name} ({member.role})
+                            {member.name} ({tAny(member.role)})
                           </Badge>
                         ))}
                       </div>
@@ -486,7 +484,7 @@ export function AmbulanceServicesDashboard() {
         <TabsContent value="requests" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Ambulance Requests</CardTitle>
+              <CardTitle>{t("Ambulance Requests")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -499,7 +497,7 @@ export function AmbulanceServicesDashboard() {
                       <div>
                         <p className="font-medium text-lg">{request.requestNumber}</p>
                         <p className="text-sm text-muted-foreground">
-                          {format(request.requestTime, "MMM dd, yyyy HH:mm")}
+                          {fmt(request.requestTime, "MMM dd, yyyy HH:mm")}
                         </p>
                       </div>
                       <Badge
@@ -511,27 +509,27 @@ export function AmbulanceServicesDashboard() {
                             : "outline"
                         }
                       >
-                        {request.priority}
+                        {tAny(request.priority)}
                       </Badge>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Caller:</span>{" "}
+                        <span className="text-muted-foreground">{t("Caller:")}</span>{" "}
                         {request.callerDetails.name}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Contact:</span>{" "}
+                        <span className="text-muted-foreground">{t("Contact:")}</span>{" "}
                         {request.callerDetails.contactNumber}
                       </div>
                       {request.patientInfo.name && (
                         <>
                           <div>
-                            <span className="text-muted-foreground">Patient:</span>{" "}
+                            <span className="text-muted-foreground">{t("Patient:")}</span>{" "}
                             {request.patientInfo.name}
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Age:</span>{" "}
+                            <span className="text-muted-foreground">{t("Age:")}</span>{" "}
                             {request.patientInfo.age}Y
                           </div>
                         </>
@@ -540,7 +538,7 @@ export function AmbulanceServicesDashboard() {
 
                     <div className="pt-2 border-t">
                       <p className="text-sm">
-                        <span className="font-medium">Complaint:</span>{" "}
+                        <span className="font-medium">{t("Complaint:")}</span>{" "}
                         {request.patientInfo.chiefComplaint}
                       </p>
                     </div>
@@ -549,7 +547,7 @@ export function AmbulanceServicesDashboard() {
                       <div className="flex items-start gap-2">
                         <MapPin className="h-4 w-4 text-muted-foreground mt-1" />
                         <div>
-                          <p className="text-sm font-medium">Pickup</p>
+                          <p className="text-sm font-medium">{t("Pickup")}</p>
                           <p className="text-sm text-muted-foreground">
                             {request.pickupAddress}
                             {request.pickupLandmark && ` (${request.pickupLandmark})`}
@@ -559,7 +557,7 @@ export function AmbulanceServicesDashboard() {
                       <div className="flex items-start gap-2">
                         <Navigation className="h-4 w-4 text-muted-foreground mt-1" />
                         <div>
-                          <p className="text-sm font-medium">Destination</p>
+                          <p className="text-sm font-medium">{t("Destination")}</p>
                           <p className="text-sm text-muted-foreground">
                             {request.destinationAddress}
                           </p>
@@ -568,12 +566,12 @@ export function AmbulanceServicesDashboard() {
                     </div>
 
                     <div className="flex gap-2 pt-2">
-                      <Button size="sm">Assign Ambulance</Button>
+                      <Button size="sm">{t("Assign Ambulance")}</Button>
                       <Button size="sm" variant="outline">
-                        View Map
+                        {t("View Map")}
                       </Button>
                       <Button size="sm" variant="outline">
-                        Call Caller
+                        {t("Call Caller")}
                       </Button>
                     </div>
                   </div>
@@ -586,7 +584,7 @@ export function AmbulanceServicesDashboard() {
         <TabsContent value="fleet" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Fleet Status</CardTitle>
+              <CardTitle>{t("Fleet Status")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -599,7 +597,7 @@ export function AmbulanceServicesDashboard() {
                       <div>
                         <p className="font-medium text-lg">{vehicle.vehicleNumber}</p>
                         <p className="text-sm text-muted-foreground">
-                          {vehicle.registrationNumber} • {vehicle.type}
+                          {vehicle.registrationNumber} • {tAny(vehicle.type)}
                         </p>
                       </div>
                       <Badge
@@ -611,44 +609,44 @@ export function AmbulanceServicesDashboard() {
                             : "outline"
                         }
                       >
-                        {vehicle.status}
+                        {tAny(vehicle.status)}
                       </Badge>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Model:</span>{" "}
+                        <span className="text-muted-foreground">{t("Model:")}</span>{" "}
                         {vehicle.manufacturer} {vehicle.model}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Year:</span>{" "}
+                        <span className="text-muted-foreground">{t("Year:")}</span>{" "}
                         {vehicle.yearOfManufacture}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Capacity:</span>{" "}
-                        {vehicle.capacity} passengers
+                        <span className="text-muted-foreground">{t("Capacity:")}</span>{" "}
+                        {vehicle.capacity} {t("passengers")}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Fuel Level:</span>{" "}
+                        <span className="text-muted-foreground">{t("Fuel Level:")}</span>{" "}
                         {vehicle.fuelLevel}%
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Mileage:</span>{" "}
-                        {vehicle.maintenance.mileage.toLocaleString()} km
+                        <span className="text-muted-foreground">{t("Mileage:")}</span>{" "}
+                        {vehicle.maintenance.mileage.toLocaleString()} {t("km")}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Base:</span>{" "}
+                        <span className="text-muted-foreground">{t("Base:")}</span>{" "}
                         {vehicle.baseStation}
                       </div>
                     </div>
 
                     {vehicle.crew && vehicle.crew.length > 0 && (
                       <div className="pt-2 border-t">
-                        <p className="text-sm font-medium mb-2">Current Crew</p>
+                        <p className="text-sm font-medium mb-2">{t("Current Crew")}</p>
                         <div className="flex gap-2">
                           {vehicle.crew.map((member, idx) => (
                             <Badge key={idx} variant="outline">
-                              {member.name} ({member.role})
+                              {member.name} ({tAny(member.role)})
                             </Badge>
                           ))}
                         </div>
@@ -656,7 +654,7 @@ export function AmbulanceServicesDashboard() {
                     )}
 
                     <div className="pt-2 border-t">
-                      <p className="text-sm font-medium mb-2">Equipment</p>
+                      <p className="text-sm font-medium mb-2">{t("Equipment")}</p>
                       <div className="flex flex-wrap gap-2">
                         {vehicle.equipment.map((item, idx) => (
                           <Badge
@@ -673,14 +671,14 @@ export function AmbulanceServicesDashboard() {
 
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline">
-                        View Details
+                        {t("View Details")}
                       </Button>
                       <Button size="sm" variant="outline">
-                        Maintenance Log
+                        {t("Maintenance Log")}
                       </Button>
                       <Button size="sm" variant="outline">
                         <MapPin className="mr-1 h-3 w-3" />
-                        Track
+                        {t("Track")}
                       </Button>
                     </div>
                   </div>

@@ -8,6 +8,8 @@ import { SampleTracking } from "./sample-tracking";
 import { TestResultEntry } from "./test-result-entry";
 import { EquipmentIntegration } from "./equipment-integration";
 import { AutomatedNotifications } from "./automated-notifications";
+import { useT } from "@/lib/i18n/messages";
+import { LAB_KM } from "@/features/diagnostics/laboratory/km";
 
 const TABS = ["overview", "orders", "samples", "results", "equipment", "notifications"] as const;
 
@@ -17,23 +19,24 @@ const noop = async (...args: unknown[]) => {
 };
 
 export function LaboratoryManagement() {
+  const t = useT(LAB_KM);
   const [tab, setTab] = useTabParam("overview", TABS);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Laboratory</h1>
-        <p className="text-muted-foreground">Orders, samples, results and equipment</p>
+        <h1 className="text-3xl font-bold">{t("Laboratory")}</h1>
+        <p className="text-muted-foreground">{t("Orders, samples, results and equipment")}</p>
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex w-full flex-wrap h-auto">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="orders">Orders</TabsTrigger>
-          <TabsTrigger value="samples">Samples</TabsTrigger>
-          <TabsTrigger value="results">Results</TabsTrigger>
-          <TabsTrigger value="equipment">Equipment</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="orders">{t("Orders")}</TabsTrigger>
+          <TabsTrigger value="samples">{t("Samples")}</TabsTrigger>
+          <TabsTrigger value="results">{t("Results")}</TabsTrigger>
+          <TabsTrigger value="equipment">{t("Equipment")}</TabsTrigger>
+          <TabsTrigger value="notifications">{t("Notifications")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">

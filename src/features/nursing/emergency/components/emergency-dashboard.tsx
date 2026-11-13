@@ -6,10 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmergencyCase, ERBed, Ambulance } from "@/features/nursing/emergency/types";
 import { Ambulance as AmbulanceIcon, Activity, Users, Clock, AlertCircle, Bed } from "lucide-react";
-import { format } from "date-fns";
 import { useTabParam } from "@/hooks/use-tab-param";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { EMERGENCY_KM } from "@/features/nursing/emergency/km";
 
 export function EmergencyDashboard() {
+  const t = useT(EMERGENCY_KM);
+  const tAny = useTranslateAny(EMERGENCY_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useTabParam("overview", ["overview", "cases", "beds", "ambulances"] as const);
 
   // Mock data
@@ -18,7 +22,7 @@ export function EmergencyDashboard() {
       id: "1",
       caseNumber: "ER-2025-001",
       patientId: "PAT001",
-      patientName: "Jane Smith",
+      patientName: "Chan Sreymom",
       age: 45,
       gender: "female",
       arrivalTime: new Date(),
@@ -40,9 +44,9 @@ export function EmergencyDashboard() {
         consciousness: "alert",
       },
       assignedDoctorId: "DOC001",
-      assignedDoctorName: "Dr. Johnson",
+      assignedDoctorName: "Dr. Lim Pisey",
       assignedNurseId: "NUR001",
-      assignedNurseName: "Nurse Mary",
+      assignedNurseName: "Nurse Sophea",
       bedId: "BED001",
       bedNumber: "ER-1",
       status: "in-treatment",
@@ -61,7 +65,7 @@ export function EmergencyDashboard() {
       location: "Resuscitation Bay",
       equipment: ["Ventilator", "Cardiac Monitor", "Defibrillator"],
       currentPatientId: "PAT001",
-      currentPatientName: "Jane Smith",
+      currentPatientName: "Chan Sreymom",
     },
     {
       id: "BED002",
@@ -82,8 +86,8 @@ export function EmergencyDashboard() {
       currentLocation: "Hospital Base",
       capacity: 2,
       crew: [
-        { staffId: "PMD001", name: "Paramedic Mike", role: "paramedic" },
-        { staffId: "EMT001", name: "EMT Sarah", role: "emt" },
+        { staffId: "PMD001", name: "Paramedic Rotha", role: "paramedic" },
+        { staffId: "EMT001", name: "EMT Sreyleak", role: "emt" },
       ],
       equipment: ["Defibrillator", "Ventilator", "Stretcher", "Trauma Kit"],
       lastMaintenance: new Date(2025, 0, 1),
@@ -131,16 +135,16 @@ export function EmergencyDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Emergency Room Management</h1>
-        <p className="text-muted-foreground">Real-time ER operations and patient tracking</p>
+        <h1 className="text-3xl font-bold">{t("Emergency Room Management")}</h1>
+        <p className="text-muted-foreground">{t("Real-time ER operations and patient tracking")}</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="cases">Active Cases</TabsTrigger>
-          <TabsTrigger value="beds">ER Beds</TabsTrigger>
-          <TabsTrigger value="ambulances">Ambulances</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="cases">{t("Active Cases")}</TabsTrigger>
+          <TabsTrigger value="beds">{t("ER Beds")}</TabsTrigger>
+          <TabsTrigger value="ambulances">{t("Ambulances")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -148,20 +152,19 @@ export function EmergencyDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Cases</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Total Cases")}</CardTitle>
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalCases}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.waiting} waiting · {stats.inTreatment} in treatment
-                </p>
+                  {t("{waiting} waiting · {inTreatment} in treatment", { waiting: stats.waiting, inTreatment: stats.inTreatment })}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Critical/Urgent</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Critical/Urgent")}</CardTitle>
                 <AlertCircle className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
@@ -169,21 +172,20 @@ export function EmergencyDashboard() {
                   {stats.critical + stats.urgent}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.critical} critical · {stats.urgent} urgent
-                </p>
+                  {t("{critical} critical · {urgent} urgent", { critical: stats.critical, urgent: stats.urgent })}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Bed Occupancy</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Bed Occupancy")}</CardTitle>
                 <Bed className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
                   {stats.occupiedBeds}/{stats.totalBeds}
                 </div>
-                <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-blue-500"
                     style={{ width: `${(stats.occupiedBeds / stats.totalBeds) * 100}%` }}
@@ -194,14 +196,13 @@ export function EmergencyDashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg Wait Time</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Avg Wait Time")}</CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.averageWaitTime} min</div>
+                <div className="text-2xl font-bold">{t("{averageWaitTime} min", { averageWaitTime: stats.averageWaitTime })}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.ambulancesAvailable} ambulances available
-                </p>
+                  {t("{ambulancesAvailable} ambulances available", { ambulancesAvailable: stats.ambulancesAvailable })}</p>
               </CardContent>
             </Card>
           </div>
@@ -209,36 +210,36 @@ export function EmergencyDashboard() {
           {/* Triage Distribution */}
           <Card>
             <CardHeader>
-              <CardTitle>Triage Distribution</CardTitle>
-              <CardDescription>Current cases by severity level</CardDescription>
+              <CardTitle>{t("Triage Distribution")}</CardTitle>
+              <CardDescription>{t("Current cases by severity level")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-500" />
-                    <span className="text-sm font-medium">Level 1 - Resuscitation (Critical)</span>
+                    <span className="text-sm font-medium">{t("Level 1 - Resuscitation (Critical)")}</span>
                   </div>
                   <Badge variant="destructive">{stats.critical}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-orange-500" />
-                    <span className="text-sm font-medium">Level 2 - Emergency (Urgent)</span>
+                    <span className="text-sm font-medium">{t("Level 2 - Emergency (Urgent)")}</span>
                   </div>
                   <Badge className="bg-orange-500">{stats.urgent}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                    <span className="text-sm font-medium">Level 3 - Urgent (Semi-Urgent)</span>
+                    <span className="text-sm font-medium">{t("Level 3 - Urgent (Semi-Urgent)")}</span>
                   </div>
                   <Badge className="bg-yellow-500">{stats.semiUrgent}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-green-500" />
-                    <span className="text-sm font-medium">Level 4 - Semi-Urgent (Non-Urgent)</span>
+                    <span className="text-sm font-medium">{t("Level 4 - Semi-Urgent (Non-Urgent)")}</span>
                   </div>
                   <Badge className="bg-green-500">{stats.nonUrgent}</Badge>
                 </div>
@@ -252,12 +253,12 @@ export function EmergencyDashboard() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Active ER Cases</CardTitle>
-                  <CardDescription>Current emergency cases in the system</CardDescription>
+                  <CardTitle>{t("Active ER Cases")}</CardTitle>
+                  <CardDescription>{t("Current emergency cases in the system")}</CardDescription>
                 </div>
                 <Button>
                   <Activity className="mr-2 h-4 w-4" />
-                  New Case
+                  {t("New Case")}
                 </Button>
               </div>
             </CardHeader>
@@ -272,41 +273,41 @@ export function EmergencyDashboard() {
                             <Badge variant="outline">{case_.caseNumber}</Badge>
                             <h3 className="font-semibold text-lg">{case_.patientName}</h3>
                             <Badge className={`${getTriageColor(case_.triageScore)} text-white`}>
-                              Level {case_.triageScore}
+                              {t("Level {triageScore}", { triageScore: case_.triageScore })}
                             </Badge>
-                            <Badge className="capitalize">{case_.status}</Badge>
+                            <Badge className="capitalize">{tAny(case_.status)}</Badge>
                           </div>
 
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
-                              <div className="text-muted-foreground">Age/Gender</div>
+                              <div className="text-muted-foreground">{t("Age/Gender")}</div>
                               <div className="font-medium">
-                                {case_.age}y / {case_.gender}
+                                {case_.age}y / {tAny(case_.gender)}
                               </div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Arrival</div>
-                              <div className="font-medium">{format(case_.arrivalTime, "HH:mm")}</div>
+                              <div className="text-muted-foreground">{t("Arrival")}</div>
+                              <div className="font-medium">{fmt(case_.arrivalTime, "HH:mm")}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Bed</div>
+                              <div className="text-muted-foreground">{t("Bed")}</div>
                               <div className="font-medium">{case_.bedNumber}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Doctor</div>
+                              <div className="text-muted-foreground">{t("Doctor")}</div>
                               <div className="font-medium">{case_.assignedDoctorName}</div>
                             </div>
                           </div>
 
                           <div className="text-sm">
-                            <div className="text-muted-foreground">Chief Complaint</div>
+                            <div className="text-muted-foreground">{t("Chief Complaint")}</div>
                             <div>{case_.chiefComplaint}</div>
                           </div>
 
                           <div className="flex items-center gap-4 text-sm">
-                            <span>BP: {case_.vitalSigns.bloodPressure}</span>
-                            <span>HR: {case_.vitalSigns.heartRate}</span>
-                            <span>SpO₂: {case_.vitalSigns.oxygenSaturation}%</span>
+                            <span>{t("BP: {bloodPressure}", { bloodPressure: case_.vitalSigns.bloodPressure })}</span>
+                            <span>{t("HR: {heartRate}", { heartRate: case_.vitalSigns.heartRate })}</span>
+                            <span>{t("SpO₂: {oxygenSaturation}%", { oxygenSaturation: case_.vitalSigns.oxygenSaturation })}</span>
                           </div>
                         </div>
                       </div>
@@ -321,8 +322,8 @@ export function EmergencyDashboard() {
         <TabsContent value="beds" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>ER Bed Status</CardTitle>
-              <CardDescription>Real-time bed availability</CardDescription>
+              <CardTitle>{t("ER Bed Status")}</CardTitle>
+              <CardDescription>{t("Real-time bed availability")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -336,20 +337,20 @@ export function EmergencyDashboard() {
                             variant={bed.status === "available" ? "secondary" : "default"}
                             className="capitalize"
                           >
-                            {bed.status}
+                            {tAny(bed.status)}
                           </Badge>
                         </div>
                         <div className="text-sm">
-                          <div className="text-muted-foreground">Type</div>
-                          <div className="font-medium capitalize">{bed.bedType}</div>
+                          <div className="text-muted-foreground">{t("Type")}</div>
+                          <div className="font-medium capitalize">{tAny(bed.bedType)}</div>
                         </div>
                         <div className="text-sm">
-                          <div className="text-muted-foreground">Location</div>
+                          <div className="text-muted-foreground">{t("Location")}</div>
                           <div className="font-medium">{bed.location}</div>
                         </div>
                         {bed.currentPatientName && (
                           <div className="text-sm">
-                            <div className="text-muted-foreground">Patient</div>
+                            <div className="text-muted-foreground">{t("Patient")}</div>
                             <div className="font-medium">{bed.currentPatientName}</div>
                           </div>
                         )}
@@ -372,8 +373,8 @@ export function EmergencyDashboard() {
         <TabsContent value="ambulances" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Ambulance Fleet</CardTitle>
-              <CardDescription>Ambulance status and dispatch</CardDescription>
+              <CardTitle>{t("Ambulance Fleet")}</CardTitle>
+              <CardDescription>{t("Ambulance status and dispatch")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -389,22 +390,22 @@ export function EmergencyDashboard() {
                               variant={ambulance.status === "available" ? "secondary" : "default"}
                               className="capitalize"
                             >
-                              {ambulance.status}
+                              {tAny(ambulance.status)}
                             </Badge>
                           </div>
 
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
-                              <div className="text-muted-foreground">Type</div>
-                              <div className="font-medium uppercase">{ambulance.type}</div>
+                              <div className="text-muted-foreground">{t("Type")}</div>
+                              <div className="font-medium uppercase">{tAny(ambulance.type)}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Location</div>
+                              <div className="text-muted-foreground">{t("Location")}</div>
                               <div className="font-medium">{ambulance.currentLocation}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Crew</div>
-                              <div className="font-medium">{ambulance.crew.length} members</div>
+                              <div className="text-muted-foreground">{t("Crew")}</div>
+                              <div className="font-medium">{t("{length} members", { length: ambulance.crew.length })}</div>
                             </div>
                           </div>
 
@@ -417,7 +418,7 @@ export function EmergencyDashboard() {
                           </div>
                         </div>
                         {ambulance.status === "available" && (
-                          <Button size="sm">Dispatch</Button>
+                          <Button size="sm">{t("Dispatch")}</Button>
                         )}
                       </div>
                     </CardContent>

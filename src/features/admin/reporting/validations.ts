@@ -33,49 +33,6 @@ export const clinicalReportSchema = z.object({
   includeBenchmarks: z.boolean()
 });
 
-export const billingSummarySchema = z.object({
-  dateRange: z.object({
-    start: z.date(),
-    end: z.date()
-  }),
-  includeDepartmentBreakdown: z.boolean().default(true),
-  includeAgeingAnalysis: z.boolean().default(true),
-  includePaymentMethods: z.boolean().default(true),
-  groupBy: z.enum(["day", "week", "month"]).default("month")
-});
-
-export const inventoryReportSchema = z.object({
-  reportDate: z.date(),
-  includeCategories: z.boolean().default(true),
-  includeSupplierAnalysis: z.boolean().default(false),
-  includeWasteAnalysis: z.boolean().default(true),
-  lowStockThreshold: z.number().min(1).default(10),
-  expiryDays: z.number().min(1).default(30)
-});
-
-export const resourceUtilizationSchema = z.object({
-  dateRange: z.object({
-    start: z.date(),
-    end: z.date()
-  }),
-  includeRooms: z.boolean().default(true),
-  includeEquipment: z.boolean().default(true),
-  includeStaff: z.boolean().default(true),
-  departmentIds: z.array(z.string()).optional()
-});
-
-export const doctorPerformanceSchema = z.object({
-  doctorId: z.string().min(1, "Doctor selection is required"),
-  dateRange: z.object({
-    start: z.date(),
-    end: z.date()
-  }),
-  includeFinancials: z.boolean().default(true),
-  includeQuality: z.boolean().default(true),
-  includePatientOutcomes: z.boolean().default(true),
-  compareWithPeers: z.boolean().default(false)
-});
-
 // Dashboard Configuration Schemas
 export const dashboardWidgetSchema = z.object({
   type: z.enum(["chart", "metric", "table", "alert", "gauge", "map"]),
@@ -167,10 +124,6 @@ export const reportExportSchema = z.object({
 export type ReportFiltersFormData = z.infer<typeof reportFiltersSchema>;
 export type DailyCensusFormData = z.infer<typeof dailyCensusSchema>;
 export type ClinicalReportFormData = z.infer<typeof clinicalReportSchema>;
-export type BillingSummaryFormData = z.infer<typeof billingSummarySchema>;
-export type InventoryReportFormData = z.infer<typeof inventoryReportSchema>;
-export type ResourceUtilizationFormData = z.infer<typeof resourceUtilizationSchema>;
-export type DoctorPerformanceFormData = z.infer<typeof doctorPerformanceSchema>;
 export type DashboardWidgetFormData = z.infer<typeof dashboardWidgetSchema>;
 export type CustomDashboardFormData = z.infer<typeof customDashboardSchema>;
 export type ReportScheduleFormData = z.infer<typeof reportScheduleSchema>;

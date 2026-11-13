@@ -8,6 +8,8 @@ import { AdvancedAppointmentBooking } from "./advanced-appointment-booking";
 import { DepartmentScheduleManagement } from "./department-schedule-management";
 import { AutomatedReminderSystem } from "./automated-reminder-system";
 import { TelemedicineManagement } from "./telemedicine-management";
+import { useT } from "@/lib/i18n/messages";
+import { SCHEDULING_KM } from "@/features/front-desk/scheduling/km";
 
 // Triage lives in the Emergency module; the scheduling copy is not shown (two triage screens confuse users).
 const TABS = ["overview", "booking", "departments", "reminders", "telemedicine"] as const;
@@ -16,23 +18,24 @@ const TABS = ["overview", "booking", "departments", "reminders", "telemedicine"]
 const log = (...args: unknown[]) => console.info("[scheduling]", ...args);
 
 export function SchedulingManagement() {
+  const t = useT(SCHEDULING_KM);
   const router = useRouter();
   const [tab, setTab] = useTabParam("overview", TABS);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Scheduling</h1>
-        <p className="text-muted-foreground">Appointments, department rosters, reminders and telemedicine</p>
+        <h1 className="text-3xl font-bold">{t("Scheduling")}</h1>
+        <p className="text-muted-foreground">{t("Appointments, department rosters, reminders and telemedicine")}</p>
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex w-full flex-wrap h-auto">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="booking">Book Appointment</TabsTrigger>
-          <TabsTrigger value="departments">Departments</TabsTrigger>
-          <TabsTrigger value="reminders">Reminders</TabsTrigger>
-          <TabsTrigger value="telemedicine">Telemedicine</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="booking">{t("Book Appointment")}</TabsTrigger>
+          <TabsTrigger value="departments">{t("Departments")}</TabsTrigger>
+          <TabsTrigger value="reminders">{t("Reminders")}</TabsTrigger>
+          <TabsTrigger value="telemedicine">{t("Telemedicine")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">

@@ -6,10 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QueueToken, QueueCounter } from "@/features/front-desk/queue/types";
 import { Hash, Users, Clock, TrendingUp, Monitor, UserCheck } from "lucide-react";
-import { format } from "date-fns";
 import { useTabParam } from "@/hooks/use-tab-param";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { QUEUE_KM } from "@/features/front-desk/queue/km";
 
 export function QueueDashboard() {
+  const t = useT(QUEUE_KM);
+  const tAny = useTranslateAny(QUEUE_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useTabParam("overview", ["overview", "queue", "counters"] as const);
 
   // Mock data
@@ -19,15 +23,15 @@ export function QueueDashboard() {
       tokenNumber: "A001",
       displayNumber: "A001",
       patientId: "PAT001",
-      patientName: "John Doe",
-      patientPhone: "123-456-7890",
+      patientName: "Sok Dara",
+      patientPhone: "012 345 678",
       serviceType: "opd",
       service: "Consultation",
       department: "General Medicine",
       priority: "normal",
       status: "in-service",
       counterNumber: "Counter 1",
-      servedBy: "Staff Member 1",
+      servedBy: "Pov Chanthou",
       issueTime: new Date(2025, 0, 15, 9, 0),
       calledTime: new Date(2025, 0, 15, 9, 15),
       serviceStartTime: new Date(2025, 0, 15, 9, 15),
@@ -38,8 +42,8 @@ export function QueueDashboard() {
       tokenNumber: "A002",
       displayNumber: "A002",
       patientId: "PAT002",
-      patientName: "Jane Smith",
-      patientPhone: "123-456-7891",
+      patientName: "Chan Sreymom",
+      patientPhone: "012 345 679",
       serviceType: "opd",
       service: "Consultation",
       department: "General Medicine",
@@ -62,7 +66,7 @@ export function QueueDashboard() {
       currentTokenId: "1",
       currentTokenNumber: "A001",
       staffId: "STAFF001",
-      staffName: "Staff Member 1",
+      staffName: "Pov Chanthou",
       location: "Ground Floor",
       tokensServedToday: 12,
       averageServiceTime: 8,
@@ -115,15 +119,15 @@ export function QueueDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Queue Management System</h1>
-        <p className="text-muted-foreground">Manage patient queues and service counters</p>
+        <h1 className="text-3xl font-bold">{t("Queue Management System")}</h1>
+        <p className="text-muted-foreground">{t("Manage patient queues and service counters")}</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="queue">Active Queue</TabsTrigger>
-          <TabsTrigger value="counters">Counters</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="queue">{t("Active Queue")}</TabsTrigger>
+          <TabsTrigger value="counters">{t("Counters")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -131,40 +135,38 @@ export function QueueDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Tokens Today</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Total Tokens Today")}</CardTitle>
                 <Hash className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalTokens}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.waiting} waiting · {stats.serving} serving
-                </p>
+                  {t("{waiting} waiting · {serving} serving", { waiting: stats.waiting, serving: stats.serving })}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg Wait Time</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Avg Wait Time")}</CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.averageWaitTime} min</div>
+                <div className="text-2xl font-bold">{t("{averageWaitTime} min", { averageWaitTime: stats.averageWaitTime })}</div>
                 <p className="text-xs text-muted-foreground">
-                  Service: {stats.averageServiceTime} min
-                </p>
+                  {t("Service: {averageServiceTime} min", { averageServiceTime: stats.averageServiceTime })}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Counters</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Active Counters")}</CardTitle>
                 <UserCheck className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
                   {stats.activeCounters}/{stats.totalCounters}
                 </div>
-                <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-blue-500"
                     style={{ width: `${(stats.activeCounters / stats.totalCounters) * 100}%` }}
@@ -175,12 +177,12 @@ export function QueueDashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Satisfaction</CardTitle>
+                <CardTitle className="text-sm font-medium">{t("Satisfaction")}</CardTitle>
                 <TrendingUp className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.satisfaction}/5.0</div>
-                <p className="text-xs text-muted-foreground">Based on feedback</p>
+                <p className="text-xs text-muted-foreground">{t("Based on feedback")}</p>
               </CardContent>
             </Card>
           </div>
@@ -189,28 +191,28 @@ export function QueueDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Queue Status</CardTitle>
-                <CardDescription>Current queue distribution</CardDescription>
+                <CardTitle>{t("Queue Status")}</CardTitle>
+                <CardDescription>{t("Current queue distribution")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                    <span className="text-sm font-medium">Waiting</span>
+                    <span className="text-sm font-medium">{t("Waiting")}</span>
                   </div>
                   <Badge className="bg-yellow-500">{stats.waiting}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-blue-500" />
-                    <span className="text-sm font-medium">Serving</span>
+                    <span className="text-sm font-medium">{t("Serving")}</span>
                   </div>
                   <Badge className="bg-blue-500">{stats.serving}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-green-500" />
-                    <span className="text-sm font-medium">Completed</span>
+                    <span className="text-sm font-medium">{t("Completed")}</span>
                   </div>
                   <Badge className="bg-green-500">{stats.completed}</Badge>
                 </div>
@@ -219,21 +221,21 @@ export function QueueDashboard() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>Common queue operations</CardDescription>
+                <CardTitle>{t("Quick Actions")}</CardTitle>
+                <CardDescription>{t("Common queue operations")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button className="w-full">
                   <Hash className="mr-2 h-4 w-4" />
-                  Generate Token
+                  {t("Generate Token")}
                 </Button>
                 <Button variant="outline" className="w-full">
                   <Monitor className="mr-2 h-4 w-4" />
-                  Display Board
+                  {t("Display Board")}
                 </Button>
                 <Button variant="outline" className="w-full">
                   <Users className="mr-2 h-4 w-4" />
-                  Call Next Patient
+                  {t("Call Next Patient")}
                 </Button>
               </CardContent>
             </Card>
@@ -242,8 +244,8 @@ export function QueueDashboard() {
           {/* Current Serving */}
           <Card>
             <CardHeader>
-              <CardTitle>Currently Serving</CardTitle>
-              <CardDescription>Patients being served at counters</CardDescription>
+              <CardTitle>{t("Currently Serving")}</CardTitle>
+              <CardDescription>{t("Patients being served at counters")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -256,16 +258,16 @@ export function QueueDashboard() {
                           <Badge className="text-lg font-bold">{token.tokenNumber}</Badge>
                           <h4 className="font-semibold">{token.patientName}</h4>
                           {token.priority === "emergency" && (
-                            <Badge variant="destructive">Emergency</Badge>
+                            <Badge variant="destructive">{t("Emergency")}</Badge>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {token.department} • {token.counterNumber}
+                          {tAny(token.department)} • {token.counterNumber}
                         </p>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm text-muted-foreground">Wait Time</div>
-                        <div className="font-semibold">{token.actualWaitTime} min</div>
+                        <div className="text-sm text-muted-foreground">{t("Wait Time")}</div>
+                        <div className="font-semibold">{t("{actualWaitTime} min", { actualWaitTime: token.actualWaitTime })}</div>
                       </div>
                     </div>
                   ))}
@@ -279,12 +281,12 @@ export function QueueDashboard() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Active Queue</CardTitle>
-                  <CardDescription>All tokens in the system</CardDescription>
+                  <CardTitle>{t("Active Queue")}</CardTitle>
+                  <CardDescription>{t("All tokens in the system")}</CardDescription>
                 </div>
                 <Button>
                   <Hash className="mr-2 h-4 w-4" />
-                  New Token
+                  {t("New Token")}
                 </Button>
               </div>
             </CardHeader>
@@ -301,45 +303,45 @@ export function QueueDashboard() {
                             <Badge
                               className={`${getStatusColor(token.status)} text-white capitalize`}
                             >
-                              {token.status}
+                              {tAny(token.status)}
                             </Badge>
                             {token.priority === "emergency" && (
-                              <Badge variant="destructive">Emergency</Badge>
+                              <Badge variant="destructive">{t("Emergency")}</Badge>
                             )}
                           </div>
 
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
-                              <div className="text-muted-foreground">Department</div>
-                              <div className="font-medium">{token.department}</div>
+                              <div className="text-muted-foreground">{t("Department")}</div>
+                              <div className="font-medium">{tAny(token.department)}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Service Type</div>
+                              <div className="text-muted-foreground">{t("Service Type")}</div>
                               <div className="font-medium uppercase">{token.serviceType}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Issued At</div>
-                              <div className="font-medium">{format(token.issueTime, "HH:mm")}</div>
+                              <div className="text-muted-foreground">{t("Issued At")}</div>
+                              <div className="font-medium">{fmt(token.issueTime, "HH:mm")}</div>
                             </div>
                             <div>
-                              <div className="text-muted-foreground">Wait Time</div>
-                              <div className="font-medium">{token.actualWaitTime} min</div>
+                              <div className="text-muted-foreground">{t("Wait Time")}</div>
+                              <div className="font-medium">{t("{actualWaitTime} min", { actualWaitTime: token.actualWaitTime })}</div>
                             </div>
                           </div>
 
                           {token.counterNumber && (
                             <div className="text-sm">
-                              <span className="text-muted-foreground">Counter: </span>
+                              <span className="text-muted-foreground">{t("Counter:")} </span>
                               <span className="font-medium">{token.counterNumber}</span>
                             </div>
                           )}
                         </div>
                         <div className="flex gap-2">
                           {token.status === "waiting" && (
-                            <Button size="sm">Call</Button>
+                            <Button size="sm">{t("Call")}</Button>
                           )}
                           {token.status === "in-service" && (
-                            <Button size="sm" variant="outline">Complete</Button>
+                            <Button size="sm" variant="outline">{t("Complete")}</Button>
                           )}
                         </div>
                       </div>
@@ -354,8 +356,8 @@ export function QueueDashboard() {
         <TabsContent value="counters" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Service Counters</CardTitle>
-              <CardDescription>Counter status and performance</CardDescription>
+              <CardTitle>{t("Service Counters")}</CardTitle>
+              <CardDescription>{t("Counter status and performance")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -372,38 +374,38 @@ export function QueueDashboard() {
                             variant={counter.status === "active" ? "default" : "secondary"}
                             className="capitalize"
                           >
-                            {counter.status}
+                            {tAny(counter.status)}
                           </Badge>
                         </div>
 
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Type</span>
+                            <span className="text-muted-foreground">{t("Type")}</span>
                             <span className="font-medium capitalize">{counter.counterName}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Department</span>
-                            <span className="font-medium">{counter.department}</span>
+                            <span className="text-muted-foreground">{t("Department")}</span>
+                            <span className="font-medium">{tAny(counter.department)}</span>
                           </div>
                           {counter.staffName && (
                             <div className="flex justify-between">
-                              <span className="text-muted-foreground">Staff</span>
+                              <span className="text-muted-foreground">{t("Staff")}</span>
                               <span className="font-medium">{counter.staffName}</span>
                             </div>
                           )}
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Tokens Served</span>
+                            <span className="text-muted-foreground">{t("Tokens Served")}</span>
                             <span className="font-medium">{counter.tokensServedToday}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Avg Service Time</span>
-                            <span className="font-medium">{counter.averageServiceTime} min</span>
+                            <span className="text-muted-foreground">{t("Avg Service Time")}</span>
+                            <span className="font-medium">{t("{averageServiceTime} min", { averageServiceTime: counter.averageServiceTime })}</span>
                           </div>
                         </div>
 
                         {counter.currentTokenNumber && (
                           <div className="pt-2 border-t">
-                            <div className="text-sm text-muted-foreground">Now Serving</div>
+                            <div className="text-sm text-muted-foreground">{t("Now Serving")}</div>
                             <Badge className="mt-1 text-lg">{counter.currentTokenNumber}</Badge>
                           </div>
                         )}
@@ -411,7 +413,7 @@ export function QueueDashboard() {
                         <div className="flex gap-2 pt-2">
                           {counter.status === "active" && (
                             <Button size="sm" variant="outline" className="flex-1">
-                              Call Next
+                              {t("Call Next")}
                             </Button>
                           )}
                           <Button
@@ -419,7 +421,7 @@ export function QueueDashboard() {
                             variant={counter.status === "active" ? "outline" : "default"}
                             className="flex-1"
                           >
-                            {counter.status === "active" ? "Close" : "Open"}
+                            {counter.status === "active" ? t("Close") : t("Open")}
                           </Button>
                         </div>
                       </div>

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, addWeeks, subWeeks } from "date-fns";
+import { startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, addWeeks, subWeeks } from "date-fns";
 import { 
   Building, 
   Users, 
@@ -36,6 +36,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { SCHEDULING_KM } from "@/features/front-desk/scheduling/km";
 
 // Department Schedule Types
 interface DepartmentSchedule {
@@ -113,6 +115,9 @@ export function DepartmentScheduleManagement({
   onDeleteScheduleSlot,
   onAllocateResource
 }: DepartmentScheduleManagementProps) {
+  const tAny = useTranslateAny(SCHEDULING_KM);
+  const t = useT(SCHEDULING_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedDepartment, setSelectedDepartment] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -202,9 +207,9 @@ export function DepartmentScheduleManagement({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-indigo-600">Department Schedules</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-indigo-600">{t("Department Schedules")}</h1>
           <p className="text-muted-foreground">
-            Manage department-wide scheduling and resource allocation
+            {t("Manage department-wide scheduling and resource allocation")}
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -213,10 +218,10 @@ export function DepartmentScheduleManagement({
             onValueChange={(v) => setSelectedDepartment(v === "all" ? "" : v)}
           >
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="All Departments" />
+              <SelectValue placeholder={t("All Departments")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Departments</SelectItem>
+              <SelectItem value="all">{t("All Departments")}</SelectItem>
               {departments.map((dept) => (
                 <SelectItem key={dept.id} value={dept.id}>
                   {dept.name}
@@ -234,7 +239,7 @@ export function DepartmentScheduleManagement({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{departments.length}</p>
-                <p className="text-xs text-muted-foreground">Total Departments</p>
+                <p className="text-xs text-muted-foreground">{t("Total Departments")}</p>
               </div>
               <Building className="h-8 w-8 text-blue-500" />
             </div>
@@ -245,7 +250,7 @@ export function DepartmentScheduleManagement({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{doctors.length}</p>
-                <p className="text-xs text-muted-foreground">Active Doctors</p>
+                <p className="text-xs text-muted-foreground">{t("Active Doctors")}</p>
               </div>
               <Stethoscope className="h-8 w-8 text-green-500" />
             </div>
@@ -256,7 +261,7 @@ export function DepartmentScheduleManagement({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{departmentSchedules.length}</p>
-                <p className="text-xs text-muted-foreground">Schedule Slots</p>
+                <p className="text-xs text-muted-foreground">{t("Schedule Slots")}</p>
               </div>
               <Calendar className="h-8 w-8 text-purple-500" />
             </div>
@@ -272,7 +277,7 @@ export function DepartmentScheduleManagement({
                     Math.round(departments.reduce((avg, dept) => avg + getDepartmentUtilization(dept.id), 0) / departments.length || 0)
                   }%
                 </p>
-                <p className="text-xs text-muted-foreground">Utilization Rate</p>
+                <p className="text-xs text-muted-foreground">{t("Utilization Rate")}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-orange-500" />
             </div>
@@ -282,11 +287,11 @@ export function DepartmentScheduleManagement({
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="calendar">Calendar View</TabsTrigger>
-          <TabsTrigger value="schedule">Create Schedule</TabsTrigger>
-          <TabsTrigger value="resources">Resources</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="calendar">{t("Calendar View")}</TabsTrigger>
+          <TabsTrigger value="schedule">{t("Create Schedule")}</TabsTrigger>
+          <TabsTrigger value="resources">{t("Resources")}</TabsTrigger>
+          <TabsTrigger value="analytics">{t("Analytics")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -296,27 +301,26 @@ export function DepartmentScheduleManagement({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-green-500" />
-                  Department Performance
+                  {t("Department Performance")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {getTopPerformingDepartments().map((dept) => (
-                    <div key={dept.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={dept.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                       <div className="flex items-center gap-3">
                         <Building className="h-5 w-5 text-blue-500" />
                         <div>
                           <div className="font-medium">{dept.name}</div>
                           <div className="text-sm text-muted-foreground">
-                            {dept.stats.totalDoctors} doctors • {dept.stats.totalAppointments} appointments
-                          </div>
+                            {t("{totalDoctors} doctors • {totalAppointments} appointments", { totalDoctors: dept.stats.totalDoctors, totalAppointments: dept.stats.totalAppointments })}</div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-green-600">
                           {dept.stats.utilizationRate}%
                         </div>
-                        <div className="text-xs text-muted-foreground">Utilization</div>
+                        <div className="text-xs text-muted-foreground">{t("Utilization")}</div>
                       </div>
                     </div>
                   ))}
@@ -329,7 +333,7 @@ export function DepartmentScheduleManagement({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-purple-500" />
-                  Today's Schedule
+                  {t("Today's Schedule")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -346,15 +350,14 @@ export function DepartmentScheduleManagement({
                           <div>
                             <div className="font-medium">{dept.name}</div>
                             <div className="text-sm text-muted-foreground">
-                              {todaySchedules.length} slots
-                            </div>
+                              {t("{length} slots", { length: todaySchedules.length })}</div>
                           </div>
                         </div>
                         <div className="text-right">
                           <div className="font-medium">
                             {totalPatients}/{maxCapacity}
                           </div>
-                          <div className="text-xs text-muted-foreground">Patients</div>
+                          <div className="text-xs text-muted-foreground">{t("Patients")}</div>
                         </div>
                       </div>
                     );
@@ -382,7 +385,7 @@ export function DepartmentScheduleManagement({
                   size="sm"
                   onClick={() => setCurrentWeek(new Date())}
                 >
-                  Today
+                  {t("Today")}
                 </Button>
                 <Button
                   variant="outline"
@@ -392,7 +395,7 @@ export function DepartmentScheduleManagement({
                   <ChevronRight className="h-4 w-4" />
                 </Button>
                 <h3 className="text-lg font-semibold ml-4">
-                  {format(startOfWeek(currentWeek), "MMM dd")} - {format(endOfWeek(currentWeek), "MMM dd, yyyy")}
+                  {fmt(startOfWeek(currentWeek), "MMM dd")} - {fmt(endOfWeek(currentWeek), "MMM dd, yyyy")}
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -401,9 +404,9 @@ export function DepartmentScheduleManagement({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="day">Day</SelectItem>
-                    <SelectItem value="week">Week</SelectItem>
-                    <SelectItem value="month">Month</SelectItem>
+                    <SelectItem value="day">{t("Day")}</SelectItem>
+                    <SelectItem value="week">{t("Week")}</SelectItem>
+                    <SelectItem value="month">{t("Month")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -415,11 +418,11 @@ export function DepartmentScheduleManagement({
             <CardContent className="pt-6">
               <div className="grid grid-cols-8 gap-1">
                 {/* Header */}
-                <div className="p-2 font-medium text-center">Time</div>
+                <div className="p-2 font-medium text-center">{t("Time")}</div>
                 {getWeekDays().map((day) => (
                   <div key={day.toString()} className="p-2 font-medium text-center border-b">
-                    <div>{format(day, "EEE")}</div>
-                    <div className="text-sm text-muted-foreground">{format(day, "MMM dd")}</div>
+                    <div>{fmt(day, "EEE")}</div>
+                    <div className="text-sm text-muted-foreground">{fmt(day, "MMM dd")}</div>
                   </div>
                 ))}
 
@@ -435,7 +438,7 @@ export function DepartmentScheduleManagement({
                       );
                       
                       return (
-                        <div key={`${day.toString()}-${time}`} className="min-h-12 border border-gray-100 p-1">
+                        <div key={`${day.toString()}-${time}`} className="min-h-12 border border-border p-1">
                           {daySchedules.map((schedule) => {
                             const doctor = doctors.find(d => d.id === schedule.doctorId);
                             const department = departments.find(d => d.id === schedule.departmentId);
@@ -446,7 +449,7 @@ export function DepartmentScheduleManagement({
                                 className="text-xs p-1 mb-1 bg-blue-100 text-blue-800 rounded cursor-pointer hover:bg-blue-200 transition-colors"
                                 onClick={() => setEditingSchedule(schedule)}
                               >
-                                <div className="font-medium truncate">{doctor ? `Dr. ${doctor.firstName} ${doctor.lastName}` : ""}</div>
+                                <div className="font-medium truncate">{doctor ? t("Dr. {firstName} {lastName}", { firstName: doctor.firstName, lastName: doctor.lastName }) : ""}</div>
                                 <div className="truncate">{department?.name}</div>
                                 <div>{schedule.currentPatients}/{schedule.maxPatients}</div>
                               </div>
@@ -467,20 +470,20 @@ export function DepartmentScheduleManagement({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Plus className="h-5 w-5 text-blue-500" />
-                {editingSchedule ? "Edit Schedule Slot" : "Create Schedule Slot"}
+                {editingSchedule ? t("Edit Schedule Slot") : t("Create Schedule Slot")}
               </CardTitle>
               <CardDescription>
-                {editingSchedule ? "Update the schedule slot" : "Create a new department schedule slot"}
+                {editingSchedule ? t("Update the schedule slot") : t("Create a new department schedule slot")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={scheduleForm.handleSubmit(handleScheduleSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Department *</Label>
+                    <Label>{t("Department *")}</Label>
                     <Select onValueChange={(value) => scheduleForm.setValue("departmentId", value)}>
                       <SelectTrigger className={scheduleForm.formState.errors.departmentId ? "border-red-500" : ""}>
-                        <SelectValue placeholder="Select department" />
+                        <SelectValue placeholder={t("Select department")} />
                       </SelectTrigger>
                       <SelectContent>
                         {departments.map((dept) => (
@@ -494,36 +497,36 @@ export function DepartmentScheduleManagement({
                       </SelectContent>
                     </Select>
                     {scheduleForm.formState.errors.departmentId && (
-                      <p className="text-sm text-red-500">{scheduleForm.formState.errors.departmentId.message}</p>
+                      <p className="text-sm text-red-500">{tAny(scheduleForm.formState.errors.departmentId.message)}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Doctor *</Label>
+                    <Label>{t("Doctor *")}</Label>
                     <Select onValueChange={(value) => scheduleForm.setValue("doctorId", value)}>
                       <SelectTrigger className={scheduleForm.formState.errors.doctorId ? "border-red-500" : ""}>
-                        <SelectValue placeholder="Select doctor" />
+                        <SelectValue placeholder={t("Select doctor")} />
                       </SelectTrigger>
                       <SelectContent>
                         {doctors.map((doctor) => (
                           <SelectItem key={doctor.id} value={doctor.id}>
                             <div className="flex items-center gap-2">
                               <Stethoscope className="h-4 w-4" />
-                              Dr. {doctor.firstName} {doctor.lastName} - {doctor.specialization}
+                              Dr. {doctor.firstName} {doctor.lastName} - {tAny(doctor.specialization)}
                             </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     {scheduleForm.formState.errors.doctorId && (
-                      <p className="text-sm text-red-500">{scheduleForm.formState.errors.doctorId.message}</p>
+                      <p className="text-sm text-red-500">{tAny(scheduleForm.formState.errors.doctorId.message)}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>Date *</Label>
+                    <Label>{t("Date *")}</Label>
                     <CalendarPicker
                       mode="single"
                       selected={scheduleForm.watch("date")}
@@ -531,52 +534,52 @@ export function DepartmentScheduleManagement({
                       className="rounded-md border"
                     />
                     {scheduleForm.formState.errors.date && (
-                      <p className="text-sm text-red-500">{scheduleForm.formState.errors.date.message}</p>
+                      <p className="text-sm text-red-500">{tAny(scheduleForm.formState.errors.date.message)}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Start Time *</Label>
+                    <Label>{t("Start Time *")}</Label>
                     <Select onValueChange={(value) => scheduleForm.setValue("startTime", value)}>
                       <SelectTrigger className={scheduleForm.formState.errors.startTime ? "border-red-500" : ""}>
-                        <SelectValue placeholder="Select start time" />
+                        <SelectValue placeholder={t("Select start time")} />
                       </SelectTrigger>
                       <SelectContent>
                         {timeSlots.map((time) => (
                           <SelectItem key={time} value={time}>
-                            {time}
+                            {tAny(time)}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     {scheduleForm.formState.errors.startTime && (
-                      <p className="text-sm text-red-500">{scheduleForm.formState.errors.startTime.message}</p>
+                      <p className="text-sm text-red-500">{tAny(scheduleForm.formState.errors.startTime.message)}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label>End Time *</Label>
+                    <Label>{t("End Time *")}</Label>
                     <Select onValueChange={(value) => scheduleForm.setValue("endTime", value)}>
                       <SelectTrigger className={scheduleForm.formState.errors.endTime ? "border-red-500" : ""}>
-                        <SelectValue placeholder="Select end time" />
+                        <SelectValue placeholder={t("Select end time")} />
                       </SelectTrigger>
                       <SelectContent>
                         {timeSlots.map((time) => (
                           <SelectItem key={time} value={time}>
-                            {time}
+                            {tAny(time)}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     {scheduleForm.formState.errors.endTime && (
-                      <p className="text-sm text-red-500">{scheduleForm.formState.errors.endTime.message}</p>
+                      <p className="text-sm text-red-500">{tAny(scheduleForm.formState.errors.endTime.message)}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="maxPatients">Maximum Patients *</Label>
+                    <Label htmlFor="maxPatients">{t("Maximum Patients *")}</Label>
                     <Input
                       id="maxPatients"
                       type="number"
@@ -586,26 +589,26 @@ export function DepartmentScheduleManagement({
                       className={scheduleForm.formState.errors.maxPatients ? "border-red-500" : ""}
                     />
                     {scheduleForm.formState.errors.maxPatients && (
-                      <p className="text-sm text-red-500">{scheduleForm.formState.errors.maxPatients.message}</p>
+                      <p className="text-sm text-red-500">{tAny(scheduleForm.formState.errors.maxPatients.message)}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="roomNumber">Room Number</Label>
+                    <Label htmlFor="roomNumber">{t("Room Number")}</Label>
                     <Input
                       id="roomNumber"
                       {...scheduleForm.register("roomNumber")}
-                      placeholder="e.g., Room 101"
+                      placeholder={t("e.g., Room 101")}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="notes">Notes</Label>
+                  <Label htmlFor="notes">{t("Notes")}</Label>
                   <Input
                     id="notes"
                     {...scheduleForm.register("notes")}
-                    placeholder="Additional notes or special instructions"
+                    placeholder={t("Additional notes or special instructions")}
                   />
                 </div>
 
@@ -619,11 +622,11 @@ export function DepartmentScheduleManagement({
                         scheduleForm.reset();
                       }}
                     >
-                      Cancel
+                      {t("Cancel")}
                     </Button>
                   )}
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Saving..." : (editingSchedule ? "Update Schedule" : "Create Schedule")}
+                    {isSubmitting ? t("Saving...") : (editingSchedule ? t("Update Schedule") : t("Create Schedule"))}
                   </Button>
                 </div>
               </form>
@@ -636,17 +639,17 @@ export function DepartmentScheduleManagement({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-green-500" />
-                Resource Allocation
+                {t("Resource Allocation")}
               </CardTitle>
               <CardDescription>
-                Manage rooms, equipment, and staff allocation
+                {t("Manage rooms, equipment, and staff allocation")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Rooms */}
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Rooms</h3>
+                  <h3 className="font-semibold text-lg">{t("Rooms")}</h3>
                   <div className="space-y-2">
                     {resourceAllocations
                       .filter(resource => resource.resourceType === "room")
@@ -654,10 +657,10 @@ export function DepartmentScheduleManagement({
                         <div key={resource.id} className="p-3 border rounded-lg">
                           <div className="font-medium">{resource.resourceName}</div>
                           <div className="text-sm text-muted-foreground">
-                            Department: {departments.find(d => d.id === resource.departmentId)?.name}
+                            {t("Department: {name}", { name: departments.find(d => d.id === resource.departmentId)?.name })}
                           </div>
                           <div className="text-xs text-green-600 mt-1">
-                            Available
+                            {t("Available")}
                           </div>
                         </div>
                       ))}
@@ -666,7 +669,7 @@ export function DepartmentScheduleManagement({
 
                 {/* Equipment */}
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Equipment</h3>
+                  <h3 className="font-semibold text-lg">{t("Equipment")}</h3>
                   <div className="space-y-2">
                     {resourceAllocations
                       .filter(resource => resource.resourceType === "equipment")
@@ -674,10 +677,10 @@ export function DepartmentScheduleManagement({
                         <div key={resource.id} className="p-3 border rounded-lg">
                           <div className="font-medium">{resource.resourceName}</div>
                           <div className="text-sm text-muted-foreground">
-                            Department: {departments.find(d => d.id === resource.departmentId)?.name}
+                            {t("Department: {name}", { name: departments.find(d => d.id === resource.departmentId)?.name })}
                           </div>
                           <div className="text-xs text-green-600 mt-1">
-                            Available
+                            {t("Available")}
                           </div>
                         </div>
                       ))}
@@ -686,7 +689,7 @@ export function DepartmentScheduleManagement({
 
                 {/* Staff */}
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Staff</h3>
+                  <h3 className="font-semibold text-lg">{t("Staff")}</h3>
                   <div className="space-y-2">
                     {resourceAllocations
                       .filter(resource => resource.resourceType === "staff")
@@ -694,10 +697,10 @@ export function DepartmentScheduleManagement({
                         <div key={resource.id} className="p-3 border rounded-lg">
                           <div className="font-medium">{resource.resourceName}</div>
                           <div className="text-sm text-muted-foreground">
-                            Department: {departments.find(d => d.id === resource.departmentId)?.name}
+                            {t("Department: {name}", { name: departments.find(d => d.id === resource.departmentId)?.name })}
                           </div>
                           <div className="text-xs text-green-600 mt-1">
-                            Available
+                            {t("Available")}
                           </div>
                         </div>
                       ))}
@@ -715,7 +718,7 @@ export function DepartmentScheduleManagement({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-purple-500" />
-                  Department Analytics
+                  {t("Department Analytics")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -734,21 +737,20 @@ export function DepartmentScheduleManagement({
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-medium">{dept.name}</h4>
                           <Badge variant="outline">
-                            {stats.utilizationRate}% utilized
-                          </Badge>
+                            {t("{utilizationRate}% utilized", { utilizationRate: stats.utilizationRate })}</Badge>
                         </div>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <span className="text-muted-foreground">Doctors:</span> {stats.totalDoctors}
+                            <span className="text-muted-foreground">{t("Doctors:")}</span> {stats.totalDoctors}
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Appointments:</span> {stats.totalAppointments}
+                            <span className="text-muted-foreground">{t("Appointments:")}</span> {stats.totalAppointments}
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Avg Wait:</span> {stats.avgWaitTime}min
+                            <span className="text-muted-foreground">{t("Avg Wait:")}</span> {stats.avgWaitTime}{t("min")}
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Satisfaction:</span> {stats.patientSatisfaction}%
+                            <span className="text-muted-foreground">{t("Satisfaction:")}</span> {stats.patientSatisfaction}%
                           </div>
                         </div>
                       </div>
@@ -763,47 +765,47 @@ export function DepartmentScheduleManagement({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Activity className="h-5 w-5 text-orange-500" />
-                  Performance Metrics
+                  {t("Performance Metrics")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">Overall Utilization</span>
+                      <span className="text-sm font-medium">{t("Overall Utilization")}</span>
                       <span className="text-sm text-muted-foreground">85%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-muted rounded-full h-2">
                       <div className="bg-green-500 h-2 rounded-full" style={{ width: "85%" }}></div>
                     </div>
                   </div>
                   
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">Patient Satisfaction</span>
+                      <span className="text-sm font-medium">{t("Patient Satisfaction")}</span>
                       <span className="text-sm text-muted-foreground">92%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-muted rounded-full h-2">
                       <div className="bg-blue-500 h-2 rounded-full" style={{ width: "92%" }}></div>
                     </div>
                   </div>
                   
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">On-Time Performance</span>
+                      <span className="text-sm font-medium">{t("On-Time Performance")}</span>
                       <span className="text-sm text-muted-foreground">78%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-muted rounded-full h-2">
                       <div className="bg-yellow-500 h-2 rounded-full" style={{ width: "78%" }}></div>
                     </div>
                   </div>
                   
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">Resource Efficiency</span>
+                      <span className="text-sm font-medium">{t("Resource Efficiency")}</span>
                       <span className="text-sm text-muted-foreground">89%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-muted rounded-full h-2">
                       <div className="bg-purple-500 h-2 rounded-full" style={{ width: "89%" }}></div>
                     </div>
                   </div>

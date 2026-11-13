@@ -1,438 +1,451 @@
 "use client";
 
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm, useWatch, type FieldError } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { CalendarIcon, QrCode, Barcode, CreditCard } from "lucide-react";
-import { patientRegistrationSchema, PatientRegistrationFormData } from "@/features/front-desk/patients/validations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { PROVINCES, getDistrict, getProvince } from "@/lib/cambodia/address";
+import { patientRegistrationSchema, type PatientRegistrationFormData } from "@/features/front-desk/patients/validations";
+import { BLOOD_TYPES, COVERAGE_LABELS, RELATIONSHIPS, emptyRegistrationForm } from "@/features/front-desk/patients/patient-utils";
+import { useT, useTranslateAny } from "@/lib/i18n/messages";
+import { useLanguage } from "@/lib/i18n/language-provider";
+import { PATIENTS_KM } from "../km";
 
 interface PatientRegistrationFormProps {
-  onSubmit: (data: PatientRegistrationFormData) => void;
+  onSubmit: (data: PatientRegistrationFormData) => void | Promise<void>;
   onCancel?: () => void;
-  initialData?: Partial<PatientRegistrationFormData>;
+  initialData?: PatientRegistrationFormData;
   isEditing?: boolean;
 }
 
-export function PatientRegistrationForm({
-  onSubmit,
-  onCancel,
-  initialData,
-  isEditing = false
-}: PatientRegistrationFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
+function Field({
+  id,
+  label,
+  required,
+  error,
+  hint,
+  children,
+  className,
+}: {
+  id?: string;
+  label: string;
+  required?: boolean;
+  error?: FieldError;
+  hint?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const tAny = useTranslateAny(PATIENTS_KM);
+  return (
+    <div className={`space-y-2 ${className ?? ""}`}>
+      <Label htmlFor={id}>
+        {label}
+        {required && " *"}
+      </Label>
+      {children}
+      {error?.message ? (
+        <p className="text-sm text-red-500">{tAny(error.message)}</p>
+      ) : (
+        hint && <p className="text-xs text-muted-foreground">{hint}</p>
+      )}
+    </div>
+  );
+}
+
+const invalid = (error?: FieldError) => (error ? "border-red-500" : "");
+
+export function PatientRegistrationForm({ onSubmit, onCancel, initialData, isEditing = false }: PatientRegistrationFormProps) {
+  const t = useT(PATIENTS_KM);
+  const tAny = useTranslateAny(PATIENTS_KM);
+  const { language } = useLanguage();
   const {
     register,
+    control,
     handleSubmit,
-    formState: { errors },
     setValue,
-    watch,
-    trigger
+    formState: { errors, isSubmitting },
   } = useForm<PatientRegistrationFormData>({
     resolver: zodResolver(patientRegistrationSchema),
-    defaultValues: initialData || {
-      gender: undefined,
-      emergencyContact: {
-        name: "",
-        relationship: "",
-        phone: ""
-      },
-      address: {
-        street: "",
-        city: "",
-        state: "",
-        zipCode: "",
-        country: "USA"
-      }
-    }
+    defaultValues: initialData ?? emptyRegistrationForm(),
   });
 
-  const watchedDateOfBirth = watch("dateOfBirth");
-
-  const handleFormSubmit = async (data: PatientRegistrationFormData) => {
-    setIsSubmitting(true);
-    try {
-      await onSubmit(data);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-  const relationships = ["Spouse", "Parent", "Child", "Sibling", "Friend", "Other"];
+  const [birthDateKnown, identityType, provinceId, districtId, coverageScheme] = useWatch({
+    control,
+    name: ["birthDateKnown", "identityType", "provinceId", "districtId", "coverageScheme"],
+  });
+  const districts = getProvince(provinceId)?.districts ?? [];
+  const communes = getDistrict(provinceId, districtId)?.communes ?? [];
+  const isForeign = identityType === "passport";
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
-      {/* Personal Information */}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+      {/* Name */}
       <Card>
         <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
-          <CardDescription>Basic patient details and contact information</CardDescription>
+          <CardTitle>{t("Name")}</CardTitle>
+          <CardDescription>{t("Family name first, as on the ID card. The Latin spelling is used on documents and for search.")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field id="khmerFamilyName" label={t("Family name (Khmer)")} required={!isForeign} error={errors.khmerFamilyName}>
+              <Input id="khmerFamilyName" lang="km" {...register("khmerFamilyName")} placeholder="សុខ" className={invalid(errors.khmerFamilyName)} />
+            </Field>
+            <Field id="khmerGivenName" label={t("Given name (Khmer)")} required={!isForeign} error={errors.khmerGivenName}>
+              <Input id="khmerGivenName" lang="km" {...register("khmerGivenName")} placeholder="ដារ៉ា" className={invalid(errors.khmerGivenName)} />
+            </Field>
+            <Field id="latinFamilyName" label={t("Family name (Latin)")} required error={errors.latinFamilyName}>
+              <Input id="latinFamilyName" {...register("latinFamilyName")} placeholder={t("Sok")} className={invalid(errors.latinFamilyName)} />
+            </Field>
+            <Field id="latinGivenName" label={t("Given name (Latin)")} required error={errors.latinGivenName}>
+              <Input id="latinGivenName" {...register("latinGivenName")} placeholder={t("Dara")} className={invalid(errors.latinGivenName)} />
+            </Field>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Sex and age */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("Sex and Age")}</CardTitle>
+          <CardDescription>{t("Many patients do not know their exact birth date; an estimated age is accepted.")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Field label={t("Sex")} required error={errors.sex}>
+            <Controller
+              control={control}
+              name="sex"
+              render={({ field }) => (
+                <RadioGroup value={field.value ?? ""} onValueChange={field.onChange} className="flex gap-6" aria-label={t("Sex")}>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="male" id="sex-male" />
+                    <Label htmlFor="sex-male" className="font-normal">{t("Male")}</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="female" id="sex-female" />
+                    <Label htmlFor="sex-female" className="font-normal">{t("Female")}</Label>
+                  </div>
+                </RadioGroup>
+              )}
+            />
+          </Field>
+
+          <Controller
+            control={control}
+            name="birthDateKnown"
+            render={({ field }) => (
+              <div className="flex items-center gap-3">
+                <Switch id="birthDateKnown" checked={field.value} onCheckedChange={field.onChange} />
+                <Label htmlFor="birthDateKnown" className="font-normal">{t("Exact date of birth is known")}</Label>
+              </div>
+            )}
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {birthDateKnown ? (
+              <Field id="dateOfBirth" label={t("Date of birth")} required error={errors.dateOfBirth}>
+                <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} className={invalid(errors.dateOfBirth)} />
+              </Field>
+            ) : (
+              <Field id="estimatedAge" label={t("Estimated age (years)")} required error={errors.estimatedAge}>
+                <Input
+                  id="estimatedAge"
+                  type="number"
+                  min={0}
+                  max={120}
+                  {...register("estimatedAge", { setValueAs: (v) => (v === "" || v === null ? undefined : Number(v)) })}
+                  className={invalid(errors.estimatedAge)}
+                />
+              </Field>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Identity document */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("Identity Document")}</CardTitle>
+          <CardDescription>{t("Optional for Cambodian patients. Foreign patients register with a passport.")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Field id="identityType" label={t("Document")}>
+              <Controller
+                control={control}
+                name="identityType"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="identityType">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">{t("No document")}</SelectItem>
+                      <SelectItem value="national_id">{t("Khmer national ID card")}</SelectItem>
+                      <SelectItem value="passport">{t("Passport (foreign patient)")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            {identityType !== "none" && (
+              <Field id="identityNumber" label={isForeign ? t("Passport number") : t("National ID number")} required error={errors.identityNumber}>
+                <Input id="identityNumber" {...register("identityNumber")} className={invalid(errors.identityNumber)} />
+              </Field>
+            )}
+            {isForeign && (
+              <Field id="nationality" label={t("Nationality")} required error={errors.nationality}>
+                <Input id="nationality" {...register("nationality")} placeholder={t("e.g. Australian")} className={invalid(errors.nationality)} />
+              </Field>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Contact and address */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("Contact and Address")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name *</Label>
-              <Input
-                id="firstName"
-                {...register("firstName")}
-                placeholder="Enter first name"
-                className={errors.firstName ? "border-red-500" : ""}
-              />
-              {errors.firstName && (
-                <p className="text-sm text-red-500">{errors.firstName.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="middleName">Middle Name</Label>
-              <Input
-                id="middleName"
-                {...register("middleName")}
-                placeholder="Enter middle name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name *</Label>
-              <Input
-                id="lastName"
-                {...register("lastName")}
-                placeholder="Enter last name"
-                className={errors.lastName ? "border-red-500" : ""}
-              />
-              {errors.lastName && (
-                <p className="text-sm text-red-500">{errors.lastName.message}</p>
-              )}
-            </div>
+            <Field id="phone" label={t("Phone")} required error={errors.phone} hint={t("e.g. 012 345 678")}>
+              <Input id="phone" type="tel" inputMode="tel" {...register("phone")} className={invalid(errors.phone)} />
+            </Field>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Date of Birth *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !watchedDateOfBirth && "text-muted-foreground",
-                      errors.dateOfBirth && "border-red-500"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {watchedDateOfBirth ? format(watchedDateOfBirth, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={watchedDateOfBirth}
-                    onSelect={(date) => {
-                      setValue("dateOfBirth", date as Date);
-                      trigger("dateOfBirth");
+            <Field id="provinceId" label={t("Province / Capital")} required error={errors.provinceId}>
+              <Controller
+                control={control}
+                name="provinceId"
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={(v) => {
+                      field.onChange(v);
+                      setValue("districtId", "");
+                      setValue("communeId", "");
                     }}
-                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              {errors.dateOfBirth && (
-                <p className="text-sm text-red-500">{errors.dateOfBirth.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label>Gender *</Label>
-              <Select onValueChange={(value) => setValue("gender", value as any)}>
-                <SelectTrigger className={errors.gender ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.gender && (
-                <p className="text-sm text-red-500">{errors.gender.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label>Blood Type</Label>
-              <Select onValueChange={(value) => setValue("bloodType", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select blood type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {bloodTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  >
+                    <SelectTrigger id="provinceId" className={invalid(errors.provinceId)}>
+                      <SelectValue placeholder={t("Select province")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PROVINCES.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {language === "km" ? `${p.nameKm} · ${p.nameEn}` : `${p.nameEn} · ${p.nameKm}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            <Field id="districtId" label={t("District / Khan")} required error={errors.districtId}>
+              <Controller
+                control={control}
+                name="districtId"
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    disabled={!provinceId}
+                    onValueChange={(v) => {
+                      field.onChange(v);
+                      setValue("communeId", "");
+                    }}
+                  >
+                    <SelectTrigger id="districtId" className={invalid(errors.districtId)}>
+                      <SelectValue placeholder={provinceId ? t("Select district") : t("Select a province first")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {districts.map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {language === "km" ? `${d.nameKm} · ${d.nameEn}` : `${d.nameEn} · ${d.nameKm}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            <Field id="communeId" label={t("Commune / Sangkat")} required error={errors.communeId}>
+              <Controller
+                control={control}
+                name="communeId"
+                render={({ field }) => (
+                  <Select value={field.value} disabled={!districtId} onValueChange={field.onChange}>
+                    <SelectTrigger id="communeId" className={invalid(errors.communeId)}>
+                      <SelectValue placeholder={districtId ? t("Select commune") : t("Select a district first")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {communes.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {language === "km" ? `${c.nameKm} · ${c.nameEn}` : `${c.nameEn} · ${c.nameKm}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                {...register("email")}
-                placeholder="Enter email address"
-                className={errors.email ? "border-red-500" : ""}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number *</Label>
-              <Input
-                id="phone"
-                {...register("phone")}
-                placeholder="Enter phone number"
-                className={errors.phone ? "border-red-500" : ""}
-              />
-              {errors.phone && (
-                <p className="text-sm text-red-500">{errors.phone.message}</p>
-              )}
-            </div>
+            <Field id="village" label={t("Village (Phum)")}>
+              <Input id="village" {...register("village")} placeholder={t("e.g. Phum 3")} />
+            </Field>
+            <Field id="houseStreet" label={t("House / Street")}>
+              <Input id="houseStreet" {...register("houseStreet")} placeholder={t("e.g. #12, St. 308")} />
+            </Field>
           </div>
         </CardContent>
       </Card>
 
-      {/* Address Information */}
+      {/* Coverage */}
       <Card>
         <CardHeader>
-          <CardTitle>Address Information</CardTitle>
-          <CardDescription>Patient's residential address details</CardDescription>
+          <CardTitle>{t("Coverage")}</CardTitle>
+          <CardDescription>{t("Who pays. Eligibility checks and claims are handled by the billing system.")}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="street">Street Address *</Label>
-            <Input
-              id="street"
-              {...register("address.street")}
-              placeholder="Enter street address"
-              className={errors.address?.street ? "border-red-500" : ""}
-            />
-            {errors.address?.street && (
-              <p className="text-sm text-red-500">{errors.address.street.message}</p>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Field id="coverageScheme" label={t("Scheme")}>
+              <Controller
+                control={control}
+                name="coverageScheme"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="coverageScheme">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(Object.keys(COVERAGE_LABELS) as (keyof typeof COVERAGE_LABELS)[]).map((k) => (
+                        <SelectItem key={k} value={k}>
+                          {tAny(COVERAGE_LABELS[k])}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            {(coverageScheme === "nssf" || coverageScheme === "hef") && (
+              <Field
+                id="coverageMemberId"
+                label={coverageScheme === "nssf" ? t("NSSF member number") : t("Equity card number")}
+                required
+                error={errors.coverageMemberId}
+              >
+                <Input id="coverageMemberId" {...register("coverageMemberId")} className={invalid(errors.coverageMemberId)} />
+              </Field>
             )}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="city">City *</Label>
-              <Input
-                id="city"
-                {...register("address.city")}
-                placeholder="Enter city"
-                className={errors.address?.city ? "border-red-500" : ""}
-              />
-              {errors.address?.city && (
-                <p className="text-sm text-red-500">{errors.address.city.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="state">State *</Label>
-              <Input
-                id="state"
-                {...register("address.state")}
-                placeholder="Enter state"
-                className={errors.address?.state ? "border-red-500" : ""}
-              />
-              {errors.address?.state && (
-                <p className="text-sm text-red-500">{errors.address.state.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="zipCode">ZIP Code *</Label>
-              <Input
-                id="zipCode"
-                {...register("address.zipCode")}
-                placeholder="Enter ZIP code"
-                className={errors.address?.zipCode ? "border-red-500" : ""}
-              />
-              {errors.address?.zipCode && (
-                <p className="text-sm text-red-500">{errors.address.zipCode.message}</p>
-              )}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="country">Country *</Label>
-            <Input
-              id="country"
-              {...register("address.country")}
-              placeholder="Enter country"
-              className={errors.address?.country ? "border-red-500" : ""}
-            />
-            {errors.address?.country && (
-              <p className="text-sm text-red-500">{errors.address.country.message}</p>
+            {coverageScheme === "private" && (
+              <>
+                <Field id="insurer" label={t("Insurer")} required error={errors.insurer}>
+                  <Input id="insurer" {...register("insurer")} className={invalid(errors.insurer)} />
+                </Field>
+                <Field id="policyNumber" label={t("Policy number")} required error={errors.policyNumber}>
+                  <Input id="policyNumber" {...register("policyNumber")} className={invalid(errors.policyNumber)} />
+                </Field>
+              </>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Emergency Contact */}
+      {/* Emergency contact */}
       <Card>
         <CardHeader>
-          <CardTitle>Emergency Contact</CardTitle>
-          <CardDescription>Contact information for emergencies</CardDescription>
+          <CardTitle>{t("Emergency Contact")}</CardTitle>
+          <CardDescription>{t("Optional")}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="emergencyName">Emergency Contact Name *</Label>
-            <Input
-              id="emergencyName"
-              {...register("emergencyContact.name")}
-              placeholder="Enter emergency contact name"
-              className={errors.emergencyContact?.name ? "border-red-500" : ""}
-            />
-            {errors.emergencyContact?.name && (
-              <p className="text-sm text-red-500">{errors.emergencyContact.name.message}</p>
-            )}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Relationship *</Label>
-              <Select onValueChange={(value) => setValue("emergencyContact.relationship", value)}>
-                <SelectTrigger className={errors.emergencyContact?.relationship ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select relationship" />
-                </SelectTrigger>
-                <SelectContent>
-                  {relationships.map((relationship) => (
-                    <SelectItem key={relationship} value={relationship}>
-                      {relationship}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.emergencyContact?.relationship && (
-                <p className="text-sm text-red-500">{errors.emergencyContact.relationship.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="emergencyPhone">Emergency Contact Phone *</Label>
-              <Input
-                id="emergencyPhone"
-                {...register("emergencyContact.phone")}
-                placeholder="Enter emergency contact phone"
-                className={errors.emergencyContact?.phone ? "border-red-500" : ""}
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Field id="emergencyName" label={t("Name")}>
+              <Input id="emergencyName" {...register("emergencyName")} />
+            </Field>
+            <Field id="emergencyRelationship" label={t("Relationship")}>
+              <Controller
+                control={control}
+                name="emergencyRelationship"
+                render={({ field }) => (
+                  <Select value={field.value || undefined} onValueChange={field.onChange}>
+                    <SelectTrigger id="emergencyRelationship">
+                      <SelectValue placeholder={t("Select")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RELATIONSHIPS.map((r) => (
+                        <SelectItem key={r} value={r}>
+                          {tAny(r)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
-              {errors.emergencyContact?.phone && (
-                <p className="text-sm text-red-500">{errors.emergencyContact.phone.message}</p>
-              )}
-            </div>
+            </Field>
+            <Field id="emergencyPhone" label={t("Phone")} error={errors.emergencyPhone}>
+              <Input id="emergencyPhone" type="tel" inputMode="tel" {...register("emergencyPhone")} className={invalid(errors.emergencyPhone)} />
+            </Field>
           </div>
         </CardContent>
       </Card>
 
-      {/* Medical Information */}
+      {/* Medical */}
       <Card>
         <CardHeader>
-          <CardTitle>Medical Information</CardTitle>
-          <CardDescription>Patient's medical history and current medications</CardDescription>
+          <CardTitle>{t("Medical Information")}</CardTitle>
+          <CardDescription>{t("Optional; can be completed by the nurse or doctor later.")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="medicalHistory">Medical History</Label>
-            <Textarea
-              id="medicalHistory"
-              {...register("medicalHistory")}
-              placeholder="Enter patient's medical history, previous diagnoses, surgeries, etc."
-              rows={3}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Field id="bloodType" label={t("Blood type")}>
+              <Controller
+                control={control}
+                name="bloodType"
+                render={({ field }) => (
+                  <Select value={field.value || undefined} onValueChange={field.onChange}>
+                    <SelectTrigger id="bloodType">
+                      <SelectValue placeholder={t("Unknown")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BLOOD_TYPES.map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="allergies">Allergies</Label>
-            <Textarea
-              id="allergies"
-              {...register("allergies")}
-              placeholder="Enter any known allergies (medications, food, environmental, etc.)"
-              rows={2}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="currentMedications">Current Medications</Label>
-            <Textarea
-              id="currentMedications"
-              {...register("currentMedications")}
-              placeholder="Enter current medications and dosages"
-              rows={3}
-            />
-          </div>
+          <Field id="allergies" label={t("Allergies")}>
+            <Textarea id="allergies" rows={2} {...register("allergies")} placeholder={t("e.g. Penicillin")} />
+          </Field>
+          <Field id="medicalHistory" label={t("Medical history")}>
+            <Textarea id="medicalHistory" rows={2} {...register("medicalHistory")} />
+          </Field>
+          <Field id="currentMedications" label={t("Current medications")}>
+            <Textarea id="currentMedications" rows={2} {...register("currentMedications")} />
+          </Field>
         </CardContent>
       </Card>
 
-      {/* Insurance Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Insurance Information
-          </CardTitle>
-          <CardDescription>Patient's insurance provider and policy details (optional)</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="insuranceProvider">Insurance Provider</Label>
-              <Input
-                id="insuranceProvider"
-                {...register("insurance.provider")}
-                placeholder="Enter insurance provider name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="membershipId">Membership ID</Label>
-              <Input
-                id="membershipId"
-                {...register("insurance.membershipId")}
-                placeholder="Enter membership ID"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="policyNumber">Policy Number</Label>
-              <Input
-                id="policyNumber"
-                {...register("insurance.policyNumber")}
-                placeholder="Enter policy number"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="groupNumber">Group Number</Label>
-              <Input
-                id="groupNumber"
-                {...register("insurance.groupNumber")}
-                placeholder="Enter group number (if applicable)"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Form Actions */}
-      <div className="flex justify-end space-x-4">
+      <div className="flex justify-end gap-2">
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+            {t("Cancel")}
           </Button>
         )}
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : isEditing ? "Update Patient" : "Register Patient"}
+          {isSubmitting ? t("Saving...") : isEditing ? t("Save Changes") : t("Register Patient")}
         </Button>
       </div>
     </form>

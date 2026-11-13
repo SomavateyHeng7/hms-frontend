@@ -20,6 +20,8 @@ import { RadiologyScheduling } from "./radiology-scheduling";
 import { StudyManagement } from "./study-management";
 import { RadiologyReports } from "./radiology-reports";
 import { useTabParam } from "@/hooks/use-tab-param";
+import { useDateFormat, useT } from "@/lib/i18n/messages";
+import { RADIOLOGY_KM } from "@/features/diagnostics/radiology/km";
 
 // Sample data until the radiology backend exists
 const mockOrders: ImagingOrder[] = [
@@ -27,7 +29,7 @@ const mockOrders: ImagingOrder[] = [
     id: "ORD-001",
     orderNumber: "IMG2024001",
     patientId: "PAT-001",
-    patientName: "John Smith",
+    patientName: "Sok Dara",
     patientMRN: "MRN001234",
     imagingType: "ct",
     examType: "Head CT",
@@ -36,15 +38,15 @@ const mockOrders: ImagingOrder[] = [
     urgency: "urgent",
     status: "scheduled",
     orderDate: new Date("2024-11-15T08:00:00"),
-    orderingPhysician: { id: "DOC-001", name: "Dr. Sarah Johnson", department: "Neurology", license: "MD12345" },
+    orderingPhysician: { id: "DOC-001", name: "Dr. Nhem Rithy", department: "Neurology", license: "MD12345" },
     contrast: { required: true, type: "iv", agent: "Iodine-based", allergies: [] },
     estimatedDuration: 45,
     preparationInstructions: ["Fast for 4 hours before exam", "Arrive 30 minutes early", "Inform staff of any allergies"],
     specialInstructions: "Patient has mild anxiety - may need reassurance",
     scheduledDateTime: new Date("2024-11-15T14:00:00"),
-    technologist: { id: "TECH-001", name: "Mike Rodriguez", license: "RT-2201" },
-    radiologist: { id: "RAD-001", name: "Dr. Emily Chen", license: "RAD12345" },
-    createdBy: "Dr. Sarah Johnson",
+    technologist: { id: "TECH-001", name: "Keo Rotha", license: "RT-2201" },
+    radiologist: { id: "RAD-001", name: "Dr. Ouk Sreyneang", license: "RAD12345" },
+    createdBy: "Dr. Nhem Rithy",
     createdAt: new Date("2024-11-15T08:00:00"),
     updatedAt: new Date("2024-11-15T08:30:00"),
   },
@@ -55,7 +57,7 @@ const mockSchedules: ImagingAppointment[] = [
     id: "SCH-001",
     orderId: "ORD-001",
     orderNumber: "IMG2024001",
-    patientName: "John Smith",
+    patientName: "Sok Dara",
     patientMRN: "MRN001234",
     examType: "Head CT",
     bodyPart: "Head",
@@ -66,7 +68,7 @@ const mockSchedules: ImagingAppointment[] = [
     equipmentId: "EQ-001",
     equipment: { id: "EQ-001", name: "Siemens CT Scanner", location: "Radiology Suite 1" },
     technicianId: "TECH-001",
-    technician: { id: "TECH-001", name: "Mike Rodriguez" },
+    technician: { id: "TECH-001", name: "Keo Rotha" },
     notes: "",
     preparationRequired: true,
     preparationInstructions: ["Fast for 4 hours", "Arrive 30 minutes early"],
@@ -78,14 +80,14 @@ const mockStudies: ImagingStudy[] = [
     id: "STU-001",
     studyInstanceUID: "1.2.840.113619.2.5.1762583153.215519.978957063.78",
     accessionNumber: "ACC001234",
-    patientName: "John Smith",
+    patientName: "Sok Dara",
     patientId: "PAT-001",
     studyDate: new Date("2024-11-15T14:00:00"),
     studyDescription: "CT Head without contrast",
     modality: "CT",
     institutionName: "City General Hospital",
     equipment: { id: "EQ-001", name: "Siemens CT Scanner" },
-    referringPhysician: "Dr. Sarah Johnson",
+    referringPhysician: "Dr. Nhem Rithy",
     status: "completed",
     series: [
       {
@@ -102,7 +104,7 @@ const mockStudies: ImagingStudy[] = [
       overallQuality: "good",
       technicalAdequacy: "adequate",
       artifactsPresent: false,
-      reviewedBy: "Mike Rodriguez",
+      reviewedBy: "Keo Rotha",
       reviewedAt: new Date("2024-11-15T14:45:00"),
       comments: "Good image quality, adequate contrast",
     },
@@ -116,10 +118,10 @@ const mockReports: RadiologyReport[] = [
     studyId: "STU-001",
     orderId: "ORD-001",
     patientId: "PAT-001",
-    patientName: "John Smith",
+    patientName: "Sok Dara",
     studyInstanceUID: "1.2.840.113619.2.5.1762583153.215519.978957063.78",
     radiologistId: "RAD-001",
-    radiologist: { id: "RAD-001", name: "Dr. Emily Chen", license: "RAD12345", signature: "" },
+    radiologist: { id: "RAD-001", name: "Dr. Ouk Sreyneang", license: "RAD12345", signature: "" },
     reportType: "preliminary",
     reportStatus: "preliminary",
     status: "pending_review",
@@ -165,29 +167,31 @@ const equipment: ImagingEquipment[] = [
 const EQUIPMENT_UTILIZATION: Record<string, number> = { "EQ-001": 85 };
 
 export default function RadiologyManagement() {
+  const fmt = useDateFormat();
+  const t = useT(RADIOLOGY_KM);
   const [activeTab, setActiveTab] = useTabParam("overview", ["overview", "orders", "scheduling", "studies", "reports"] as const);
 
   // Mock data arrays
   const patients = [
-    { id: "PAT-001", name: "John Smith", mrn: "MRN001234", age: 45, gender: "Male" },
-    { id: "PAT-002", name: "Mary Johnson", mrn: "MRN001235", age: 38, gender: "Female" }
+    { id: "PAT-001", name: "Sok Dara", mrn: "MRN001234", age: 45, gender: "Male" },
+    { id: "PAT-002", name: "Heng Sopheap", mrn: "MRN001235", age: 38, gender: "Female" }
   ];
 
   const physicians = [
-    { id: "DOC-001", name: "Dr. Sarah Johnson", department: "Neurology", license: "MD12345" },
-    { id: "DOC-002", name: "Dr. Michael Brown", department: "Emergency", license: "MD12346" }
+    { id: "DOC-001", name: "Dr. Nhem Rithy", department: "Neurology", license: "MD12345" },
+    { id: "DOC-002", name: "Dr. Seng Malis", department: "Emergency", license: "MD12346" }
   ];
 
   const technologists = [
     { 
       id: "TECH-001", 
-      name: "Mike Rodriguez", 
+      name: "Keo Rotha", 
       certifications: ["CT", "MRI", "X-Ray"], 
       shift: "Day Shift" 
     },
     { 
       id: "TECH-002", 
-      name: "Lisa Wong", 
+      name: "Seng Malis", 
       certifications: ["Ultrasound", "Mammography"], 
       shift: "Evening Shift" 
     }
@@ -196,13 +200,13 @@ export default function RadiologyManagement() {
   const radiologists = [
     { 
       id: "RAD-001", 
-      name: "Dr. Emily Chen", 
+      name: "Dr. Ouk Sreyneang", 
       license: "RAD12345", 
       specialties: ["Neuroradiology", "Body Imaging"] 
     },
     { 
       id: "RAD-002", 
-      name: "Dr. David Wilson", 
+      name: "Dr. Pich Sokunthea", 
       license: "RAD12346", 
       specialties: ["Cardiac Imaging", "Interventional Radiology"] 
     }
@@ -212,7 +216,7 @@ export default function RadiologyManagement() {
     {
       id: "STU-001",
       studyInstanceUID: "1.2.840.113619.2.5.1762583153.215519.978957063.78",
-      patientName: "John Smith",
+      patientName: "Sok Dara",
       studyDescription: "CT Head without contrast",
       studyDate: new Date("2024-11-15T14:00:00")
     }
@@ -297,12 +301,12 @@ export default function RadiologyManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted/50">
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">Radiology & Imaging Management</h1>
-          <p className="text-lg text-gray-600 mt-2">
-            Imaging orders, scheduling, studies and reports
+          <h1 className="text-4xl font-bold text-foreground">{t("Radiology & Imaging Management")}</h1>
+          <p className="text-lg text-muted-foreground mt-2">
+            {t("Imaging orders, scheduling, studies and reports")}
           </p>
         </div>
 
@@ -310,23 +314,23 @@ export default function RadiologyManagement() {
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Overview
+              {t("Overview")}
             </TabsTrigger>
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <FileImage className="h-4 w-4" />
-              Orders
+              {t("Orders")}
             </TabsTrigger>
             <TabsTrigger value="scheduling" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Scheduling
+              {t("Scheduling")}
             </TabsTrigger>
             <TabsTrigger value="studies" className="flex items-center gap-2">
               <Activity className="h-4 w-4" />
-              Studies
+              {t("Studies")}
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <FileImage className="h-4 w-4" />
-              Reports
+              {t("Reports")}
             </TabsTrigger>
           </TabsList>
 
@@ -334,34 +338,34 @@ export default function RadiologyManagement() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t("Active Orders")}</CardTitle>
                   <FileImage className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">24</div>
-                  <p className="text-xs text-muted-foreground">+3 from yesterday</p>
+                  <p className="text-xs text-muted-foreground">{t("+3 from yesterday")}</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Today's Exams</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t("Today's Exams")}</CardTitle>
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">18</div>
-                  <p className="text-xs text-muted-foreground">85% completion rate</p>
+                  <p className="text-xs text-muted-foreground">{t("85% completion rate")}</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pending Reports</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t("Pending Reports")}</CardTitle>
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">7</div>
-                  <p className="text-xs text-muted-foreground">2 urgent, 5 routine</p>
+                  <p className="text-xs text-muted-foreground">{t("2 urgent, 5 routine")}</p>
                 </CardContent>
               </Card>
 
@@ -370,16 +374,16 @@ export default function RadiologyManagement() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Orders</CardTitle>
-                  <CardDescription>Latest imaging orders requiring attention</CardDescription>
+                  <CardTitle>{t("Recent Orders")}</CardTitle>
+                  <CardDescription>{t("Latest imaging orders requiring attention")}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {mockOrders.slice(0, 5).map((order) => (
-                      <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div key={order.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                         <div>
                           <p className="font-medium">{order.patientName}</p>
-                          <p className="text-sm text-gray-600">{order.examType}</p>
+                          <p className="text-sm text-muted-foreground">{order.examType}</p>
                         </div>
                         <div className="text-right">
                           <Badge className={
@@ -389,8 +393,8 @@ export default function RadiologyManagement() {
                           }>
                             {order.urgency.toUpperCase()}
                           </Badge>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {new Date(order.orderDate).toLocaleDateString()}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {fmt(order.orderDate, "PP")}
                           </p>
                         </div>
                       </div>
@@ -401,16 +405,16 @@ export default function RadiologyManagement() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Equipment Status</CardTitle>
-                  <CardDescription>Current status of imaging equipment</CardDescription>
+                  <CardTitle>{t("Equipment Status")}</CardTitle>
+                  <CardDescription>{t("Current status of imaging equipment")}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {equipment.map((eq) => (
-                      <div key={eq.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div key={eq.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                         <div>
                           <p className="font-medium">{eq.name}</p>
-                          <p className="text-sm text-gray-600">{eq.location.room}, {eq.location.building}</p>
+                          <p className="text-sm text-muted-foreground">{eq.location.room}, {eq.location.building}</p>
                         </div>
                         <div className="text-right">
                           <Badge className={
@@ -420,9 +424,8 @@ export default function RadiologyManagement() {
                           }>
                             {eq.status.toUpperCase()}
                           </Badge>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {EQUIPMENT_UTILIZATION[eq.id] ?? 0}% utilization
-                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {t("{value}% utilization", { value: EQUIPMENT_UTILIZATION[eq.id] ?? 0 })}</p>
                         </div>
                       </div>
                     ))}
@@ -433,15 +436,15 @@ export default function RadiologyManagement() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Critical Findings Alert</CardTitle>
-                <CardDescription>Urgent findings requiring immediate attention</CardDescription>
+                <CardTitle>{t("Critical Findings Alert")}</CardTitle>
+                <CardDescription>{t("Urgent findings requiring immediate attention")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-center p-8 text-gray-500">
+                <div className="flex items-center justify-center p-8 text-muted-foreground">
                   <div className="text-center">
-                    <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <p>No critical findings at this time</p>
-                    <p className="text-sm mt-1">Critical findings will appear here for immediate review</p>
+                    <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <p>{t("No critical findings at this time")}</p>
+                    <p className="text-sm mt-1">{t("Critical findings will appear here for immediate review")}</p>
                   </div>
                 </div>
               </CardContent>

@@ -14,7 +14,6 @@ import {
   ChefHat,
   Activity
 } from "lucide-react";
-import { format } from "date-fns";
 import type { 
   PatientDietOrder, 
   MenuItem, 
@@ -23,8 +22,13 @@ import type {
   DietStats 
 } from "@/features/support/diet/types";
 import { useTabParam } from "@/hooks/use-tab-param";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { DIET_KM } from "@/features/support/diet/km";
 
 export function DietManagementDashboard() {
+  const t = useT(DIET_KM);
+  const tAny = useTranslateAny(DIET_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useTabParam("overview", ["overview", "orders", "services", "assessments"] as const);
 
   // Mock data
@@ -33,7 +37,7 @@ export function DietManagementDashboard() {
       id: "1",
       orderNumber: "DIET-2025-001",
       patientId: "PAT001",
-      patientName: "John Doe",
+      patientName: "Sok Dara",
       admissionId: "ADM-2025-001",
       ward: "Ward-A",
       bedNumber: "A-101",
@@ -66,7 +70,7 @@ export function DietManagementDashboard() {
         religiousRestrictions: [],
       },
       feedingRoute: "oral",
-      orderedBy: "Dr. Smith",
+      orderedBy: "Dr. Chea Sovann",
       orderDate: new Date(2025, 0, 10),
       status: "active",
     },
@@ -115,7 +119,7 @@ export function DietManagementDashboard() {
         {
           orderId: "1",
           patientId: "PAT001",
-          patientName: "John Doe",
+          patientName: "Sok Dara",
           bedNumber: "A-101",
           dietType: "diabetic",
           items: [
@@ -137,7 +141,7 @@ export function DietManagementDashboard() {
       id: "1",
       assessmentNumber: "NA-2025-001",
       patientId: "PAT001",
-      patientName: "John Doe",
+      patientName: "Sok Dara",
       assessmentDate: new Date(2025, 0, 10),
       assessedBy: "Dietitian Sarah",
       anthropometricData: {
@@ -213,19 +217,19 @@ export function DietManagementDashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Diet Management</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t("Diet Management")}</h2>
           <p className="text-muted-foreground">
-            Manage patient diets, menus, and nutritional services
+            {t("Manage patient diets, menus, and nutritional services")}
           </p>
         </div>
         <div className="flex gap-2">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            New Diet Order
+            {t("New Diet Order")}
           </Button>
           <Button variant="outline">
             <Calendar className="mr-2 h-4 w-4" />
-            Plan Menu
+            {t("Plan Menu")}
           </Button>
         </div>
       </div>
@@ -234,33 +238,31 @@ export function DietManagementDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Active Orders")}</CardTitle>
             <ClipboardList className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalActiveOrders}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.pendingOrders} pending approvals
-            </p>
+              {t("{pendingOrders} pending approvals", { pendingOrders: stats.pendingOrders })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Meals</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Today's Meals")}</CardTitle>
             <Utensils className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.mealsServedToday}</div>
             <p className="text-xs text-muted-foreground">
-              of {stats.todayMealsScheduled} scheduled
-            </p>
+              {t("of {todayMealsScheduled} scheduled", { todayMealsScheduled: stats.todayMealsScheduled })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Kitchen Capacity</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Kitchen Capacity")}</CardTitle>
             <ChefHat className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -268,14 +270,13 @@ export function DietManagementDashboard() {
               {Math.round((stats.kitchenCapacity.utilized / stats.kitchenCapacity.total) * 100)}%
             </div>
             <p className="text-xs text-muted-foreground">
-              {stats.kitchenCapacity.available} meals available
-            </p>
+              {t("{available} meals available", { available: stats.kitchenCapacity.available })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Patient Satisfaction</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Patient Satisfaction")}</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -283,8 +284,7 @@ export function DietManagementDashboard() {
               {stats.patientSatisfaction.averageRating}/5
             </div>
             <p className="text-xs text-muted-foreground">
-              from {stats.patientSatisfaction.totalResponses} responses
-            </p>
+              {t("from {totalResponses} responses", { totalResponses: stats.patientSatisfaction.totalResponses })}</p>
           </CardContent>
         </Card>
       </div>
@@ -292,17 +292,17 @@ export function DietManagementDashboard() {
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="orders">Diet Orders</TabsTrigger>
-          <TabsTrigger value="services">Meal Services</TabsTrigger>
-          <TabsTrigger value="assessments">Assessments</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="orders">{t("Diet Orders")}</TabsTrigger>
+          <TabsTrigger value="services">{t("Meal Services")}</TabsTrigger>
+          <TabsTrigger value="assessments">{t("Assessments")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Diet Type Distribution</CardTitle>
+                <CardTitle>{t("Diet Type Distribution")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -310,7 +310,7 @@ export function DietManagementDashboard() {
                     <div key={dietType} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium capitalize">{dietType}</span>
-                        <span className="text-sm font-bold">{count} patients</span>
+                        <span className="text-sm font-bold">{t("{count} patients", { count: count })}</span>
                       </div>
                       <div className="h-2 bg-secondary rounded-full overflow-hidden">
                         <div
@@ -328,7 +328,7 @@ export function DietManagementDashboard() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Today's Meal Services</CardTitle>
+                <CardTitle>{t("Today's Meal Services")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -339,9 +339,9 @@ export function DietManagementDashboard() {
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium capitalize">{service.mealType}</p>
+                          <p className="font-medium capitalize">{tAny(service.mealType)}</p>
                           <p className="text-sm text-muted-foreground">
-                            {service.ward} • {service.serviceNumber}
+                            {tAny(service.ward)} • {service.serviceNumber}
                           </p>
                         </div>
                         <Badge
@@ -353,15 +353,14 @@ export function DietManagementDashboard() {
                               : "outline"
                           }
                         >
-                          {service.status}
+                          {tAny(service.status)}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">
-                          {service.servedMeals} / {service.totalMeals} served
-                        </span>
+                          {t("{servedMeals} / {totalMeals} served", { servedMeals: service.servedMeals, totalMeals: service.totalMeals })}</span>
                         <span className="text-muted-foreground">
-                          {format(service.serviceTime, "HH:mm")}
+                          {fmt(service.serviceTime, "HH:mm")}
                         </span>
                       </div>
                     </div>
@@ -375,7 +374,7 @@ export function DietManagementDashboard() {
         <TabsContent value="orders" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Active Diet Orders</CardTitle>
+              <CardTitle>{t("Active Diet Orders")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -388,29 +387,29 @@ export function DietManagementDashboard() {
                       <div>
                         <p className="font-medium">{order.patientName}</p>
                         <p className="text-sm text-muted-foreground">
-                          {order.orderNumber} • {order.ward} - {order.bedNumber}
+                          {order.orderNumber} • {tAny(order.ward)} - {order.bedNumber}
                         </p>
                       </div>
                       <Badge variant={order.status === "active" ? "default" : "secondary"}>
-                        {order.status}
+                        {tAny(order.status)}
                       </Badge>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Diet Type:</span>{" "}
-                        <span className="capitalize">{order.dietType}</span>
+                        <span className="text-muted-foreground">{t("Diet Type:")}</span>{" "}
+                        <span className="capitalize">{tAny(order.dietType)}</span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Consistency:</span>{" "}
+                        <span className="text-muted-foreground">{t("Consistency:")}</span>{" "}
                         <span className="capitalize">{order.consistency}</span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Feeding Route:</span>{" "}
+                        <span className="text-muted-foreground">{t("Feeding Route:")}</span>{" "}
                         <span className="uppercase">{order.feedingRoute}</span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Ordered By:</span>{" "}
+                        <span className="text-muted-foreground">{t("Ordered By:")}</span>{" "}
                         {order.orderedBy}
                       </div>
                     </div>
@@ -419,7 +418,7 @@ export function DietManagementDashboard() {
                       <div className="pt-2 border-t">
                         <p className="text-sm font-medium mb-1 flex items-center gap-2">
                           <AlertCircle className="h-4 w-4 text-red-500" />
-                          Allergies
+                          {t("Allergies")}
                         </p>
                         <div className="flex gap-2">
                           {order.restrictions.allergies.map((allergy, idx) => (
@@ -432,11 +431,11 @@ export function DietManagementDashboard() {
                     )}
 
                     <div className="pt-2 border-t">
-                      <p className="text-sm font-medium mb-2">Meal Schedule</p>
+                      <p className="text-sm font-medium mb-2">{t("Meal Schedule")}</p>
                       <div className="space-y-2">
                         {order.mealSchedule.map((meal, idx) => (
                           <div key={idx} className="text-sm">
-                            <span className="font-medium capitalize">{meal.mealType}</span>{" "}
+                            <span className="font-medium capitalize">{tAny(meal.mealType)}</span>{" "}
                             <span className="text-muted-foreground">({meal.time}):</span>{" "}
                             {meal.menuItems.map((item) => item.itemName).join(", ")}
                           </div>
@@ -446,10 +445,10 @@ export function DietManagementDashboard() {
 
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline">
-                        Modify Order
+                        {t("Modify Order")}
                       </Button>
                       <Button size="sm" variant="outline">
-                        View Details
+                        {t("View Details")}
                       </Button>
                     </div>
                   </div>
@@ -462,7 +461,7 @@ export function DietManagementDashboard() {
         <TabsContent value="services" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Meal Service Status</CardTitle>
+              <CardTitle>{t("Meal Service Status")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -473,9 +472,9 @@ export function DietManagementDashboard() {
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-medium text-lg capitalize">{service.mealType}</p>
+                        <p className="font-medium text-lg capitalize">{tAny(service.mealType)}</p>
                         <p className="text-sm text-muted-foreground">
-                          {service.serviceNumber} • {format(service.date, "MMM dd, yyyy")}
+                          {service.serviceNumber} • {fmt(service.date, "MMM dd, yyyy")}
                         </p>
                       </div>
                       <Badge
@@ -487,30 +486,29 @@ export function DietManagementDashboard() {
                             : "outline"
                         }
                       >
-                        {service.status}
+                        {tAny(service.status)}
                       </Badge>
                     </div>
 
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Ward:</span> {service.ward}
+                        <span className="text-muted-foreground">{t("Ward:")}</span> {tAny(service.ward)}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Time:</span>{" "}
-                        {format(service.serviceTime, "HH:mm")}
+                        <span className="text-muted-foreground">{t("Time:")}</span>{" "}
+                        {fmt(service.serviceTime, "HH:mm")}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Prepared By:</span>{" "}
+                        <span className="text-muted-foreground">{t("Prepared By:")}</span>{" "}
                         {service.preparedBy}
                       </div>
                     </div>
 
                     <div className="pt-2 border-t">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">Service Progress</span>
+                        <span className="text-sm font-medium">{t("Service Progress")}</span>
                         <span className="text-sm text-muted-foreground">
-                          {service.servedMeals} / {service.totalMeals} meals
-                        </span>
+                          {t("{servedMeals} / {totalMeals} meals", { servedMeals: service.servedMeals, totalMeals: service.totalMeals })}</span>
                       </div>
                       <div className="h-2 bg-secondary rounded-full overflow-hidden">
                         <div
@@ -523,9 +521,9 @@ export function DietManagementDashboard() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button size="sm">Mark Served</Button>
+                      <Button size="sm">{t("Mark Served")}</Button>
                       <Button size="sm" variant="outline">
-                        View Orders
+                        {t("View Orders")}
                       </Button>
                     </div>
                   </div>
@@ -538,7 +536,7 @@ export function DietManagementDashboard() {
         <TabsContent value="assessments" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Nutritional Assessments</CardTitle>
+              <CardTitle>{t("Nutritional Assessments")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -552,7 +550,7 @@ export function DietManagementDashboard() {
                         <p className="font-medium">{assessment.patientName}</p>
                         <p className="text-sm text-muted-foreground">
                           {assessment.assessmentNumber} •{" "}
-                          {format(assessment.assessmentDate, "MMM dd, yyyy")}
+                          {fmt(assessment.assessmentDate, "MMM dd, yyyy")}
                         </p>
                       </div>
                       <Badge variant="secondary">{assessment.assessedBy}</Badge>
@@ -560,56 +558,56 @@ export function DietManagementDashboard() {
 
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Height:</span>{" "}
-                        {assessment.anthropometricData.height} cm
+                        <span className="text-muted-foreground">{t("Height:")}</span>{" "}
+                        {assessment.anthropometricData.height} {t("cm")}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Weight:</span>{" "}
-                        {assessment.anthropometricData.weight} kg
+                        <span className="text-muted-foreground">{t("Weight:")}</span>{" "}
+                        {assessment.anthropometricData.weight} {t("kg")}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">BMI:</span>{" "}
+                        <span className="text-muted-foreground">{t("BMI:")}</span>{" "}
                         {assessment.anthropometricData.bmi.toFixed(1)}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Ideal Weight:</span>{" "}
-                        {assessment.anthropometricData.idealBodyWeight} kg
+                        <span className="text-muted-foreground">{t("Ideal Weight:")}</span>{" "}
+                        {assessment.anthropometricData.idealBodyWeight} {t("kg")}
                       </div>
                     </div>
 
                     <div className="pt-2 border-t">
                       <p className="text-sm">
-                        <span className="font-medium">Diagnosis:</span>{" "}
+                        <span className="font-medium">{t("Diagnosis:")}</span>{" "}
                         {assessment.nutritionalDiagnosis}
                       </p>
                     </div>
 
                     <div className="pt-2 border-t">
-                      <p className="text-sm font-medium mb-2">Recommendations</p>
+                      <p className="text-sm font-medium mb-2">{t("Recommendations")}</p>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Diet Type:</span>{" "}
-                          <span className="capitalize">{assessment.recommendations.dietType}</span>
+                          <span className="text-muted-foreground">{t("Diet Type:")}</span>{" "}
+                          <span className="capitalize">{tAny(assessment.recommendations.dietType)}</span>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Energy:</span>{" "}
-                          {assessment.recommendations.energyRequirement} kcal/day
+                          <span className="text-muted-foreground">{t("Energy:")}</span>{" "}
+                          {assessment.recommendations.energyRequirement} {t("kcal/day")}
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Protein:</span>{" "}
-                          {assessment.recommendations.proteinRequirement} g/day
+                          <span className="text-muted-foreground">{t("Protein:")}</span>{" "}
+                          {assessment.recommendations.proteinRequirement} {t("g/day")}
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Fluids:</span>{" "}
-                          {assessment.recommendations.fluidRequirement} ml/day
+                          <span className="text-muted-foreground">{t("Fluids:")}</span>{" "}
+                          {assessment.recommendations.fluidRequirement} {t("ml/day")}
                         </div>
                       </div>
                     </div>
 
                     <div className="flex gap-2">
-                      <Button size="sm">Create Diet Order</Button>
+                      <Button size="sm">{t("Create Diet Order")}</Button>
                       <Button size="sm" variant="outline">
-                        View Full Report
+                        {t("View Full Report")}
                       </Button>
                     </div>
                   </div>

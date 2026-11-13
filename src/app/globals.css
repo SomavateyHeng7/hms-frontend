@@ -1,71 +1,244 @@
 @import "tailwindcss";
 
+/* Dark mode follows the .dark class set by next-themes (not only the OS setting). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens. Components use semantic classes (bg-background, text-muted-foreground,
+ * bg-primary...) that Tailwind v4 generates from the --color-* variables below; the raw
+ * HSL values live in :root and .dark so both themes switch together.
+ */
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --font-sans: var(--font-geist-sans), var(--font-khmer), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
 @layer base {
   :root {
-    --font-geist-sans: "Geist", sans-serif;
-    --font-geist-mono: "Geist Mono", monospace;
-    
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
+    --popover-foreground: 222 47% 11%;
+    /* Hospital blue */
+    --primary: 211 88% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 40%;
+    --accent: 210 40% 94%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 89%;
+    --input: 214 32% 85%;
+    --ring: 211 88% 42%;
+    --chart-1: 211 88% 42%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
-  
+
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
+    --background: 222 40% 7%;
+    --foreground: 210 40% 96%;
+    --card: 222 35% 10%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 35% 10%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 211 90% 62%;
+    --primary-foreground: 222 47% 8%;
+    --secondary: 217 30% 17%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 30% 15%;
+    --muted-foreground: 215 20% 68%;
+    --accent: 217 30% 19%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 25% 22%;
+    --input: 217 25% 26%;
+    --ring: 211 90% 62%;
+    --chart-1: 211 90% 62%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
-  
+
   * {
     border-color: hsl(var(--border));
   }
-  
+
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: var(--font-geist-sans), sans-serif;
+    font-family: var(--font-sans);
+  }
+
+  /* Khmer script needs a Khmer font and more vertical room for stacked vowels and subscripts. */
+  :lang(km) {
+    font-family: var(--font-khmer), var(--font-geist-sans), sans-serif;
+    line-height: 1.75;
+    /* Font-size utilities (text-4xl...) read --tw-leading first, so Khmer headings get room too. */
+    --tw-leading: 1.6;
   }
 }
+
+/*
+ * Dark mode for colour tints used across the screens (status badges, alert boxes, coloured
+ * numbers). Light tints (bg-*-50/100) become translucent so they sit on the dark page, and dark
+ * text shades (text-*-600..900) switch to light ones, keeping the meaning of each colour.
+ * Unlayered on purpose so these win over Tailwind's utilities; `color-scheme` + tokens above
+ * handle everything else. Keep this list in sync if a new colour family is introduced.
+ */
+.dark .bg-red-50, .dark .bg-red-100 { background-color: color-mix(in oklab, var(--color-red-500) 14%, transparent); }
+.dark .bg-red-200 { background-color: color-mix(in oklab, var(--color-red-500) 24%, transparent); }
+.dark .border-red-100, .dark .border-red-200, .dark .border-red-300 { border-color: color-mix(in oklab, var(--color-red-500) 40%, transparent); }
+.dark .text-red-700, .dark .text-red-800, .dark .text-red-900 { color: var(--color-red-300); }
+.dark .text-red-600 { color: var(--color-red-400); }
+.dark .bg-orange-50, .dark .bg-orange-100 { background-color: color-mix(in oklab, var(--color-orange-500) 14%, transparent); }
+.dark .bg-orange-200 { background-color: color-mix(in oklab, var(--color-orange-500) 24%, transparent); }
+.dark .border-orange-100, .dark .border-orange-200, .dark .border-orange-300 { border-color: color-mix(in oklab, var(--color-orange-500) 40%, transparent); }
+.dark .text-orange-700, .dark .text-orange-800, .dark .text-orange-900 { color: var(--color-orange-300); }
+.dark .text-orange-600 { color: var(--color-orange-400); }
+.dark .bg-amber-50, .dark .bg-amber-100 { background-color: color-mix(in oklab, var(--color-amber-500) 14%, transparent); }
+.dark .bg-amber-200 { background-color: color-mix(in oklab, var(--color-amber-500) 24%, transparent); }
+.dark .border-amber-100, .dark .border-amber-200, .dark .border-amber-300 { border-color: color-mix(in oklab, var(--color-amber-500) 40%, transparent); }
+.dark .text-amber-700, .dark .text-amber-800, .dark .text-amber-900 { color: var(--color-amber-300); }
+.dark .text-amber-600 { color: var(--color-amber-400); }
+.dark .bg-yellow-50, .dark .bg-yellow-100 { background-color: color-mix(in oklab, var(--color-yellow-500) 14%, transparent); }
+.dark .bg-yellow-200 { background-color: color-mix(in oklab, var(--color-yellow-500) 24%, transparent); }
+.dark .border-yellow-100, .dark .border-yellow-200, .dark .border-yellow-300 { border-color: color-mix(in oklab, var(--color-yellow-500) 40%, transparent); }
+.dark .text-yellow-700, .dark .text-yellow-800, .dark .text-yellow-900 { color: var(--color-yellow-300); }
+.dark .text-yellow-600 { color: var(--color-yellow-400); }
+.dark .bg-lime-50, .dark .bg-lime-100 { background-color: color-mix(in oklab, var(--color-lime-500) 14%, transparent); }
+.dark .bg-lime-200 { background-color: color-mix(in oklab, var(--color-lime-500) 24%, transparent); }
+.dark .border-lime-100, .dark .border-lime-200, .dark .border-lime-300 { border-color: color-mix(in oklab, var(--color-lime-500) 40%, transparent); }
+.dark .text-lime-700, .dark .text-lime-800, .dark .text-lime-900 { color: var(--color-lime-300); }
+.dark .text-lime-600 { color: var(--color-lime-400); }
+.dark .bg-green-50, .dark .bg-green-100 { background-color: color-mix(in oklab, var(--color-green-500) 14%, transparent); }
+.dark .bg-green-200 { background-color: color-mix(in oklab, var(--color-green-500) 24%, transparent); }
+.dark .border-green-100, .dark .border-green-200, .dark .border-green-300 { border-color: color-mix(in oklab, var(--color-green-500) 40%, transparent); }
+.dark .text-green-700, .dark .text-green-800, .dark .text-green-900 { color: var(--color-green-300); }
+.dark .text-green-600 { color: var(--color-green-400); }
+.dark .bg-emerald-50, .dark .bg-emerald-100 { background-color: color-mix(in oklab, var(--color-emerald-500) 14%, transparent); }
+.dark .bg-emerald-200 { background-color: color-mix(in oklab, var(--color-emerald-500) 24%, transparent); }
+.dark .border-emerald-100, .dark .border-emerald-200, .dark .border-emerald-300 { border-color: color-mix(in oklab, var(--color-emerald-500) 40%, transparent); }
+.dark .text-emerald-700, .dark .text-emerald-800, .dark .text-emerald-900 { color: var(--color-emerald-300); }
+.dark .text-emerald-600 { color: var(--color-emerald-400); }
+.dark .bg-teal-50, .dark .bg-teal-100 { background-color: color-mix(in oklab, var(--color-teal-500) 14%, transparent); }
+.dark .bg-teal-200 { background-color: color-mix(in oklab, var(--color-teal-500) 24%, transparent); }
+.dark .border-teal-100, .dark .border-teal-200, .dark .border-teal-300 { border-color: color-mix(in oklab, var(--color-teal-500) 40%, transparent); }
+.dark .text-teal-700, .dark .text-teal-800, .dark .text-teal-900 { color: var(--color-teal-300); }
+.dark .text-teal-600 { color: var(--color-teal-400); }
+.dark .bg-cyan-50, .dark .bg-cyan-100 { background-color: color-mix(in oklab, var(--color-cyan-500) 14%, transparent); }
+.dark .bg-cyan-200 { background-color: color-mix(in oklab, var(--color-cyan-500) 24%, transparent); }
+.dark .border-cyan-100, .dark .border-cyan-200, .dark .border-cyan-300 { border-color: color-mix(in oklab, var(--color-cyan-500) 40%, transparent); }
+.dark .text-cyan-700, .dark .text-cyan-800, .dark .text-cyan-900 { color: var(--color-cyan-300); }
+.dark .text-cyan-600 { color: var(--color-cyan-400); }
+.dark .bg-sky-50, .dark .bg-sky-100 { background-color: color-mix(in oklab, var(--color-sky-500) 14%, transparent); }
+.dark .bg-sky-200 { background-color: color-mix(in oklab, var(--color-sky-500) 24%, transparent); }
+.dark .border-sky-100, .dark .border-sky-200, .dark .border-sky-300 { border-color: color-mix(in oklab, var(--color-sky-500) 40%, transparent); }
+.dark .text-sky-700, .dark .text-sky-800, .dark .text-sky-900 { color: var(--color-sky-300); }
+.dark .text-sky-600 { color: var(--color-sky-400); }
+.dark .bg-blue-50, .dark .bg-blue-100 { background-color: color-mix(in oklab, var(--color-blue-500) 14%, transparent); }
+.dark .bg-blue-200 { background-color: color-mix(in oklab, var(--color-blue-500) 24%, transparent); }
+.dark .border-blue-100, .dark .border-blue-200, .dark .border-blue-300 { border-color: color-mix(in oklab, var(--color-blue-500) 40%, transparent); }
+.dark .text-blue-700, .dark .text-blue-800, .dark .text-blue-900 { color: var(--color-blue-300); }
+.dark .text-blue-600 { color: var(--color-blue-400); }
+.dark .bg-indigo-50, .dark .bg-indigo-100 { background-color: color-mix(in oklab, var(--color-indigo-500) 14%, transparent); }
+.dark .bg-indigo-200 { background-color: color-mix(in oklab, var(--color-indigo-500) 24%, transparent); }
+.dark .border-indigo-100, .dark .border-indigo-200, .dark .border-indigo-300 { border-color: color-mix(in oklab, var(--color-indigo-500) 40%, transparent); }
+.dark .text-indigo-700, .dark .text-indigo-800, .dark .text-indigo-900 { color: var(--color-indigo-300); }
+.dark .text-indigo-600 { color: var(--color-indigo-400); }
+.dark .bg-violet-50, .dark .bg-violet-100 { background-color: color-mix(in oklab, var(--color-violet-500) 14%, transparent); }
+.dark .bg-violet-200 { background-color: color-mix(in oklab, var(--color-violet-500) 24%, transparent); }
+.dark .border-violet-100, .dark .border-violet-200, .dark .border-violet-300 { border-color: color-mix(in oklab, var(--color-violet-500) 40%, transparent); }
+.dark .text-violet-700, .dark .text-violet-800, .dark .text-violet-900 { color: var(--color-violet-300); }
+.dark .text-violet-600 { color: var(--color-violet-400); }
+.dark .bg-purple-50, .dark .bg-purple-100 { background-color: color-mix(in oklab, var(--color-purple-500) 14%, transparent); }
+.dark .bg-purple-200 { background-color: color-mix(in oklab, var(--color-purple-500) 24%, transparent); }
+.dark .border-purple-100, .dark .border-purple-200, .dark .border-purple-300 { border-color: color-mix(in oklab, var(--color-purple-500) 40%, transparent); }
+.dark .text-purple-700, .dark .text-purple-800, .dark .text-purple-900 { color: var(--color-purple-300); }
+.dark .text-purple-600 { color: var(--color-purple-400); }
+.dark .bg-fuchsia-50, .dark .bg-fuchsia-100 { background-color: color-mix(in oklab, var(--color-fuchsia-500) 14%, transparent); }
+.dark .bg-fuchsia-200 { background-color: color-mix(in oklab, var(--color-fuchsia-500) 24%, transparent); }
+.dark .border-fuchsia-100, .dark .border-fuchsia-200, .dark .border-fuchsia-300 { border-color: color-mix(in oklab, var(--color-fuchsia-500) 40%, transparent); }
+.dark .text-fuchsia-700, .dark .text-fuchsia-800, .dark .text-fuchsia-900 { color: var(--color-fuchsia-300); }
+.dark .text-fuchsia-600 { color: var(--color-fuchsia-400); }
+.dark .bg-pink-50, .dark .bg-pink-100 { background-color: color-mix(in oklab, var(--color-pink-500) 14%, transparent); }
+.dark .bg-pink-200 { background-color: color-mix(in oklab, var(--color-pink-500) 24%, transparent); }
+.dark .border-pink-100, .dark .border-pink-200, .dark .border-pink-300 { border-color: color-mix(in oklab, var(--color-pink-500) 40%, transparent); }
+.dark .text-pink-700, .dark .text-pink-800, .dark .text-pink-900 { color: var(--color-pink-300); }
+.dark .text-pink-600 { color: var(--color-pink-400); }
+.dark .bg-rose-50, .dark .bg-rose-100 { background-color: color-mix(in oklab, var(--color-rose-500) 14%, transparent); }
+.dark .bg-rose-200 { background-color: color-mix(in oklab, var(--color-rose-500) 24%, transparent); }
+.dark .border-rose-100, .dark .border-rose-200, .dark .border-rose-300 { border-color: color-mix(in oklab, var(--color-rose-500) 40%, transparent); }
+.dark .text-rose-700, .dark .text-rose-800, .dark .text-rose-900 { color: var(--color-rose-300); }
+.dark .text-rose-600 { color: var(--color-rose-400); }
+.dark .bg-slate-50, .dark .bg-slate-100 { background-color: color-mix(in oklab, var(--color-slate-500) 14%, transparent); }
+.dark .bg-slate-200 { background-color: color-mix(in oklab, var(--color-slate-500) 24%, transparent); }
+.dark .border-slate-100, .dark .border-slate-200, .dark .border-slate-300 { border-color: color-mix(in oklab, var(--color-slate-500) 40%, transparent); }
+.dark .text-slate-700, .dark .text-slate-800, .dark .text-slate-900 { color: var(--color-slate-300); }
+.dark .text-slate-600 { color: var(--color-slate-400); }
+.dark .bg-gray-50, .dark .bg-gray-100 { background-color: color-mix(in oklab, var(--color-gray-500) 14%, transparent); }
+.dark .bg-gray-200 { background-color: color-mix(in oklab, var(--color-gray-500) 24%, transparent); }
+.dark .border-gray-100, .dark .border-gray-200, .dark .border-gray-300 { border-color: color-mix(in oklab, var(--color-gray-500) 40%, transparent); }
+.dark .text-gray-700, .dark .text-gray-800, .dark .text-gray-900 { color: var(--color-gray-300); }
+.dark .text-gray-600 { color: var(--color-gray-400); }
+.dark .bg-zinc-50, .dark .bg-zinc-100 { background-color: color-mix(in oklab, var(--color-zinc-500) 14%, transparent); }
+.dark .bg-zinc-200 { background-color: color-mix(in oklab, var(--color-zinc-500) 24%, transparent); }
+.dark .border-zinc-100, .dark .border-zinc-200, .dark .border-zinc-300 { border-color: color-mix(in oklab, var(--color-zinc-500) 40%, transparent); }
+.dark .text-zinc-700, .dark .text-zinc-800, .dark .text-zinc-900 { color: var(--color-zinc-300); }
+.dark .text-zinc-600 { color: var(--color-zinc-400); }
+.dark .bg-neutral-50, .dark .bg-neutral-100 { background-color: color-mix(in oklab, var(--color-neutral-500) 14%, transparent); }
+.dark .bg-neutral-200 { background-color: color-mix(in oklab, var(--color-neutral-500) 24%, transparent); }
+.dark .border-neutral-100, .dark .border-neutral-200, .dark .border-neutral-300 { border-color: color-mix(in oklab, var(--color-neutral-500) 40%, transparent); }
+.dark .text-neutral-700, .dark .text-neutral-800, .dark .text-neutral-900 { color: var(--color-neutral-300); }
+.dark .text-neutral-600 { color: var(--color-neutral-400); }
+.dark .bg-stone-50, .dark .bg-stone-100 { background-color: color-mix(in oklab, var(--color-stone-500) 14%, transparent); }
+.dark .bg-stone-200 { background-color: color-mix(in oklab, var(--color-stone-500) 24%, transparent); }
+.dark .border-stone-100, .dark .border-stone-200, .dark .border-stone-300 { border-color: color-mix(in oklab, var(--color-stone-500) 40%, transparent); }
+.dark .text-stone-700, .dark .text-stone-800, .dark .text-stone-900 { color: var(--color-stone-300); }
+.dark .text-stone-600 { color: var(--color-stone-400); }

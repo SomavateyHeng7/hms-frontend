@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_Khmer } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Sidebar } from "@/components/layout/sidebar";
+import { LanguageProvider } from "@/lib/i18n/language-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,9 +14,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const notoSansKhmer = Noto_Sans_Khmer({
+  variable: "--font-khmer",
+  subsets: ["khmer"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "HMS - Hospital Management System",
-  description: "Comprehensive Hospital Management System",
+  description: "Hospital management system for Cambodian public and private hospitals",
 };
 
 export default function RootLayout({
@@ -26,25 +31,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="flex min-h-screen">
-            <Suspense>
-              <Sidebar />
-            </Suspense>
-            <main className="flex-1 lg:pl-64">
-              {/* Suspense lets client components read ?tab= (useSearchParams) on static pages */}
-              <Suspense>{children}</Suspense>
-            </main>
-          </div>
+    // suppressHydrationWarning: next-themes sets the theme class on <html> before React hydrates.
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${notoSansKhmer.variable} antialiased`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <LanguageProvider>{children}</LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

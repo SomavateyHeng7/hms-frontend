@@ -11,7 +11,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { VitalSigns } from "@/features/nursing/inpatient/types";
 import { Activity, CalendarIcon, Heart, Thermometer, Wind, Droplet, Weight, TrendingUp } from "lucide-react";
-import { format } from "date-fns";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { INPATIENT_KM } from "@/features/nursing/inpatient/km";
 
 interface VitalSignsMonitoringProps {
   patientId?: string;
@@ -19,6 +20,9 @@ interface VitalSignsMonitoringProps {
 }
 
 export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonitoringProps) {
+  const t = useT(INPATIENT_KM);
+  const tAny = useTranslateAny(INPATIENT_KM);
+  const fmt = useDateFormat();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [formData, setFormData] = useState({
     temperature: "",
@@ -42,8 +46,8 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
       patientId: "PAT001",
       admissionId: "ADM001",
       recordedAt: new Date(2025, 11, 30, 8, 0),
-      recordedBy: "Nurse Sarah",
-      temperature: 98.6,
+      recordedBy: "Nurse Sreyleak",
+      temperature: 37.0,
       bloodPressureSystolic: 120,
       bloodPressureDiastolic: 80,
       heartRate: 72,
@@ -59,7 +63,7 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
       admissionId: "ADM001",
       recordedAt: new Date(2025, 11, 30, 14, 0),
       recordedBy: "Nurse John",
-      temperature: 99.1,
+      temperature: 37.3,
       bloodPressureSystolic: 125,
       bloodPressureDiastolic: 82,
       heartRate: 78,
@@ -88,14 +92,14 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Vital Signs Monitoring</h2>
-        <p className="text-muted-foreground">Record and track patient vital signs</p>
+        <h2 className="text-2xl font-bold">{t("Vital Signs Monitoring")}</h2>
+        <p className="text-muted-foreground">{t("Record and track patient vital signs")}</p>
       </div>
 
       <Tabs defaultValue="record" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="record">Record Vitals</TabsTrigger>
-          <TabsTrigger value="history">View History</TabsTrigger>
+          <TabsTrigger value="record">{t("Record Vitals")}</TabsTrigger>
+          <TabsTrigger value="history">{t("View History")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="record" className="space-y-6">
@@ -106,31 +110,31 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Activity className="h-5 w-5" />
-                    Basic Vital Signs
+                    {t("Basic Vital Signs")}
                   </CardTitle>
-                  <CardDescription>Record current vital measurements</CardDescription>
+                  <CardDescription>{t("Record current vital measurements")}</CardDescription>
                 </CardHeader>
                 <CardContent className="grid md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="temperature" className="flex items-center gap-2">
                       <Thermometer className="h-4 w-4" />
-                      Temperature (°F) *
+                      {t("Temperature (°C) *")}
                     </Label>
                     <Input
                       id="temperature"
                       type="number"
                       step="0.1"
-                      placeholder="98.6"
+                      placeholder="37.0"
                       value={formData.temperature}
                       onChange={(e) => handleChange("temperature", e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">Normal: 97.8 - 99.1°F</p>
+                    <p className="text-xs text-muted-foreground">{t("Normal: 36.5 - 37.5°C")}</p>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="heartRate" className="flex items-center gap-2">
                       <Heart className="h-4 w-4" />
-                      Heart Rate (bpm) *
+                      {t("Heart Rate (bpm) *")}
                     </Label>
                     <Input
                       id="heartRate"
@@ -139,13 +143,13 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
                       value={formData.heartRate}
                       onChange={(e) => handleChange("heartRate", e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">Normal: 60 - 100 bpm</p>
+                    <p className="text-xs text-muted-foreground">{t("Normal: 60 - 100 bpm")}</p>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="respiratoryRate" className="flex items-center gap-2">
                       <Wind className="h-4 w-4" />
-                      Respiratory Rate *
+                      {t("Respiratory Rate *")}
                     </Label>
                     <Input
                       id="respiratoryRate"
@@ -154,11 +158,11 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
                       value={formData.respiratoryRate}
                       onChange={(e) => handleChange("respiratoryRate", e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">Normal: 12 - 20 /min</p>
+                    <p className="text-xs text-muted-foreground">{t("Normal: 12 - 20 /min")}</p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="systolic">Blood Pressure (mmHg) *</Label>
+                    <Label htmlFor="systolic">{t("Blood Pressure (mmHg) *")}</Label>
                     <div className="flex gap-2 items-center">
                       <Input
                         id="systolic"
@@ -176,13 +180,13 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
                         onChange={(e) => handleChange("diastolic", e.target.value)}
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground">Normal: 120/80 mmHg</p>
+                    <p className="text-xs text-muted-foreground">{t("Normal: 120/80 mmHg")}</p>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="oxygenSaturation" className="flex items-center gap-2">
                       <Droplet className="h-4 w-4" />
-                      O2 Saturation (%) *
+                      {t("O2 Saturation (%) *")}
                     </Label>
                     <Input
                       id="oxygenSaturation"
@@ -191,11 +195,11 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
                       value={formData.oxygenSaturation}
                       onChange={(e) => handleChange("oxygenSaturation", e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">Normal: 95 - 100%</p>
+                    <p className="text-xs text-muted-foreground">{t("Normal: 95 - 100%")}</p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="bloodGlucose">Blood Glucose (mg/dL)</Label>
+                    <Label htmlFor="bloodGlucose">{t("Blood Glucose (mg/dL)")}</Label>
                     <Input
                       id="bloodGlucose"
                       type="number"
@@ -203,7 +207,7 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
                       value={formData.bloodGlucose}
                       onChange={(e) => handleChange("bloodGlucose", e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">Fasting: 70 - 100</p>
+                    <p className="text-xs text-muted-foreground">{t("Fasting: 70 - 100")}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -213,12 +217,12 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Weight className="h-5 w-5" />
-                    Physical Measurements
+                    {t("Physical Measurements")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="grid md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="weight">Weight (kg)</Label>
+                    <Label htmlFor="weight">{t("Weight (kg)")}</Label>
                     <Input
                       id="weight"
                       type="number"
@@ -230,7 +234,7 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="height">Height (cm)</Label>
+                    <Label htmlFor="height">{t("Height (cm)")}</Label>
                     <Input
                       id="height"
                       type="number"
@@ -242,7 +246,7 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="painLevel">Pain Level (0-10)</Label>
+                    <Label htmlFor="painLevel">{t("Pain Level (0-10)")}</Label>
                     <Input
                       id="painLevel"
                       type="number"
@@ -259,9 +263,9 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
               {/* Actions */}
               <div className="flex gap-4 justify-end">
                 <Button type="button" variant="outline">
-                  Clear
+                  {t("Clear")}
                 </Button>
-                <Button type="submit">Record Vital Signs</Button>
+                <Button type="submit">{t("Record Vital Signs")}</Button>
               </div>
             </div>
           </form>
@@ -270,8 +274,8 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
         <TabsContent value="history" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Vital Signs History</CardTitle>
-              <CardDescription>Past vital sign recordings</CardDescription>
+              <CardTitle>{t("Vital Signs History")}</CardTitle>
+              <CardDescription>{t("Past vital sign recordings")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -281,37 +285,36 @@ export function VitalSignsMonitoring({ patientId, admissionId }: VitalSignsMonit
                       <div className="flex items-center justify-between">
                         <div>
                           <CardTitle className="text-base">
-                            {format(vital.recordedAt, "PPP p")}
+                            {fmt(vital.recordedAt, "PPP p")}
                           </CardTitle>
-                          <CardDescription>Recorded by {vital.recordedBy}</CardDescription>
+                          <CardDescription>{t("Recorded by {recordedBy}", { recordedBy: vital.recordedBy })}</CardDescription>
                         </div>
                         <Badge variant="outline" className="capitalize">
-                          {vital.consciousness}
+                          {tAny(vital.consciousness)}
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="space-y-1">
-                          <div className="text-sm text-muted-foreground">Temperature</div>
-                          <div className={`text-lg font-semibold ${getVitalStatus(vital.temperature, { min: 97.8, max: 99.1 })}`}>
-                            {vital.temperature}°F
+                          <div className="text-sm text-muted-foreground">{t("Temperature")}</div>
+                          <div className={`text-lg font-semibold ${getVitalStatus(vital.temperature, { min: 36.5, max: 37.5 })}`}>
+                            {vital.temperature}°C
                           </div>
                         </div>
                         <div className="space-y-1">
-                          <div className="text-sm text-muted-foreground">Blood Pressure</div>
+                          <div className="text-sm text-muted-foreground">{t("Blood Pressure")}</div>
                           <div className="text-lg font-semibold">
                             {vital.bloodPressureSystolic}/{vital.bloodPressureDiastolic}
                           </div>
                         </div>
                         <div className="space-y-1">
-                          <div className="text-sm text-muted-foreground">Heart Rate</div>
+                          <div className="text-sm text-muted-foreground">{t("Heart Rate")}</div>
                           <div className={`text-lg font-semibold ${getVitalStatus(vital.heartRate, { min: 60, max: 100 })}`}>
-                            {vital.heartRate} bpm
-                          </div>
+                            {t("{heartRate} bpm", { heartRate: vital.heartRate })}</div>
                         </div>
                         <div className="space-y-1">
-                          <div className="text-sm text-muted-foreground">O2 Saturation</div>
+                          <div className="text-sm text-muted-foreground">{t("O2 Saturation")}</div>
                           <div className={`text-lg font-semibold ${getVitalStatus(vital.oxygenSaturation, { min: 95, max: 100 })}`}>
                             {vital.oxygenSaturation}%
                           </div>

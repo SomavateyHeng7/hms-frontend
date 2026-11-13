@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { QrCode, Barcode, CreditCard, Search, UserCheck } from "lucide-react";
+import { useT } from "@/lib/i18n/messages";
+import { PATIENTS_KM } from "../km";
 
 interface PatientIdentificationProps {
   onPatientFound: (patientId: string, method: "qr" | "barcode" | "rfid" | "manual") => void;
@@ -15,6 +17,7 @@ interface PatientIdentificationProps {
 }
 
 export function PatientIdentification({ onPatientFound, onError }: PatientIdentificationProps) {
+  const t = useT(PATIENTS_KM);
   const [isScanning, setIsScanning] = useState(false);
   const [manualId, setManualId] = useState("");
   const [barcodeInput, setBarcodeInput] = useState("");
@@ -101,10 +104,10 @@ export function PatientIdentification({ onPatientFound, onError }: PatientIdenti
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <UserCheck className="h-6 w-6" />
-          Patient Identification
+          {t("Patient Identification")}
         </CardTitle>
         <CardDescription>
-          Use QR code, barcode, RFID, or manual search to identify a patient
+          {t("Use QR code, barcode, RFID, or manual search to identify a patient")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -112,39 +115,39 @@ export function PatientIdentification({ onPatientFound, onError }: PatientIdenti
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="qr" className="flex items-center gap-2">
               <QrCode className="h-4 w-4" />
-              QR Code
+              {t("QR Code")}
             </TabsTrigger>
             <TabsTrigger value="barcode" className="flex items-center gap-2">
               <Barcode className="h-4 w-4" />
-              Barcode
+              {t("Barcode")}
             </TabsTrigger>
             <TabsTrigger value="rfid" className="flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
-              RFID
+              {t("RFID")}
             </TabsTrigger>
             <TabsTrigger value="manual" className="flex items-center gap-2">
               <Search className="h-4 w-4" />
-              Manual
+              {t("Manual")}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="qr" className="space-y-4">
             <div className="text-center space-y-4">
-              <h3 className="text-lg font-medium">QR Code Scanner</h3>
+              <h3 className="text-lg font-medium">{t("QR Code Scanner")}</h3>
               <p className="text-sm text-muted-foreground">
-                Position the patient's QR code within the scanner area
+                {t("Position the patient's QR code within the scanner area")}
               </p>
               
               {!isScanning ? (
                 <Button onClick={startQRScanning}>
                   <QrCode className="mr-2 h-4 w-4" />
-                  Start QR Scanner
+                  {t("Start QR Scanner")}
                 </Button>
               ) : (
                 <div className="space-y-4">
                   <div id={qrCodeRegionId} className="w-full" />
                   <Button variant="outline" onClick={stopQRScanning}>
-                    Stop Scanner
+                    {t("Stop Scanner")}
                   </Button>
                 </div>
               )}
@@ -153,26 +156,26 @@ export function PatientIdentification({ onPatientFound, onError }: PatientIdenti
 
           <TabsContent value="barcode" className="space-y-4">
             <div className="text-center space-y-4">
-              <h3 className="text-lg font-medium">Barcode Input</h3>
+              <h3 className="text-lg font-medium">{t("Barcode Input")}</h3>
               <p className="text-sm text-muted-foreground">
-                Scan or manually enter the patient's barcode
+                {t("Scan or manually enter the patient's barcode")}
               </p>
               
               <form onSubmit={handleBarcodeSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="barcode">Barcode</Label>
+                  <Label htmlFor="barcode">{t("Barcode")}</Label>
                   <Input
                     id="barcode"
                     type="text"
                     value={barcodeInput}
                     onChange={(e) => setBarcodeInput(e.target.value)}
-                    placeholder="Enter or scan barcode"
+                    placeholder={t("Enter or scan barcode")}
                     className="text-center"
                   />
                 </div>
                 <Button type="submit" disabled={!barcodeInput.trim()}>
                   <Barcode className="mr-2 h-4 w-4" />
-                  Identify Patient
+                  {t("Identify Patient")}
                 </Button>
               </form>
             </div>
@@ -180,26 +183,26 @@ export function PatientIdentification({ onPatientFound, onError }: PatientIdenti
 
           <TabsContent value="rfid" className="space-y-4">
             <div className="text-center space-y-4">
-              <h3 className="text-lg font-medium">RFID Input</h3>
+              <h3 className="text-lg font-medium">{t("RFID Input")}</h3>
               <p className="text-sm text-muted-foreground">
-                Tap patient's RFID card or enter RFID number manually
+                {t("Tap patient's RFID card or enter RFID number manually")}
               </p>
               
               <form onSubmit={handleRfidSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="rfid">RFID Number</Label>
+                  <Label htmlFor="rfid">{t("RFID Number")}</Label>
                   <Input
                     id="rfid"
                     type="text"
                     value={rfidInput}
                     onChange={(e) => setRfidInput(e.target.value)}
-                    placeholder="Enter RFID number"
+                    placeholder={t("Enter RFID number")}
                     className="text-center"
                   />
                 </div>
                 <Button type="submit" disabled={!rfidInput.trim()}>
                   <CreditCard className="mr-2 h-4 w-4" />
-                  Identify Patient
+                  {t("Identify Patient")}
                 </Button>
               </form>
             </div>
@@ -207,26 +210,26 @@ export function PatientIdentification({ onPatientFound, onError }: PatientIdenti
 
           <TabsContent value="manual" className="space-y-4">
             <div className="text-center space-y-4">
-              <h3 className="text-lg font-medium">Manual Search</h3>
+              <h3 className="text-lg font-medium">{t("Manual Search")}</h3>
               <p className="text-sm text-muted-foreground">
-                Enter patient ID, name, or phone number to search
+                {t("Enter patient ID, name, or phone number to search")}
               </p>
               
               <form onSubmit={handleManualSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="manual">Patient ID / Name / Phone</Label>
+                  <Label htmlFor="manual">{t("Patient ID / Name / Phone")}</Label>
                   <Input
                     id="manual"
                     type="text"
                     value={manualId}
                     onChange={(e) => setManualId(e.target.value)}
-                    placeholder="Enter patient identifier"
+                    placeholder={t("Enter patient identifier")}
                     className="text-center"
                   />
                 </div>
                 <Button type="submit" disabled={!manualId.trim()}>
                   <Search className="mr-2 h-4 w-4" />
-                  Search Patient
+                  {t("Search Patient")}
                 </Button>
               </form>
             </div>

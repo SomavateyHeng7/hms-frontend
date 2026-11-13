@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
 import { 
   AlertTriangle, 
   Heart, 
@@ -28,6 +27,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { SCHEDULING_KM } from "@/features/front-desk/scheduling/km";
 
 interface EmergencyTriageManagementProps {
   emergencyQueue: EmergencyQueue[];
@@ -42,6 +43,9 @@ export function EmergencyTriageManagement({
   onUpdateEmergencyStatus,
   onTransferPatient
 }: EmergencyTriageManagementProps) {
+  const t = useT(SCHEDULING_KM);
+  const tAny = useTranslateAny(SCHEDULING_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useState("queue");
   const [selectedEmergency, setSelectedEmergency] = useState<EmergencyQueue | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -117,10 +121,10 @@ export function EmergencyTriageManagement({
   ];
 
   const mockDoctors = [
-    { id: "DOC001", name: "Dr. Sarah Johnson", department: "Emergency Medicine" },
-    { id: "DOC002", name: "Dr. Michael Chen", department: "Cardiology" },
-    { id: "DOC003", name: "Dr. Emily Rodriguez", department: "Emergency Medicine" },
-    { id: "DOC004", name: "Dr. David Wilson", department: "Surgery" },
+    { id: "DOC001", name: "Dr. Nhem Rithy", department: "Emergency Medicine" },
+    { id: "DOC002", name: "Dr. Lim Pisey", department: "Cardiology" },
+    { id: "DOC003", name: "Dr. Ouk Sreyneang", department: "Emergency Medicine" },
+    { id: "DOC004", name: "Dr. Pich Sokunthea", department: "Surgery" },
   ];
 
   const sortedQueue = emergencyQueue.sort((a, b) => {
@@ -135,14 +139,14 @@ export function EmergencyTriageManagement({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-red-600">Emergency Triage</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-red-600">{t("Emergency Triage")}</h1>
           <p className="text-muted-foreground">
-            Manage emergency patients based on priority and medical urgency
+            {t("Manage emergency patients based on priority and medical urgency")}
           </p>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-sm">
-            <span className="font-medium">Total in Queue: </span>
+            <span className="font-medium">{t("Total in Queue:")} </span>
             <span className="text-2xl font-bold text-red-600">{emergencyQueue.length}</span>
           </div>
         </div>
@@ -164,8 +168,7 @@ export function EmergencyTriageManagement({
                       "text-yellow-600": priority === "medium",
                       "text-green-600": priority === "low",
                     })}>
-                      {priority.toUpperCase()} Priority
-                    </p>
+                      {t("{toUpperCase} Priority", { toUpperCase: priority.toUpperCase() })}</p>
                   </div>
                   <AlertTriangle className={cn("h-8 w-8", {
                     "text-red-500": priority === "critical",
@@ -182,8 +185,8 @@ export function EmergencyTriageManagement({
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="queue">Emergency Queue</TabsTrigger>
-          <TabsTrigger value="triage">New Triage</TabsTrigger>
+          <TabsTrigger value="queue">{t("Emergency Queue")}</TabsTrigger>
+          <TabsTrigger value="triage">{t("New Triage")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="queue" className="space-y-4">
@@ -192,9 +195,9 @@ export function EmergencyTriageManagement({
               <CardContent className="pt-6">
                 <div className="text-center py-8">
                   <Heart className="mx-auto h-12 w-12 text-green-500 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2 text-green-600">All Clear!</h3>
+                  <h3 className="text-lg font-semibold mb-2 text-green-600">{t("All Clear!")}</h3>
                   <p className="text-muted-foreground">
-                    No emergency patients in the queue at this time
+                    {t("No emergency patients in the queue at this time")}
                   </p>
                 </div>
               </CardContent>
@@ -218,7 +221,7 @@ export function EmergencyTriageManagement({
                             {emergency.priority.toUpperCase()}
                           </Badge>
                           <Badge className={getStatusColor(emergency.status)}>
-                            {emergency.status}
+                            {tAny(emergency.status)}
                           </Badge>
                         </div>
 
@@ -226,32 +229,32 @@ export function EmergencyTriageManagement({
                           <div className="space-y-1">
                             <div className="flex items-center gap-1">
                               <User className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">Patient ID:</span> {emergency.patientId}
+                              <span className="font-medium">{t("Patient ID:")}</span> {emergency.patientId}
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">Arrival:</span> {format(emergency.arrivalTime, "HH:mm")}
+                              <span className="font-medium">{t("Arrival:")}</span> {fmt(emergency.arrivalTime, "HH:mm")}
                             </div>
                             <div className="flex items-center gap-1">
                               <Activity className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">Department:</span> {emergency.department}
+                              <span className="font-medium">{t("Department:")}</span> {tAny(emergency.department)}
                             </div>
                           </div>
                           <div className="space-y-1">
                             <div>
-                              <span className="font-medium">Wait Time:</span> ~{emergency.estimatedWaitTime} min
+                              <span className="font-medium">{t("Wait Time:")}</span> ~{emergency.estimatedWaitTime} {t("min")}
                             </div>
                             {emergency.assignedDoctor && (
                               <div className="flex items-center gap-1">
                                 <Stethoscope className="h-4 w-4 text-muted-foreground" />
-                                <span className="font-medium">Assigned:</span> {emergency.assignedDoctor}
+                                <span className="font-medium">{t("Assigned:")}</span> {emergency.assignedDoctor}
                               </div>
                             )}
                           </div>
                         </div>
 
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <span className="font-medium text-sm">Triage Notes:</span>
+                        <div className="p-3 bg-muted/50 rounded-lg">
+                          <span className="font-medium text-sm">{t("Triage Notes:")}</span>
                           <p className="text-sm mt-1">{emergency.triageNotes}</p>
                         </div>
 
@@ -268,7 +271,7 @@ export function EmergencyTriageManagement({
                               onUpdateEmergencyStatus(emergency.id, "in-progress", doctor?.name);
                             }}>
                               <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Assign Doctor" />
+                                <SelectValue placeholder={t("Assign Doctor")} />
                               </SelectTrigger>
                               <SelectContent>
                                 {mockDoctors
@@ -291,16 +294,16 @@ export function EmergencyTriageManagement({
                               className="w-full"
                             >
                               <CheckCircle className="mr-1 h-3 w-3" />
-                              Complete
+                              {t("Complete")}
                             </Button>
                             <Select onValueChange={(dept) => onTransferPatient(emergency.id, dept)}>
                               <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Transfer to..." />
+                                <SelectValue placeholder={t("Transfer to...")} />
                               </SelectTrigger>
                               <SelectContent>
                                 {departments.map((dept) => (
                                   <SelectItem key={dept} value={dept}>
-                                    {dept}
+                                    {tAny(dept)}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -313,7 +316,7 @@ export function EmergencyTriageManagement({
                           variant="outline"
                           onClick={() => setSelectedEmergency(emergency)}
                         >
-                          View Details
+                          {t("View Details")}
                         </Button>
                       </div>
                     </div>
@@ -329,10 +332,10 @@ export function EmergencyTriageManagement({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
-                Emergency Triage Assessment
+                {t("Emergency Triage Assessment")}
               </CardTitle>
               <CardDescription>
-                Perform initial assessment and prioritize emergency patients
+                {t("Perform initial assessment and prioritize emergency patients")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -340,65 +343,65 @@ export function EmergencyTriageManagement({
                 {/* Patient Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="patientId">Patient ID *</Label>
+                    <Label htmlFor="patientId">{t("Patient ID *")}</Label>
                     <Input
                       id="patientId"
                       {...register("patientId")}
-                      placeholder="Enter patient ID"
+                      placeholder={t("Enter patient ID")}
                       className={errors.patientId ? "border-red-500" : ""}
                     />
                     {errors.patientId && (
-                      <p className="text-sm text-red-500">{errors.patientId.message}</p>
+                      <p className="text-sm text-red-500">{tAny(errors.patientId.message)}</p>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="patientName">Patient Name *</Label>
+                    <Label htmlFor="patientName">{t("Patient Name *")}</Label>
                     <Input
                       id="patientName"
                       {...register("patientName")}
-                      placeholder="Enter patient name"
+                      placeholder={t("Enter patient name")}
                       className={errors.patientName ? "border-red-500" : ""}
                     />
                     {errors.patientName && (
-                      <p className="text-sm text-red-500">{errors.patientName.message}</p>
+                      <p className="text-sm text-red-500">{tAny(errors.patientName.message)}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Chief Complaint */}
                 <div className="space-y-2">
-                  <Label htmlFor="chiefComplaint">Chief Complaint *</Label>
+                  <Label htmlFor="chiefComplaint">{t("Chief Complaint *")}</Label>
                   <Textarea
                     id="chiefComplaint"
                     {...register("chiefComplaint")}
-                    placeholder="Describe the patient's primary concern or symptoms"
+                    placeholder={t("Describe the patient's primary concern or symptoms")}
                     rows={3}
                     className={errors.chiefComplaint ? "border-red-500" : ""}
                   />
                   {errors.chiefComplaint && (
-                    <p className="text-sm text-red-500">{errors.chiefComplaint.message}</p>
+                    <p className="text-sm text-red-500">{tAny(errors.chiefComplaint.message)}</p>
                   )}
                 </div>
 
                 {/* Vital Signs */}
                 <div className="space-y-4">
-                  <Label className="text-base font-medium">Vital Signs</Label>
+                  <Label className="text-base font-medium">{t("Vital Signs")}</Label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="temperature" className="flex items-center gap-2">
                         <Thermometer className="h-4 w-4" />
-                        Temperature (°F)
+                        {t("Temperature (°C)")}
                       </Label>
                       <Input
                         id="temperature"
                         type="number"
                         step="0.1"
                         {...register("vitalSigns.temperature", { valueAsNumber: true })}
-                        placeholder="98.6"
+                        placeholder="37.0"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="bloodPressure">Blood Pressure</Label>
+                      <Label htmlFor="bloodPressure">{t("Blood Pressure")}</Label>
                       <Input
                         id="bloodPressure"
                         {...register("vitalSigns.bloodPressure")}
@@ -408,7 +411,7 @@ export function EmergencyTriageManagement({
                     <div className="space-y-2">
                       <Label htmlFor="heartRate" className="flex items-center gap-2">
                         <Heart className="h-4 w-4" />
-                        Heart Rate (bpm)
+                        {t("Heart Rate (bpm)")}
                       </Label>
                       <Input
                         id="heartRate"
@@ -418,7 +421,7 @@ export function EmergencyTriageManagement({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="respiratoryRate">Respiratory Rate (bpm)</Label>
+                      <Label htmlFor="respiratoryRate">{t("Respiratory Rate (bpm)")}</Label>
                       <Input
                         id="respiratoryRate"
                         type="number"
@@ -427,7 +430,7 @@ export function EmergencyTriageManagement({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="oxygenSaturation">Oxygen Saturation (%)</Label>
+                      <Label htmlFor="oxygenSaturation">{t("Oxygen Saturation (%)")}</Label>
                       <Input
                         id="oxygenSaturation"
                         type="number"
@@ -438,7 +441,7 @@ export function EmergencyTriageManagement({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="painLevel">Pain Level (0-10)</Label>
+                      <Label htmlFor="painLevel">{t("Pain Level (0-10)")}</Label>
                       <Input
                         id="painLevel"
                         type="number"
@@ -454,76 +457,76 @@ export function EmergencyTriageManagement({
                 {/* Priority and Assessment */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Priority Level *</Label>
+                    <Label>{t("Priority Level *")}</Label>
                     <Select onValueChange={(value) => setValue("priority", value as any)}>
                       <SelectTrigger className={errors.priority ? "border-red-500" : ""}>
-                        <SelectValue placeholder="Select priority level" />
+                        <SelectValue placeholder={t("Select priority level")} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="critical">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                            <span>Critical - Life threatening</span>
+                            <span>{t("Critical - Life threatening")}</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="high">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                            <span>High - Urgent care needed</span>
+                            <span>{t("High - Urgent care needed")}</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="medium">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                            <span>Medium - Moderate condition</span>
+                            <span>{t("Medium - Moderate condition")}</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="low">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span>Low - Minor condition</span>
+                            <span>{t("Low - Minor condition")}</span>
                           </div>
                         </SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.priority && (
-                      <p className="text-sm text-red-500">{errors.priority.message}</p>
+                      <p className="text-sm text-red-500">{tAny(errors.priority.message)}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Consciousness Level *</Label>
+                    <Label>{t("Consciousness Level *")}</Label>
                     <Select onValueChange={(value) => setValue("consciousness", value as any)}>
                       <SelectTrigger className={errors.consciousness ? "border-red-500" : ""}>
-                        <SelectValue placeholder="Select consciousness level" />
+                        <SelectValue placeholder={t("Select consciousness level")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="alert">Alert and responsive</SelectItem>
-                        <SelectItem value="drowsy">Drowsy or confused</SelectItem>
-                        <SelectItem value="unconscious">Unconscious</SelectItem>
+                        <SelectItem value="alert">{t("Alert and responsive")}</SelectItem>
+                        <SelectItem value="drowsy">{t("Drowsy or confused")}</SelectItem>
+                        <SelectItem value="unconscious">{t("Unconscious")}</SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.consciousness && (
-                      <p className="text-sm text-red-500">{errors.consciousness.message}</p>
+                      <p className="text-sm text-red-500">{tAny(errors.consciousness.message)}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Arrival Mode *</Label>
+                    <Label>{t("Arrival Mode *")}</Label>
                     <Select onValueChange={(value) => setValue("arrivalMode", value as any)}>
                       <SelectTrigger className={errors.arrivalMode ? "border-red-500" : ""}>
-                        <SelectValue placeholder="How did patient arrive?" />
+                        <SelectValue placeholder={t("How did patient arrive?")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="walk-in">Walk-in</SelectItem>
-                        <SelectItem value="ambulance">Ambulance</SelectItem>
-                        <SelectItem value="transfer">Transfer from other facility</SelectItem>
+                        <SelectItem value="walk-in">{t("Walk-in")}</SelectItem>
+                        <SelectItem value="ambulance">{t("Ambulance")}</SelectItem>
+                        <SelectItem value="transfer">{t("Transfer from other facility")}</SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.arrivalMode && (
-                      <p className="text-sm text-red-500">{errors.arrivalMode.message}</p>
+                      <p className="text-sm text-red-500">{tAny(errors.arrivalMode.message)}</p>
                     )}
                   </div>
                 </div>
@@ -531,35 +534,35 @@ export function EmergencyTriageManagement({
                 {/* Medical Information */}
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="triageNotes">Triage Assessment Notes *</Label>
+                    <Label htmlFor="triageNotes">{t("Triage Assessment Notes *")}</Label>
                     <Textarea
                       id="triageNotes"
                       {...register("triageNotes")}
-                      placeholder="Detailed assessment notes, observations, and initial treatment recommendations"
+                      placeholder={t("Detailed assessment notes, observations, and initial treatment recommendations")}
                       rows={4}
                       className={errors.triageNotes ? "border-red-500" : ""}
                     />
                     {errors.triageNotes && (
-                      <p className="text-sm text-red-500">{errors.triageNotes.message}</p>
+                      <p className="text-sm text-red-500">{tAny(errors.triageNotes.message)}</p>
                     )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="allergies">Known Allergies</Label>
+                      <Label htmlFor="allergies">{t("Known Allergies")}</Label>
                       <Textarea
                         id="allergies"
                         {...register("allergies")}
-                        placeholder="List any known allergies"
+                        placeholder={t("List any known allergies")}
                         rows={2}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="currentMedications">Current Medications</Label>
+                      <Label htmlFor="currentMedications">{t("Current Medications")}</Label>
                       <Textarea
                         id="currentMedications"
                         {...register("currentMedications")}
-                        placeholder="List current medications"
+                        placeholder={t("List current medications")}
                         rows={2}
                       />
                     </div>
@@ -569,10 +572,10 @@ export function EmergencyTriageManagement({
                 {/* Submit Button */}
                 <div className="flex justify-end space-x-4 pt-4">
                   <Button type="button" variant="outline" onClick={() => reset()}>
-                    Clear Form
+                    {t("Clear Form")}
                   </Button>
                   <Button type="submit" disabled={isSubmitting} className="bg-red-600 hover:bg-red-700">
-                    {isSubmitting ? "Adding to Queue..." : "Add to Emergency Queue"}
+                    {isSubmitting ? t("Adding to Queue...") : t("Add to Emergency Queue")}
                   </Button>
                 </div>
               </form>

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, addDays, startOfDay, isSameDay, isAfter, isBefore } from "date-fns";
+import { addDays, startOfDay, isSameDay, isAfter, isBefore } from "date-fns";
 import { CalendarIcon, Clock, Video, Phone, Mail, AlertTriangle, CreditCard } from "lucide-react";
 import { appointmentBookingSchema, AppointmentBookingFormData } from "@/features/front-desk/scheduling/validations";
 import { Doctor, Department, AppointmentSlot } from "@/features/front-desk/scheduling/types";
@@ -18,6 +18,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { SCHEDULING_KM } from "@/features/front-desk/scheduling/km";
 
 interface AdvancedAppointmentBookingProps {
   onSubmit: (data: AppointmentBookingFormData) => void;
@@ -42,6 +44,9 @@ export function AdvancedAppointmentBooking({
   initialData,
   isEditing = false
 }: AdvancedAppointmentBookingProps) {
+  const tAny = useTranslateAny(SCHEDULING_KM);
+  const t = useT(SCHEDULING_KM);
+  const fmt = useDateFormat();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(initialData?.appointmentDate);
   const [selectedDepartment, setSelectedDepartment] = useState<string>(initialData?.departmentId || "");
@@ -151,30 +156,30 @@ export function AdvancedAppointmentBooking({
   };
 
   const appointmentTypes = [
-    { value: "consultation", label: "Consultation" },
-    { value: "follow-up", label: "Follow-up" },
-    { value: "surgery", label: "Surgery" },
-    { value: "test", label: "Test/Lab" },
-    { value: "emergency", label: "Emergency" },
-    { value: "telemedicine", label: "Telemedicine" }
+    { value: "consultation", label: t("Consultation") },
+    { value: "follow-up", label: t("Follow-up") },
+    { value: "surgery", label: t("Surgery") },
+    { value: "test", label: t("Test/Lab") },
+    { value: "emergency", label: t("Emergency") },
+    { value: "telemedicine", label: t("Telemedicine") }
   ];
 
   const reminderOptions = [
-    { value: 10, label: "10 minutes before" },
-    { value: 30, label: "30 minutes before" },
-    { value: 60, label: "1 hour before" },
-    { value: 1440, label: "24 hours before" },
-    { value: 2880, label: "2 days before" },
-    { value: 10080, label: "1 week before" }
+    { value: 10, label: t("10 minutes before") },
+    { value: 30, label: t("30 minutes before") },
+    { value: 60, label: t("1 hour before") },
+    { value: 1440, label: t("24 hours before") },
+    { value: 2880, label: t("2 days before") },
+    { value: 10080, label: t("1 week before") }
   ];
 
   // Mock patients data
   const patients = [
-    { id: "PAT001", name: "John Smith" },
-    { id: "PAT002", name: "Mary Johnson" },
-    { id: "PAT003", name: "Robert Davis" },
-    { id: "PAT004", name: "Sarah Wilson" },
-    { id: "PAT005", name: "Michael Brown" },
+    { id: "PAT001", name: "Sok Dara" },
+    { id: "PAT002", name: "Heng Sopheap" },
+    { id: "PAT003", name: "Kim Sokha" },
+    { id: "PAT004", name: "Mao Chenda" },
+    { id: "PAT005", name: "Long Vannak" },
   ];
 
   const getSlotTypeColor = (type: string) => {
@@ -196,12 +201,12 @@ export function AdvancedAppointmentBooking({
     <div className="space-y-6 max-w-4xl mx-auto">
       <div>
         <h1 className="text-2xl font-bold">
-          {isEditing ? "Edit Appointment" : "Book New Appointment"}
+          {isEditing ? t("Edit Appointment") : t("Book New Appointment")}
         </h1>
         <p className="text-muted-foreground">
           {preSelectedPatientName 
-            ? `Booking appointment for ${preSelectedPatientName}`
-            : "Schedule a new appointment with comprehensive options"
+            ? t("Booking appointment for {preSelectedPatientName}", { preSelectedPatientName: preSelectedPatientName })
+            : t("Schedule a new appointment with comprehensive options")
           }
         </p>
       </div>
@@ -210,16 +215,16 @@ export function AdvancedAppointmentBooking({
         {/* Patient Selection */}
         <Card>
           <CardHeader>
-            <CardTitle>Patient Information</CardTitle>
-            <CardDescription>Select the patient for this appointment</CardDescription>
+            <CardTitle>{t("Patient Information")}</CardTitle>
+            <CardDescription>{t("Select the patient for this appointment")}</CardDescription>
           </CardHeader>
           <CardContent>
             {!preSelectedPatientId ? (
               <div className="space-y-2">
-                <Label>Patient *</Label>
+                <Label>{t("Patient *")}</Label>
                 <Select onValueChange={(value) => setValue("patientId", value)}>
                   <SelectTrigger className={errors.patientId ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select a patient" />
+                    <SelectValue placeholder={t("Select a patient")} />
                   </SelectTrigger>
                   <SelectContent>
                     {patients.map((patient) => (
@@ -230,15 +235,15 @@ export function AdvancedAppointmentBooking({
                   </SelectContent>
                 </Select>
                 {errors.patientId && (
-                  <p className="text-sm text-red-500">{errors.patientId.message}</p>
+                  <p className="text-sm text-red-500">{tAny(errors.patientId.message)}</p>
                 )}
               </div>
             ) : (
               <>
                 <input type="hidden" {...register("patientId")} value={preSelectedPatientId} />
                 <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="font-medium">Patient: {preSelectedPatientName}</p>
-                  <p className="text-sm text-muted-foreground">ID: {preSelectedPatientId}</p>
+                  <p className="font-medium">{t("Patient: {preSelectedPatientName}", { preSelectedPatientName: preSelectedPatientName })}</p>
+                  <p className="text-sm text-muted-foreground">{t("ID: {preSelectedPatientId}", { preSelectedPatientId: preSelectedPatientId })}</p>
                 </div>
               </>
             )}
@@ -248,16 +253,16 @@ export function AdvancedAppointmentBooking({
         {/* Department and Doctor Selection */}
         <Card>
           <CardHeader>
-            <CardTitle>Healthcare Provider</CardTitle>
-            <CardDescription>Select department and doctor for the appointment</CardDescription>
+            <CardTitle>{t("Healthcare Provider")}</CardTitle>
+            <CardDescription>{t("Select department and doctor for the appointment")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Department *</Label>
+                <Label>{t("Department *")}</Label>
                 <Select onValueChange={handleDepartmentChange} value={selectedDepartment}>
                   <SelectTrigger className={errors.departmentId ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder={t("Select department")} />
                   </SelectTrigger>
                   <SelectContent>
                     {departments.map((dept) => (
@@ -271,24 +276,24 @@ export function AdvancedAppointmentBooking({
                   </SelectContent>
                 </Select>
                 {errors.departmentId && (
-                  <p className="text-sm text-red-500">{errors.departmentId.message}</p>
+                  <p className="text-sm text-red-500">{tAny(errors.departmentId.message)}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label>Doctor *</Label>
+                <Label>{t("Doctor *")}</Label>
                 <Select onValueChange={handleDoctorChange} value={selectedDoctor} disabled={!selectedDepartment}>
                   <SelectTrigger className={errors.doctorId ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select doctor" />
+                    <SelectValue placeholder={t("Select doctor")} />
                   </SelectTrigger>
                   <SelectContent>
                     {filteredDoctors.map((doctor) => (
                       <SelectItem key={doctor.id} value={doctor.id}>
                         <div className="flex flex-col">
-                          <span>Dr. {doctor.firstName} {doctor.lastName}</span>
+                          <span>{t("Dr. {firstName} {lastName}", { firstName: doctor.firstName, lastName: doctor.lastName })}</span>
                           <span className="text-xs text-muted-foreground">
-                            {doctor.specialization} • ${doctor.consultationFee}
-                            {doctor.telemedicineEnabled && " • Telemedicine available"}
+                            {tAny(doctor.specialization)} • ${doctor.consultationFee}
+                            {doctor.telemedicineEnabled && t("• Telemedicine available")}
                           </span>
                         </div>
                       </SelectItem>
@@ -296,32 +301,32 @@ export function AdvancedAppointmentBooking({
                   </SelectContent>
                 </Select>
                 {errors.doctorId && (
-                  <p className="text-sm text-red-500">{errors.doctorId.message}</p>
+                  <p className="text-sm text-red-500">{tAny(errors.doctorId.message)}</p>
                 )}
               </div>
             </div>
 
             {/* Doctor Information Display */}
             {selectedDoctor && (
-              <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="p-4 bg-muted/50 rounded-lg">
                 {(() => {
                   const doctor = doctors.find(d => d.id === selectedDoctor);
                   if (!doctor) return null;
                   return (
                     <div className="space-y-2">
-                      <h4 className="font-medium">Dr. {doctor.firstName} {doctor.lastName}</h4>
+                      <h4 className="font-medium">{t("Dr. {firstName} {lastName}", { firstName: doctor.firstName, lastName: doctor.lastName })}</h4>
                       <div className="text-sm text-muted-foreground space-y-1">
-                        <div>Specialization: {doctor.specialization}</div>
-                        <div>Experience: {doctor.experience} years</div>
-                        <div>Consultation Fee: ${doctor.consultationFee}</div>
+                        <div>{t("Specialization: {specialization}", { specialization: tAny(doctor.specialization) })}</div>
+                        <div>{t("Experience: {experience} years", { experience: doctor.experience })}</div>
+                        <div>{t("Consultation Fee: ${consultationFee}", { consultationFee: doctor.consultationFee })}</div>
                         <div className="flex gap-2 flex-wrap">
                           {doctor.telemedicineEnabled && (
                             <Badge variant="outline">
                               <Video className="mr-1 h-3 w-3" />
-                              Telemedicine
+                              {t("Telemedicine")}
                             </Badge>
                           )}
-                          <Badge variant="outline">Available</Badge>
+                          <Badge variant="outline">{t("Available")}</Badge>
                         </div>
                       </div>
                     </div>
@@ -335,32 +340,32 @@ export function AdvancedAppointmentBooking({
         {/* Appointment Type and Telemedicine */}
         <Card>
           <CardHeader>
-            <CardTitle>Appointment Type</CardTitle>
-            <CardDescription>Select the type of appointment and delivery method</CardDescription>
+            <CardTitle>{t("Appointment Type")}</CardTitle>
+            <CardDescription>{t("Select the type of appointment and delivery method")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Appointment Type *</Label>
+                <Label>{t("Appointment Type *")}</Label>
                 <Select onValueChange={(value) => setValue("type", value as any)}>
                   <SelectTrigger className={errors.type ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select appointment type" />
+                    <SelectValue placeholder={t("Select appointment type")} />
                   </SelectTrigger>
                   <SelectContent>
                     {appointmentTypes.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
-                        {type.label}
+                        {tAny(type.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {errors.type && (
-                  <p className="text-sm text-red-500">{errors.type.message}</p>
+                  <p className="text-sm text-red-500">{tAny(errors.type.message)}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label>Delivery Method</Label>
+                <Label>{t("Delivery Method")}</Label>
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="telemedicine"
@@ -376,12 +381,12 @@ export function AdvancedAppointmentBooking({
                   />
                   <Label htmlFor="telemedicine" className="flex items-center gap-2">
                     <Video className="h-4 w-4" />
-                    Telemedicine (Virtual Consultation)
+                    {t("Telemedicine (Virtual Consultation)")}
                   </Label>
                 </div>
                 {selectedDoctor && !doctors.find(d => d.id === selectedDoctor)?.telemedicineEnabled && isTelemedicine && (
                   <p className="text-sm text-orange-600">
-                    This doctor does not support telemedicine appointments
+                    {t("This doctor does not support telemedicine appointments")}
                   </p>
                 )}
               </div>
@@ -392,14 +397,14 @@ export function AdvancedAppointmentBooking({
         {/* Date and Time Selection */}
         <Card>
           <CardHeader>
-            <CardTitle>Schedule</CardTitle>
-            <CardDescription>Select your preferred date and time slot</CardDescription>
+            <CardTitle>{t("Schedule")}</CardTitle>
+            <CardDescription>{t("Select your preferred date and time slot")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Date Selection */}
               <div className="space-y-2">
-                <Label>Appointment Date *</Label>
+                <Label>{t("Appointment Date *")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -412,7 +417,7 @@ export function AdvancedAppointmentBooking({
                       disabled={!selectedDoctor}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
+                      {selectedDate ? fmt(selectedDate, "PPP") : t("Pick a date")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -435,20 +440,20 @@ export function AdvancedAppointmentBooking({
                   </PopoverContent>
                 </Popover>
                 {errors.appointmentDate && (
-                  <p className="text-sm text-red-500">{errors.appointmentDate.message}</p>
+                  <p className="text-sm text-red-500">{tAny(errors.appointmentDate.message)}</p>
                 )}
               </div>
 
               {/* Available Time Slots */}
               <div className="space-y-2">
-                <Label>Available Time Slots</Label>
+                <Label>{t("Available Time Slots")}</Label>
                 {!selectedDate || !selectedDoctor ? (
                   <div className="p-4 border rounded-lg text-center text-muted-foreground">
-                    Please select a doctor and date to view available slots
+                    {t("Please select a doctor and date to view available slots")}
                   </div>
                 ) : availableTimeSlots.length === 0 ? (
                   <div className="p-4 border rounded-lg text-center text-muted-foreground">
-                    No available slots for the selected date
+                    {t("No available slots for the selected date")}
                   </div>
                 ) : (
                   <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -456,7 +461,7 @@ export function AdvancedAppointmentBooking({
                       <div
                         key={slot.id}
                         className={cn(
-                          "p-3 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50",
+                          "p-3 border rounded-lg cursor-pointer transition-colors hover:bg-muted",
                           selectedSlot?.id === slot.id && "border-blue-500 bg-blue-50"
                         )}
                         onClick={() => handleSlotSelection(slot)}
@@ -468,8 +473,7 @@ export function AdvancedAppointmentBooking({
                               {slot.startTime} - {slot.endTime}
                             </div>
                             <div className="text-sm text-muted-foreground">
-                              {slot.maxAppointments - slot.currentAppointments} slots available
-                            </div>
+                              {t("{value} slots available", { value: slot.maxAppointments - slot.currentAppointments })}</div>
                           </div>
                           <div className="flex flex-col items-end gap-1">
                             <Badge className={getSlotTypeColor(slot.appointmentType)}>
@@ -483,7 +487,7 @@ export function AdvancedAppointmentBooking({
                   </div>
                 )}
                 {errors.slotId && (
-                  <p className="text-sm text-red-500">Please select a time slot</p>
+                  <p className="text-sm text-red-500">{t("Please select a time slot")}</p>
                 )}
               </div>
             </div>
@@ -493,52 +497,52 @@ export function AdvancedAppointmentBooking({
         {/* Appointment Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Appointment Details</CardTitle>
-            <CardDescription>Provide reason for visit and additional information</CardDescription>
+            <CardTitle>{t("Appointment Details")}</CardTitle>
+            <CardDescription>{t("Provide reason for visit and additional information")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="reason">Reason for Appointment *</Label>
+              <Label htmlFor="reason">{t("Reason for Appointment *")}</Label>
               <Textarea
                 id="reason"
                 {...register("reason")}
-                placeholder="Describe the reason for this appointment"
+                placeholder={t("Describe the reason for this appointment")}
                 rows={3}
                 className={errors.reason ? "border-red-500" : ""}
               />
               {errors.reason && (
-                <p className="text-sm text-red-500">{errors.reason.message}</p>
+                <p className="text-sm text-red-500">{tAny(errors.reason.message)}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">Additional Notes</Label>
+              <Label htmlFor="notes">{t("Additional Notes")}</Label>
               <Textarea
                 id="notes"
                 {...register("notes")}
-                placeholder="Any additional notes or special requirements"
+                placeholder={t("Any additional notes or special requirements")}
                 rows={2}
               />
             </div>
 
             {/* Emergency Contact (for surgery or high-risk appointments) */}
             <div className="space-y-4">
-              <Label className="text-base font-medium">Emergency Contact (Optional)</Label>
+              <Label className="text-base font-medium">{t("Emergency Contact (Optional)")}</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="emergencyContactName">Contact Name</Label>
+                  <Label htmlFor="emergencyContactName">{t("Contact Name")}</Label>
                   <Input
                     id="emergencyContactName"
                     {...register("emergencyContact.name")}
-                    placeholder="Emergency contact name"
+                    placeholder={t("Emergency contact name")}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="emergencyContactPhone">Contact Phone</Label>
+                  <Label htmlFor="emergencyContactPhone">{t("Contact Phone")}</Label>
                   <Input
                     id="emergencyContactPhone"
                     {...register("emergencyContact.phone")}
-                    placeholder="Emergency contact phone"
+                    placeholder={t("Emergency contact phone")}
                   />
                 </div>
               </div>
@@ -551,14 +555,14 @@ export function AdvancedAppointmentBooking({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5" />
-              Reminder Preferences
+              {t("Reminder Preferences")}
             </CardTitle>
-            <CardDescription>Configure how you'd like to receive appointment reminders</CardDescription>
+            <CardDescription>{t("Configure how you'd like to receive appointment reminders")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-4">
               <div>
-                <Label className="text-base font-medium">Reminder Methods</Label>
+                <Label className="text-base font-medium">{t("Reminder Methods")}</Label>
                 <div className="space-y-2 mt-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -567,7 +571,7 @@ export function AdvancedAppointmentBooking({
                     />
                     <Label htmlFor="smsReminder" className="flex items-center gap-2">
                       <Phone className="h-4 w-4" />
-                      SMS Text Message
+                      {t("SMS Text Message")}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -577,7 +581,7 @@ export function AdvancedAppointmentBooking({
                     />
                     <Label htmlFor="emailReminder" className="flex items-center gap-2">
                       <Mail className="h-4 w-4" />
-                      Email
+                      {t("Email")}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -587,14 +591,14 @@ export function AdvancedAppointmentBooking({
                     />
                     <Label htmlFor="pushReminder" className="flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4" />
-                      Push Notification
+                      {t("Push Notification")}
                     </Label>
                   </div>
                 </div>
               </div>
 
               <div>
-                <Label className="text-base font-medium">Reminder Schedule</Label>
+                <Label className="text-base font-medium">{t("Reminder Schedule")}</Label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
                   {reminderOptions.map((option) => (
                     <div key={option.value} className="flex items-center space-x-2">
@@ -620,22 +624,22 @@ export function AdvancedAppointmentBooking({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
-                Payment Summary
+                {t("Payment Summary")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span>Consultation Fee:</span>
+                  <span>{t("Consultation Fee:")}</span>
                   <span>${selectedSlot.consultationFee}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Booking Fee:</span>
+                  <span>{t("Booking Fee:")}</span>
                   <span>$5.00</span>
                 </div>
                 <hr />
                 <div className="flex justify-between font-bold">
-                  <span>Total:</span>
+                  <span>{t("Total:")}</span>
                   <span>${selectedSlot.consultationFee + 5}</span>
                 </div>
               </div>
@@ -647,11 +651,11 @@ export function AdvancedAppointmentBooking({
         <div className="flex justify-end space-x-4 pt-4">
           {onCancel && (
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+              {t("Cancel")}
             </Button>
           )}
           <Button type="submit" disabled={isSubmitting || !selectedSlot}>
-            {isSubmitting ? "Booking..." : isEditing ? "Update Appointment" : "Book Appointment"}
+            {isSubmitting ? t("Booking...") : isEditing ? t("Update Appointment") : t("Book Appointment")}
           </Button>
         </div>
       </form>

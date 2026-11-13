@@ -15,6 +15,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useT, useTranslateAny } from "@/lib/i18n/messages";
+import { PATIENTS_KM } from "../km";
 
 interface AppointmentSchedulingFormProps {
   onSubmit: (data: AppointmentFormData) => void;
@@ -33,6 +35,8 @@ export function AppointmentSchedulingForm({
   preSelectedPatientName,
   isEditing = false
 }: AppointmentSchedulingFormProps) {
+  const t = useT(PATIENTS_KM);
+  const tAny = useTranslateAny(PATIENTS_KM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
@@ -63,11 +67,11 @@ export function AppointmentSchedulingForm({
   };
 
   const appointmentTypes = [
-    { value: "consultation", label: "Consultation" },
-    { value: "follow-up", label: "Follow-up" },
-    { value: "surgery", label: "Surgery" },
-    { value: "test", label: "Test/Lab" },
-    { value: "emergency", label: "Emergency" }
+    { value: "consultation", label: t("Consultation") },
+    { value: "follow-up", label: t("Follow-up") },
+    { value: "surgery", label: t("Surgery") },
+    { value: "test", label: t("Test/Lab") },
+    { value: "emergency", label: t("Emergency") }
   ];
 
   const departments = [
@@ -78,6 +82,7 @@ export function AppointmentSchedulingForm({
     "Gastroenterology",
     "General Medicine",
     "Neurology",
+    "Obstetrics & Gynecology",
     "Oncology",
     "Orthopedics",
     "Pediatrics",
@@ -95,40 +100,40 @@ export function AppointmentSchedulingForm({
   ];
 
   const durations = [
-    { value: 15, label: "15 minutes" },
-    { value: 30, label: "30 minutes" },
-    { value: 45, label: "45 minutes" },
-    { value: 60, label: "1 hour" },
-    { value: 90, label: "1.5 hours" },
-    { value: 120, label: "2 hours" }
+    { value: 15, label: t("15 minutes") },
+    { value: 30, label: t("30 minutes") },
+    { value: 45, label: t("45 minutes") },
+    { value: 60, label: t("1 hour") },
+    { value: 90, label: t("1.5 hours") },
+    { value: 120, label: t("2 hours") }
   ];
 
   // Mock doctors data - in real app, this would come from API
   const doctors = [
-    { id: "DOC001", name: "Dr. Sarah Johnson", department: "Cardiology" },
-    { id: "DOC002", name: "Dr. Michael Chen", department: "General Medicine" },
-    { id: "DOC003", name: "Dr. Emily Rodriguez", department: "Pediatrics" },
-    { id: "DOC004", name: "Dr. David Wilson", department: "Orthopedics" },
-    { id: "DOC005", name: "Dr. Lisa Thompson", department: "Dermatology" },
+    { id: "DOC001", name: "Dr. Chea Sovann", department: "General Medicine" },
+    { id: "DOC002", name: "Dr. Lim Pisey", department: "Pediatrics" },
+    { id: "DOC003", name: "Dr. Nhem Rithy", department: "Cardiology" },
+    { id: "DOC004", name: "Dr. Ouk Sreyneang", department: "Obstetrics & Gynecology" },
+    { id: "DOC005", name: "Dr. Pich Sokunthea", department: "Orthopedics" },
   ];
 
   // Mock patients data - in real app, this would come from API
   const patients = [
-    { id: "PAT001", name: "John Smith" },
-    { id: "PAT002", name: "Mary Johnson" },
-    { id: "PAT003", name: "Robert Davis" },
-    { id: "PAT004", name: "Sarah Wilson" },
-    { id: "PAT005", name: "Michael Brown" },
+    { id: "PT-000001", name: "សុខ ដារ៉ា · SOK Dara" },
+    { id: "PT-000002", name: "ចាន់ ស្រីមុំ · CHAN Sreymom" },
+    { id: "PT-000003", name: "គីម សុខា · KIM Sokha" },
+    { id: "PT-000004", name: "ហេង សុភាព · HENG Sopheap" },
+    { id: "PT-000005", name: "ឡុង វណ្ណៈ · LONG Vannak" },
   ];
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle>{isEditing ? "Edit Appointment" : "Schedule New Appointment"}</CardTitle>
+        <CardTitle>{isEditing ? t("Edit Appointment") : t("Schedule New Appointment")}</CardTitle>
         <CardDescription>
           {preSelectedPatientName 
-            ? `Scheduling appointment for ${preSelectedPatientName}`
-            : "Fill in the appointment details below"
+            ? t("Scheduling appointment for {name}", { name: preSelectedPatientName })
+            : t("Fill in the appointment details below")
           }
         </CardDescription>
       </CardHeader>
@@ -137,7 +142,7 @@ export function AppointmentSchedulingForm({
           {/* Patient Selection */}
           {!preSelectedPatientId && (
             <div className="space-y-2">
-              <Label>Patient *</Label>
+              <Label>{t("Patient *")}</Label>
               <Select 
                 onValueChange={(value) => {
                   setValue("patientId", value);
@@ -146,7 +151,7 @@ export function AppointmentSchedulingForm({
                 defaultValue={initialData?.patientId}
               >
                 <SelectTrigger className={errors.patientId ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select a patient" />
+                  <SelectValue placeholder={t("Select a patient")} />
                 </SelectTrigger>
                 <SelectContent>
                   {patients.map((patient) => (
@@ -157,7 +162,7 @@ export function AppointmentSchedulingForm({
                 </SelectContent>
               </Select>
               {errors.patientId && (
-                <p className="text-sm text-red-500">{errors.patientId.message}</p>
+                <p className="text-sm text-red-500">{tAny(errors.patientId.message)}</p>
               )}
             </div>
           )}
@@ -169,7 +174,7 @@ export function AppointmentSchedulingForm({
           {/* Doctor and Department Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Doctor *</Label>
+              <Label>{t("Doctor *")}</Label>
               <Select 
                 onValueChange={(value) => {
                   const doctor = doctors.find(d => d.id === value);
@@ -183,23 +188,23 @@ export function AppointmentSchedulingForm({
                 defaultValue={initialData?.doctorId}
               >
                 <SelectTrigger className={errors.doctorId ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select a doctor" />
+                  <SelectValue placeholder={t("Select a doctor")} />
                 </SelectTrigger>
                 <SelectContent>
                   {doctors.map((doctor) => (
                     <SelectItem key={doctor.id} value={doctor.id}>
-                      {doctor.name} - {doctor.department}
+                      {doctor.name} - {tAny(doctor.department)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {errors.doctorId && (
-                <p className="text-sm text-red-500">{errors.doctorId.message}</p>
+                <p className="text-sm text-red-500">{tAny(errors.doctorId.message)}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label>Department *</Label>
+              <Label>{t("Department *")}</Label>
               <Select 
                 onValueChange={(value) => {
                   setValue("department", value);
@@ -208,18 +213,18 @@ export function AppointmentSchedulingForm({
                 defaultValue={initialData?.department}
               >
                 <SelectTrigger className={errors.department ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select department" />
+                  <SelectValue placeholder={t("Select department")} />
                 </SelectTrigger>
                 <SelectContent>
                   {departments.map((dept) => (
                     <SelectItem key={dept} value={dept}>
-                      {dept}
+                      {tAny(dept)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {errors.department && (
-                <p className="text-sm text-red-500">{errors.department.message}</p>
+                <p className="text-sm text-red-500">{tAny(errors.department.message)}</p>
               )}
             </div>
           </div>
@@ -227,7 +232,7 @@ export function AppointmentSchedulingForm({
           {/* Date and Time Selection */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>Appointment Date *</Label>
+              <Label>{t("Appointment Date *")}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -239,7 +244,7 @@ export function AppointmentSchedulingForm({
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {watchedAppointmentDate ? format(watchedAppointmentDate, "PPP") : "Pick a date"}
+                    {watchedAppointmentDate ? format(watchedAppointmentDate, "PPP") : t("Pick a date")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -256,12 +261,12 @@ export function AppointmentSchedulingForm({
                 </PopoverContent>
               </Popover>
               {errors.appointmentDate && (
-                <p className="text-sm text-red-500">{errors.appointmentDate.message}</p>
+                <p className="text-sm text-red-500">{tAny(errors.appointmentDate.message)}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label>Appointment Time *</Label>
+              <Label>{t("Appointment Time *")}</Label>
               <Select 
                 onValueChange={(value) => {
                   setValue("appointmentTime", value);
@@ -270,7 +275,7 @@ export function AppointmentSchedulingForm({
                 defaultValue={initialData?.appointmentTime}
               >
                 <SelectTrigger className={errors.appointmentTime ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select time" />
+                  <SelectValue placeholder={t("Select time")} />
                 </SelectTrigger>
                 <SelectContent>
                   {timeSlots.map((time) => (
@@ -284,12 +289,12 @@ export function AppointmentSchedulingForm({
                 </SelectContent>
               </Select>
               {errors.appointmentTime && (
-                <p className="text-sm text-red-500">{errors.appointmentTime.message}</p>
+                <p className="text-sm text-red-500">{tAny(errors.appointmentTime.message)}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label>Duration *</Label>
+              <Label>{t("Duration *")}</Label>
               <Select 
                 onValueChange={(value) => {
                   setValue("duration", parseInt(value));
@@ -298,7 +303,7 @@ export function AppointmentSchedulingForm({
                 defaultValue={initialData?.duration?.toString() || "30"}
               >
                 <SelectTrigger className={errors.duration ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select duration" />
+                  <SelectValue placeholder={t("Select duration")} />
                 </SelectTrigger>
                 <SelectContent>
                   {durations.map((duration) => (
@@ -309,7 +314,7 @@ export function AppointmentSchedulingForm({
                 </SelectContent>
               </Select>
               {errors.duration && (
-                <p className="text-sm text-red-500">{errors.duration.message}</p>
+                <p className="text-sm text-red-500">{tAny(errors.duration.message)}</p>
               )}
             </div>
           </div>
@@ -317,16 +322,16 @@ export function AppointmentSchedulingForm({
           {/* Appointment Type and Room */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Appointment Type *</Label>
+              <Label>{t("Appointment Type *")}</Label>
               <Select 
                 onValueChange={(value) => {
-                  setValue("type", value as any);
+                  setValue("type", value as AppointmentFormData["type"]);
                   trigger("type");
                 }}
                 defaultValue={initialData?.type}
               >
                 <SelectTrigger className={errors.type ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select appointment type" />
+                  <SelectValue placeholder={t("Select appointment type")} />
                 </SelectTrigger>
                 <SelectContent>
                   {appointmentTypes.map((type) => (
@@ -337,42 +342,42 @@ export function AppointmentSchedulingForm({
                 </SelectContent>
               </Select>
               {errors.type && (
-                <p className="text-sm text-red-500">{errors.type.message}</p>
+                <p className="text-sm text-red-500">{tAny(errors.type.message)}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="roomNumber">Room Number</Label>
+              <Label htmlFor="roomNumber">{t("Room Number")}</Label>
               <Input
                 id="roomNumber"
                 {...register("roomNumber")}
-                placeholder="Enter room number (optional)"
+                placeholder={t("Enter room number (optional)")}
               />
             </div>
           </div>
 
           {/* Reason for Appointment */}
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason for Appointment *</Label>
+            <Label htmlFor="reason">{t("Reason for Appointment *")}</Label>
             <Textarea
               id="reason"
               {...register("reason")}
-              placeholder="Describe the reason for this appointment"
+              placeholder={t("Describe the reason for this appointment")}
               rows={3}
               className={errors.reason ? "border-red-500" : ""}
             />
             {errors.reason && (
-              <p className="text-sm text-red-500">{errors.reason.message}</p>
+              <p className="text-sm text-red-500">{tAny(errors.reason.message)}</p>
             )}
           </div>
 
           {/* Additional Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Additional Notes</Label>
+            <Label htmlFor="notes">{t("Additional Notes")}</Label>
             <Textarea
               id="notes"
               {...register("notes")}
-              placeholder="Any additional notes or special instructions"
+              placeholder={t("Any additional notes or special instructions")}
               rows={2}
             />
           </div>
@@ -384,11 +389,11 @@ export function AppointmentSchedulingForm({
           <div className="flex justify-end space-x-4 pt-4">
             {onCancel && (
               <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
+                {t("Cancel")}
               </Button>
             )}
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : isEditing ? "Update Appointment" : "Schedule Appointment"}
+              {isSubmitting ? t("Saving...") : isEditing ? t("Update Appointment") : t("Schedule Appointment")}
             </Button>
           </div>
         </form>

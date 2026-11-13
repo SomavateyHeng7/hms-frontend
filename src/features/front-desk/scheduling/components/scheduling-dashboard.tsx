@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { format, addDays, startOfWeek, addWeeks, subWeeks, isSameDay, isToday } from "date-fns";
+import { addDays, startOfWeek, addWeeks, subWeeks, isSameDay, isToday } from "date-fns";
 import { 
   Calendar,
   Clock, 
@@ -28,6 +28,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SchedulingAppointment, Doctor, Department, AppointmentSlot, EmergencyQueue } from "@/features/front-desk/scheduling/types";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { SCHEDULING_KM } from "@/features/front-desk/scheduling/km";
 
 interface SchedulingDashboardProps {
   appointments: SchedulingAppointment[];
@@ -58,6 +60,9 @@ export function SchedulingDashboard({
   onManageEmergency,
   onScheduleTelemedicine
 }: SchedulingDashboardProps) {
+  const t = useT(SCHEDULING_KM);
+  const tAny = useTranslateAny(SCHEDULING_KM);
+  const fmt = useDateFormat();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("week");
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
@@ -155,19 +160,19 @@ export function SchedulingDashboard({
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Appointment & Scheduling</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("Appointment & Scheduling")}</h1>
           <p className="text-muted-foreground">
-            Comprehensive scheduling system for all departments
+            {t("Comprehensive scheduling system for all departments")}
           </p>
         </div>
         <div className="flex gap-2">
           <Button onClick={onScheduleTelemedicine} variant="outline">
             <Video className="mr-2 h-4 w-4" />
-            Telemedicine
+            {t("Telemedicine")}
           </Button>
           <Button onClick={onCreateAppointment}>
             <Plus className="mr-2 h-4 w-4" />
-            New Appointment
+            {t("New Appointment")}
           </Button>
         </div>
       </div>
@@ -179,7 +184,7 @@ export function SchedulingDashboard({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{getTotalAppointmentsToday()}</p>
-                <p className="text-xs text-muted-foreground">Today's Appointments</p>
+                <p className="text-xs text-muted-foreground">{t("Today's Appointments")}</p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
             </div>
@@ -190,7 +195,7 @@ export function SchedulingDashboard({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{getConfirmedAppointmentsToday()}</p>
-                <p className="text-xs text-muted-foreground">Confirmed Today</p>
+                <p className="text-xs text-muted-foreground">{t("Confirmed Today")}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
@@ -201,7 +206,7 @@ export function SchedulingDashboard({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{emergencyQueue.length}</p>
-                <p className="text-xs text-muted-foreground">Emergency Queue</p>
+                <p className="text-xs text-muted-foreground">{t("Emergency Queue")}</p>
               </div>
               <AlertTriangle className="h-8 w-8 text-red-500" />
             </div>
@@ -212,7 +217,7 @@ export function SchedulingDashboard({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold">{getTelemedicineAppointmentsToday()}</p>
-                <p className="text-xs text-muted-foreground">Telemedicine Today</p>
+                <p className="text-xs text-muted-foreground">{t("Telemedicine Today")}</p>
               </div>
               <Video className="h-8 w-8 text-purple-500" />
             </div>
@@ -223,24 +228,24 @@ export function SchedulingDashboard({
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="appointments">Appointments</TabsTrigger>
-          <TabsTrigger value="calendar">Calendar View</TabsTrigger>
-          <TabsTrigger value="emergency">Emergency Queue</TabsTrigger>
-          <TabsTrigger value="telemedicine">Telemedicine</TabsTrigger>
+          <TabsTrigger value="appointments">{t("Appointments")}</TabsTrigger>
+          <TabsTrigger value="calendar">{t("Calendar View")}</TabsTrigger>
+          <TabsTrigger value="emergency">{t("Emergency Queue")}</TabsTrigger>
+          <TabsTrigger value="telemedicine">{t("Telemedicine")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="appointments" className="space-y-4">
           {/* Filters */}
           <Card>
             <CardHeader>
-              <CardTitle>Filter Appointments</CardTitle>
+              <CardTitle>{t("Filter Appointments")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 transform -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Search by reason or doctor..."
+                    placeholder={t("Search by reason or doctor...")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -248,10 +253,10 @@ export function SchedulingDashboard({
                 </div>
                 <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
                   <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Select Department" />
+                    <SelectValue placeholder={t("Select Department")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Departments</SelectItem>
+                    <SelectItem value="all">{t("All Departments")}</SelectItem>
                     {departments.map((dept) => (
                       <SelectItem key={dept.id} value={dept.name}>
                         {dept.name}
@@ -261,13 +266,13 @@ export function SchedulingDashboard({
                 </Select>
                 <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
                   <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Select Doctor" />
+                    <SelectValue placeholder={t("Select Doctor")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Doctors</SelectItem>
+                    <SelectItem value="all">{t("All Doctors")}</SelectItem>
                     {doctors.map((doctor) => (
                       <SelectItem key={doctor.id} value={doctor.id}>
-                        Dr. {doctor.firstName} {doctor.lastName}
+                        {t("Dr. {firstName} {lastName}", { firstName: doctor.firstName, lastName: doctor.lastName })}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -283,13 +288,13 @@ export function SchedulingDashboard({
                 <CardContent className="pt-6">
                   <div className="text-center py-8">
                     <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No appointments found</h3>
+                    <h3 className="text-lg font-semibold mb-2">{t("No appointments found")}</h3>
                     <p className="text-muted-foreground mb-4">
-                      Try adjusting your filters or create a new appointment
+                      {t("Try adjusting your filters or create a new appointment")}
                     </p>
                     <Button onClick={onCreateAppointment}>
                       <Plus className="mr-2 h-4 w-4" />
-                      Create Appointment
+                      {t("Create Appointment")}
                     </Button>
                   </div>
                 </CardContent>
@@ -303,25 +308,25 @@ export function SchedulingDashboard({
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold">{appointment.doctorName}</h3>
                           <Badge className={getStatusColor(appointment.status)}>
-                            {appointment.status}
+                            {tAny(appointment.status)}
                           </Badge>
                           {appointment.isTelemedicine && (
                             <Badge variant="outline">
                               <Video className="mr-1 h-3 w-3" />
-                              Telemedicine
+                              {t("Telemedicine")}
                             </Badge>
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground space-y-1">
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {format(appointment.appointmentDate, "MMM dd, yyyy")} at {appointment.appointmentTime}
+                            {fmt(appointment.appointmentDate, "MMM dd, yyyy")} {t("at")} {appointment.appointmentTime}
                           </div>
-                          <div>Patient ID: {appointment.patientId}</div>
-                          <div>Department: {appointment.department}</div>
-                          <div>Reason: {appointment.reason}</div>
+                          <div>{t("Patient ID: {patientId}", { patientId: appointment.patientId })}</div>
+                          <div>{t("Department: {department}", { department: appointment.department })}</div>
+                          <div>{t("Reason: {reason}", { reason: appointment.reason })}</div>
                           {appointment.roomNumber && (
-                            <div>Room: {appointment.roomNumber}</div>
+                            <div>{t("Room: {roomNumber}", { roomNumber: appointment.roomNumber })}</div>
                           )}
                         </div>
                       </div>
@@ -333,7 +338,7 @@ export function SchedulingDashboard({
                             onClick={() => onConfirmAppointment(appointment.id)}
                           >
                             <CheckCircle className="mr-1 h-3 w-3" />
-                            Confirm
+                            {t("Confirm")}
                           </Button>
                         )}
                         <Button
@@ -342,7 +347,7 @@ export function SchedulingDashboard({
                           onClick={() => onEditAppointment(appointment)}
                         >
                           <Edit className="mr-1 h-3 w-3" />
-                          Edit
+                          {t("Edit")}
                         </Button>
                         <Button
                           size="sm"
@@ -350,7 +355,7 @@ export function SchedulingDashboard({
                           onClick={() => onRescheduleAppointment(appointment.id)}
                         >
                           <RotateCcw className="mr-1 h-3 w-3" />
-                          Reschedule
+                          {t("Reschedule")}
                         </Button>
                         <Button
                           size="sm"
@@ -358,7 +363,7 @@ export function SchedulingDashboard({
                           onClick={() => onCancelAppointment(appointment.id)}
                         >
                           <XCircle className="mr-1 h-3 w-3" />
-                          Cancel
+                          {t("Cancel")}
                         </Button>
                       </div>
                     </div>
@@ -374,7 +379,7 @@ export function SchedulingDashboard({
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>Calendar View</CardTitle>
+                <CardTitle>{t("Calendar View")}</CardTitle>
                 <div className="flex items-center gap-4">
                   <div className="flex gap-2">
                     <Button
@@ -382,21 +387,21 @@ export function SchedulingDashboard({
                       size="sm"
                       onClick={() => setViewMode("day")}
                     >
-                      Day
+                      {t("Day")}
                     </Button>
                     <Button
                       variant={viewMode === "week" ? "default" : "outline"}
                       size="sm"
                       onClick={() => setViewMode("week")}
                     >
-                      Week
+                      {t("Week")}
                     </Button>
                     <Button
                       variant={viewMode === "month" ? "default" : "outline"}
                       size="sm"
                       onClick={() => setViewMode("month")}
                     >
-                      Month
+                      {t("Month")}
                     </Button>
                   </div>
                   <div className="flex items-center gap-2">
@@ -408,7 +413,7 @@ export function SchedulingDashboard({
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <span className="font-medium min-w-[200px] text-center">
-                      {format(currentDate, "MMMM yyyy")}
+                      {fmt(currentDate, "MMMM yyyy")}
                     </span>
                     <Button
                       variant="outline"
@@ -430,9 +435,9 @@ export function SchedulingDashboard({
                 <Card key={index} className={isToday(day) ? "ring-2 ring-blue-500" : ""}>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm">
-                      {format(day, "EEE dd")}
+                      {fmt(day, "EEE dd")}
                       {isToday(day) && (
-                        <Badge variant="outline" className="ml-2">Today</Badge>
+                        <Badge variant="outline" className="ml-2">{t("Today")}</Badge>
                       )}
                     </CardTitle>
                   </CardHeader>
@@ -451,7 +456,7 @@ export function SchedulingDashboard({
                         {appointment.isTelemedicine && (
                           <Badge variant="outline" className="text-xs">
                             <Video className="mr-1 h-2 w-2" />
-                            Video
+                            {t("Video")}
                           </Badge>
                         )}
                       </div>
@@ -468,18 +473,18 @@ export function SchedulingDashboard({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
-                Emergency Queue Management
+                {t("Emergency Queue Management")}
               </CardTitle>
               <CardDescription>
-                Triage and manage emergency patients based on priority
+                {t("Triage and manage emergency patients based on priority")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {emergencyQueue.length === 0 ? (
                 <div className="text-center py-8">
                   <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No emergency patients</h3>
-                  <p className="text-muted-foreground">All clear in the emergency department</p>
+                  <h3 className="text-lg font-semibold mb-2">{t("No emergency patients")}</h3>
+                  <p className="text-muted-foreground">{t("All clear in the emergency department")}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -499,19 +504,19 @@ export function SchedulingDashboard({
                             <Badge className={getPriorityColor(emergency.priority)}>
                               {emergency.priority.toUpperCase()}
                             </Badge>
-                            <Badge variant="outline">{emergency.status}</Badge>
+                            <Badge variant="outline">{tAny(emergency.status)}</Badge>
                           </div>
                           <div className="text-sm text-muted-foreground space-y-1">
-                            <div>Patient ID: {emergency.patientId}</div>
-                            <div>Department: {emergency.department}</div>
-                            <div>Arrival: {format(emergency.arrivalTime, "HH:mm")}</div>
-                            <div>Wait Time: ~{emergency.estimatedWaitTime} minutes</div>
+                            <div>{t("Patient ID: {patientId}", { patientId: emergency.patientId })}</div>
+                            <div>{t("Department: {department}", { department: emergency.department })}</div>
+                            <div>{t("Arrival: {arrivalTime}", { arrivalTime: fmt(emergency.arrivalTime, "HH:mm") })}</div>
+                            <div>{t("Wait Time: ~{estimatedWaitTime} minutes", { estimatedWaitTime: emergency.estimatedWaitTime })}</div>
                             {emergency.assignedDoctor && (
-                              <div>Assigned: {emergency.assignedDoctor}</div>
+                              <div>{t("Assigned: {assignedDoctor}", { assignedDoctor: emergency.assignedDoctor })}</div>
                             )}
                           </div>
                           <div className="text-sm">
-                            <span className="font-medium">Triage Notes:</span> {emergency.triageNotes}
+                            <span className="font-medium">{t("Triage Notes:")}</span> {emergency.triageNotes}
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -519,7 +524,7 @@ export function SchedulingDashboard({
                             size="sm"
                             onClick={() => onManageEmergency(emergency)}
                           >
-                            Manage
+                            {t("Manage")}
                           </Button>
                         </div>
                       </div>
@@ -535,10 +540,10 @@ export function SchedulingDashboard({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Video className="h-5 w-5 text-purple-500" />
-                Telemedicine Sessions
+                {t("Telemedicine Sessions")}
               </CardTitle>
               <CardDescription>
-                Virtual consultations and remote patient care
+                {t("Virtual consultations and remote patient care")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -548,13 +553,13 @@ export function SchedulingDashboard({
                   .length === 0 ? (
                   <div className="text-center py-8">
                     <Video className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No telemedicine sessions</h3>
+                    <h3 className="text-lg font-semibold mb-2">{t("No telemedicine sessions")}</h3>
                     <p className="text-muted-foreground mb-4">
-                      Schedule virtual consultations for remote patient care
+                      {t("Schedule virtual consultations for remote patient care")}
                     </p>
                     <Button onClick={onScheduleTelemedicine}>
                       <Video className="mr-2 h-4 w-4" />
-                      Schedule Telemedicine
+                      {t("Schedule Telemedicine")}
                     </Button>
                   </div>
                 ) : (
@@ -569,27 +574,27 @@ export function SchedulingDashboard({
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold">{appointment.doctorName}</h3>
                             <Badge className={getStatusColor(appointment.status)}>
-                              {appointment.status}
+                              {tAny(appointment.status)}
                             </Badge>
                             <Badge variant="outline">
                               <Video className="mr-1 h-3 w-3" />
-                              Telemedicine
+                              {t("Telemedicine")}
                             </Badge>
                           </div>
                           <div className="text-sm text-muted-foreground space-y-1">
-                            <div>Patient ID: {appointment.patientId}</div>
+                            <div>{t("Patient ID: {patientId}", { patientId: appointment.patientId })}</div>
                             <div>
-                              {format(appointment.appointmentDate, "MMM dd, yyyy")} at {appointment.appointmentTime}
+                              {t("{appointmentDate} at {appointmentTime}", { appointmentDate: fmt(appointment.appointmentDate, "MMM dd, yyyy"), appointmentTime: appointment.appointmentTime })}
                             </div>
-                            <div>Duration: {appointment.duration} minutes</div>
-                            <div>Reason: {appointment.reason}</div>
+                            <div>{t("Duration: {duration} minutes", { duration: appointment.duration })}</div>
+                            <div>{t("Reason: {reason}", { reason: appointment.reason })}</div>
                           </div>
                         </div>
                         <div className="flex gap-2">
                           {appointment.status === "confirmed" && (
                             <Button size="sm">
                               <Video className="mr-1 h-3 w-3" />
-                              Start Session
+                              {t("Start Session")}
                             </Button>
                           )}
                           <Button
@@ -598,7 +603,7 @@ export function SchedulingDashboard({
                             onClick={() => onEditAppointment(appointment)}
                           >
                             <Edit className="mr-1 h-3 w-3" />
-                            Edit
+                            {t("Edit")}
                           </Button>
                         </div>
                       </div>

@@ -15,7 +15,6 @@ import {
   FileText,
   Activity
 } from "lucide-react";
-import { format } from "date-fns";
 import type { 
   Donor, 
   Donation, 
@@ -25,8 +24,13 @@ import type {
   BloodBankStats 
 } from "@/features/diagnostics/blood-bank/types";
 import { useTabParam } from "@/hooks/use-tab-param";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { BLOOD_BANK_KM } from "@/features/diagnostics/blood-bank/km";
 
 export function BloodBankDashboard() {
+  const t = useT(BLOOD_BANK_KM);
+  const tAny = useTranslateAny(BLOOD_BANK_KM);
+  const fmt = useDateFormat();
   const [activeTab, setActiveTab] = useTabParam("overview", ["overview", "inventory", "requests", "donors"] as const);
 
   // Mock data
@@ -34,7 +38,7 @@ export function BloodBankDashboard() {
     {
       id: "1",
       donorNumber: "DON-2025-001",
-      name: "John Smith",
+      name: "Sok Dara",
       dateOfBirth: new Date(1990, 5, 15),
       gender: "male",
       bloodGroup: "O+",
@@ -55,7 +59,7 @@ export function BloodBankDashboard() {
         surgeries: [],
       },
       emergencyContact: {
-        name: "Jane Smith",
+        name: "Chan Sreymom",
         relationship: "Spouse",
         contactNumber: "+1234567891",
       },
@@ -68,7 +72,7 @@ export function BloodBankDashboard() {
       id: "1",
       donationNumber: "DON-2025-001",
       donorId: "1",
-      donorName: "John Smith",
+      donorName: "Sok Dara",
       donorBloodGroup: "O+",
       donationDate: new Date(2024, 11, 15),
       donationType: "voluntary",
@@ -79,14 +83,14 @@ export function BloodBankDashboard() {
         pulse: 72,
         temperature: 36.8,
         weight: 75,
-        medicalOfficer: "Dr. Wilson",
+        medicalOfficer: "Dr. Pich Sokunthea",
         screeningStatus: "passed",
       },
       collectionDetails: {
         bagNumber: "BAG-2025-001",
         volumeCollected: 450,
         anticoagulant: "CPD",
-        phlebotomist: "Nurse Sarah",
+        phlebotomist: "Nurse Sreyleak",
         armUsed: "left",
       },
       testingStatus: "completed",
@@ -97,7 +101,7 @@ export function BloodBankDashboard() {
         vdrl: "negative",
         malaria: "negative",
         bloodGroupConfirmed: "O+",
-        testedBy: "Lab Tech Mike",
+        testedBy: "Lab Tech. Rotha",
         testedDate: new Date(2024, 11, 16),
       },
       componentsSeparated: [
@@ -149,7 +153,7 @@ export function BloodBankDashboard() {
       id: "1",
       requisitionNumber: "REQ-2025-001",
       patientId: "PAT001",
-      patientName: "Michael Brown",
+      patientName: "Long Vannak",
       patientBloodGroup: "O+",
       requestedBy: "Dr. Anderson",
       requestedDate: new Date(2024, 11, 20),
@@ -199,19 +203,19 @@ export function BloodBankDashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Blood Bank Management</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t("Blood Bank Management")}</h2>
           <p className="text-muted-foreground">
-            Manage donations, inventory, and transfusion services
+            {t("Manage donations, inventory, and transfusion services")}
           </p>
         </div>
         <div className="flex gap-2">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Register Donor
+            {t("Register Donor")}
           </Button>
           <Button variant="outline">
             <Calendar className="mr-2 h-4 w-4" />
-            Schedule Camp
+            {t("Schedule Camp")}
           </Button>
         </div>
       </div>
@@ -220,53 +224,49 @@ export function BloodBankDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Donors</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Active Donors")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.activeDonors}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.totalDonors} total registered
-            </p>
+              {t("{totalDonors} total registered", { totalDonors: stats.totalDonors })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Donations Today</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Donations Today")}</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.donationsToday}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.donationsThisMonth} this month
-            </p>
+              {t("{donationsThisMonth} this month", { donationsThisMonth: stats.donationsThisMonth })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Units Available</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Units Available")}</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUnitsAvailable}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.unitsExpiring7Days} expiring in 7 days
-            </p>
+              {t("{unitsExpiring7Days} expiring in 7 days", { unitsExpiring7Days: stats.unitsExpiring7Days })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("Pending Requests")}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pendingRequests}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.criticalStockItems} critical stock items
-            </p>
+              {t("{criticalStockItems} critical stock items", { criticalStockItems: stats.criticalStockItems })}</p>
           </CardContent>
         </Card>
       </div>
@@ -274,17 +274,17 @@ export function BloodBankDashboard() {
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="inventory">Inventory</TabsTrigger>
-          <TabsTrigger value="requests">Requests</TabsTrigger>
-          <TabsTrigger value="donors">Donors</TabsTrigger>
+          <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+          <TabsTrigger value="inventory">{t("Inventory")}</TabsTrigger>
+          <TabsTrigger value="requests">{t("Requests")}</TabsTrigger>
+          <TabsTrigger value="donors">{t("Donors")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Donations</CardTitle>
+                <CardTitle>{t("Recent Donations")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -309,10 +309,10 @@ export function BloodBankDashboard() {
                               : "secondary"
                           }
                         >
-                          {donation.status}
+                          {tAny(donation.status)}
                         </Badge>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {format(donation.donationDate, "MMM dd, yyyy")}
+                          {fmt(donation.donationDate, "MMM dd, yyyy")}
                         </p>
                       </div>
                     </div>
@@ -323,7 +323,7 @@ export function BloodBankDashboard() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Critical Stock Alerts</CardTitle>
+                <CardTitle>{t("Critical Stock Alerts")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -335,22 +335,20 @@ export function BloodBankDashboard() {
                           <div className="flex items-center gap-2">
                             <Droplet className="h-4 w-4 text-red-500" />
                             <span className="font-medium">
-                              {item.bloodGroup} - {item.component}
+                              {tAny(item.bloodGroup)} - {tAny(item.component)}
                             </span>
                           </div>
                           <Badge
                             variant={item.status === "critical" ? "destructive" : "secondary"}
                           >
-                            {item.available} units
-                          </Badge>
+                            {t("{available} units", { available: item.available })}</Badge>
                         </div>
                         <Progress
                           value={(item.available / item.minimumLevel) * 100}
                           className="h-2"
                         />
                         <p className="text-xs text-muted-foreground">
-                          Minimum level: {item.minimumLevel} units
-                        </p>
+                          {t("Minimum level: {minimumLevel} units", { minimumLevel: item.minimumLevel })}</p>
                       </div>
                     ))}
                 </div>
@@ -362,7 +360,7 @@ export function BloodBankDashboard() {
         <TabsContent value="inventory" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Blood Inventory Status</CardTitle>
+              <CardTitle>{t("Blood Inventory Status")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -375,11 +373,10 @@ export function BloodBankDashboard() {
                         </div>
                         <div>
                           <p className="font-medium">
-                            {item.bloodGroup} - {item.component}
+                            {tAny(item.bloodGroup)} - {tAny(item.component)}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            Min Level: {item.minimumLevel} units
-                          </p>
+                            {t("Min Level: {minimumLevel} units", { minimumLevel: item.minimumLevel })}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -392,10 +389,10 @@ export function BloodBankDashboard() {
                               : "destructive"
                           }
                         >
-                          {item.status}
+                          {tAny(item.status)}
                         </Badge>
                         <p className="text-sm mt-1">
-                          <span className="font-semibold">{item.available}</span> available
+                          <span className="font-semibold">{item.available}</span> {t("available")}
                         </p>
                       </div>
                     </div>
@@ -404,8 +401,8 @@ export function BloodBankDashboard() {
                       className="h-2"
                     />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Reserved: {item.reserved}</span>
-                      <span>Expiring soon: {item.expiringIn7Days}</span>
+                      <span>{t("Reserved: {reserved}", { reserved: item.reserved })}</span>
+                      <span>{t("Expiring soon: {expiringIn7Days}", { expiringIn7Days: item.expiringIn7Days })}</span>
                     </div>
                   </div>
                 ))}
@@ -417,7 +414,7 @@ export function BloodBankDashboard() {
         <TabsContent value="requests" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Blood Requests</CardTitle>
+              <CardTitle>{t("Blood Requests")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -442,42 +439,42 @@ export function BloodBankDashboard() {
                             : "outline"
                         }
                       >
-                        {request.priority}
+                        {tAny(request.priority)}
                       </Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Department:</span>{" "}
-                        {request.department}
+                        <span className="text-muted-foreground">{t("Department:")}</span>{" "}
+                        {tAny(request.department)}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Ward:</span>{" "}
-                        {request.ward}
+                        <span className="text-muted-foreground">{t("Ward:")}</span>{" "}
+                        {tAny(request.ward)}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Required By:</span>{" "}
-                        {format(request.requiredBy, "MMM dd, HH:mm")}
+                        <span className="text-muted-foreground">{t("Required By:")}</span>{" "}
+                        {fmt(request.requiredBy, "MMM dd, HH:mm")}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Requested By:</span>{" "}
+                        <span className="text-muted-foreground">{t("Requested By:")}</span>{" "}
                         {request.requestedBy}
                       </div>
                     </div>
                     <div className="pt-2 border-t">
-                      <p className="text-sm font-medium mb-1">Components Requested:</p>
+                      <p className="text-sm font-medium mb-1">{t("Components Requested:")}</p>
                       {request.componentsRequested.map((comp, idx) => (
                         <Badge key={idx} variant="outline" className="mr-2">
-                          {comp.component} × {comp.quantity}
+                          {tAny(comp.component)} × {comp.quantity}
                         </Badge>
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm">Approve</Button>
+                      <Button size="sm">{t("Approve")}</Button>
                       <Button size="sm" variant="outline">
-                        Cross Match
+                        {t("Cross Match")}
                       </Button>
                       <Button size="sm" variant="outline">
-                        View Details
+                        {t("View Details")}
                       </Button>
                     </div>
                   </div>
@@ -490,7 +487,7 @@ export function BloodBankDashboard() {
         <TabsContent value="donors" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Registered Donors</CardTitle>
+              <CardTitle>{t("Registered Donors")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -503,7 +500,7 @@ export function BloodBankDashboard() {
                       <div>
                         <p className="font-medium">{donor.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {donor.donorNumber} • {donor.bloodGroup}
+                          {donor.donorNumber} • {tAny(donor.bloodGroup)}
                         </p>
                       </div>
                       <Badge
@@ -518,30 +515,30 @@ export function BloodBankDashboard() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Donor Type:</span>{" "}
+                        <span className="text-muted-foreground">{t("Donor Type:")}</span>{" "}
                         {donor.donorType}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Total Donations:</span>{" "}
+                        <span className="text-muted-foreground">{t("Total Donations:")}</span>{" "}
                         {donor.totalDonations}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Last Donation:</span>{" "}
+                        <span className="text-muted-foreground">{t("Last Donation:")}</span>{" "}
                         {donor.lastDonationDate
-                          ? format(donor.lastDonationDate, "MMM dd, yyyy")
-                          : "Never"}
+                          ? fmt(donor.lastDonationDate, "MMM dd, yyyy")
+                          : t("Never")}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Contact:</span>{" "}
+                        <span className="text-muted-foreground">{t("Contact:")}</span>{" "}
                         {donor.contactNumber}
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline">
-                        Schedule Donation
+                        {t("Schedule Donation")}
                       </Button>
                       <Button size="sm" variant="outline">
-                        View History
+                        {t("View History")}
                       </Button>
                     </div>
                   </div>

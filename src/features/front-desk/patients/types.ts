@@ -1,41 +1,63 @@
+export type Sex = "male" | "female";
+
+export type CoverageScheme = "none" | "nssf" | "hef" | "private";
+
+/** Who pays, as recorded at registration. Eligibility checks and claims happen in billing. */
+export interface PatientCoverage {
+  scheme: CoverageScheme;
+  /** NSSF member number or Health Equity Fund (equity card) number. */
+  memberId?: string;
+  /** Private insurer name. */
+  insurer?: string;
+  policyNumber?: string;
+}
+
+/** Cambodian address. Area ids refer to src/lib/cambodia/address.ts. */
+export interface PatientAddress {
+  provinceId: string;
+  districtId: string;
+  communeId: string;
+  village?: string;
+  houseStreet?: string;
+}
+
+export type IdentityDocument =
+  | { type: "national_id"; number: string }
+  | { type: "passport"; number: string; nationality: string }
+  | { type: "none" };
+
+/**
+ * A registered patient. Dates are ISO strings (as a JSON API returns them).
+ * Names are stored family name first, as written in Cambodia.
+ */
 export interface Patient {
   id: string;
+  /** Hospital number shown on cards and documents, e.g. "PT-000123". */
   patientId: string;
-  firstName: string;
-  lastName: string;
-  middleName?: string;
-  dateOfBirth: Date;
-  gender: 'male' | 'female' | 'other';
-  bloodType?: string;
-  email?: string;
+  khmerName: { family: string; given: string };
+  latinName: { family: string; given: string };
+  sex: Sex;
+  /** Exact date of birth (YYYY-MM-DD) when known. */
+  dateOfBirth?: string;
+  /** Age in years at registration when the birth date is unknown. */
+  estimatedAge?: number;
+  identity: IdentityDocument;
   phone: string;
+  address: PatientAddress;
+  coverage: PatientCoverage;
   emergencyContact: {
     name: string;
     relationship: string;
     phone: string;
   };
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  insurance?: {
-    provider: string;
-    policyNumber: string;
-    groupNumber?: string;
-    membershipId: string;
-  };
-  medicalHistory?: string;
+  bloodType?: string;
   allergies?: string;
+  medicalHistory?: string;
   currentMedications?: string;
-  qrCode?: string;
-  barcode?: string;
-  rfidId?: string;
-  registrationDate: Date;
-  lastVisit?: Date;
-  status: 'active' | 'inactive' | 'deceased';
+  qrCode: string;
+  registeredAt: string;
+  lastVisitAt?: string;
+  status: "active" | "inactive" | "deceased";
 }
 
 export interface Appointment {
@@ -91,5 +113,5 @@ export interface EHRRecord {
   doctorName: string;
   department: string;
   attachments?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

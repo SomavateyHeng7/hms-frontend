@@ -16,6 +16,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sampleCollectionSchema, type SampleCollectionFormData } from "@/features/diagnostics/laboratory/validations";
 import QRCode from "react-qr-code";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { LAB_KM } from "@/features/diagnostics/laboratory/km";
 
 interface SampleTrackingProps {
   samples: LabSample[];
@@ -80,6 +82,9 @@ export function SampleTracking({
   onUpdateLocation,
   onGenerateBarcode,
 }: SampleTrackingProps) {
+  const fmt = useDateFormat();
+  const t = useT(LAB_KM);
+  const tAny = useTranslateAny(LAB_KM);
   const [collectionDialogOpen, setCollectionDialogOpen] = useState(false);
   const [barcodeDialogOpen, setBarcodeDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -178,15 +183,15 @@ export function SampleTracking({
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Sample Tracking</h1>
-        <p className="text-gray-600">Track laboratory samples with barcode management</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("Sample Tracking")}</h1>
+        <p className="text-muted-foreground">{t("Track laboratory samples with barcode management")}</p>
       </div>
 
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by sample ID, barcode, patient name, or MRN..."
+            placeholder={t("Search by sample ID, barcode, patient name, or MRN...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -194,23 +199,23 @@ export function SampleTracking({
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t("Status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="collected">Collected</SelectItem>
-            <SelectItem value="received">Received</SelectItem>
-            <SelectItem value="processing">Processing</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="all">{t("All Status")}</SelectItem>
+            <SelectItem value="collected">{t("Collected")}</SelectItem>
+            <SelectItem value="received">{t("Received")}</SelectItem>
+            <SelectItem value="processing">{t("Processing")}</SelectItem>
+            <SelectItem value="completed">{t("Completed")}</SelectItem>
+            <SelectItem value="rejected">{t("Rejected")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Sample Type" />
+            <SelectValue placeholder={t("Sample Type")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="all">{t("All Types")}</SelectItem>
             {SAMPLE_TYPES.map((type) => (
               <SelectItem key={type.value} value={type.value}>
                 {type.icon} {type.label}
@@ -222,34 +227,34 @@ export function SampleTracking({
           <DialogTrigger asChild>
             <Button>
               <Package className="mr-2 h-4 w-4" />
-              Collect Sample
+              {t("Collect Sample")}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Collect New Sample</DialogTitle>
+              <DialogTitle>{t("Collect New Sample")}</DialogTitle>
               <DialogDescription>
-                Enter sample collection details
+                {t("Enter sample collection details")}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(handleCollectSample)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="orderId">Order ID *</Label>
+                <Label htmlFor="orderId">{t("Order ID *")}</Label>
                 <Input
                   id="orderId"
                   {...form.register("orderId")}
-                  placeholder="Enter lab order ID"
+                  placeholder={t("Enter lab order ID")}
                 />
                 {form.formState.errors.orderId && (
-                  <p className="text-sm text-red-500">{form.formState.errors.orderId.message}</p>
+                  <p className="text-sm text-red-500">{tAny(form.formState.errors.orderId.message)}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label>Sample Type *</Label>
+                <Label>{t("Sample Type *")}</Label>
                 <Select onValueChange={(value) => form.setValue("sampleType", value as any)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select sample type" />
+                    <SelectValue placeholder={t("Select sample type")} />
                   </SelectTrigger>
                   <SelectContent>
                     {SAMPLE_TYPES.map((type) => (
@@ -260,13 +265,13 @@ export function SampleTracking({
                   </SelectContent>
                 </Select>
                 {form.formState.errors.sampleType && (
-                  <p className="text-sm text-red-500">{form.formState.errors.sampleType.message}</p>
+                  <p className="text-sm text-red-500">{tAny(form.formState.errors.sampleType.message)}</p>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="volume">Volume *</Label>
+                  <Label htmlFor="volume">{t("Volume *")}</Label>
                   <Input
                     id="volume"
                     type="number"
@@ -275,66 +280,66 @@ export function SampleTracking({
                     placeholder="e.g., 5.0"
                   />
                   {form.formState.errors.volume && (
-                    <p className="text-sm text-red-500">{form.formState.errors.volume.message}</p>
+                    <p className="text-sm text-red-500">{tAny(form.formState.errors.volume.message)}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="unit">Unit *</Label>
+                  <Label htmlFor="unit">{t("Unit *")}</Label>
                   <Select onValueChange={(value) => form.setValue("unit", value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="mL">mL</SelectItem>
+                      <SelectItem value="mL">{t("mL")}</SelectItem>
                       <SelectItem value="L">L</SelectItem>
                       <SelectItem value="g">g</SelectItem>
-                      <SelectItem value="mg">mg</SelectItem>
-                      <SelectItem value="pieces">pieces</SelectItem>
+                      <SelectItem value="mg">{t("mg")}</SelectItem>
+                      <SelectItem value="pieces">{t("pieces")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="collectionDate">Collection Date & Time *</Label>
+                <Label htmlFor="collectionDate">{t("Collection Date & Time *")}</Label>
                 <Input
                   id="collectionDate"
                   type="datetime-local"
                   {...form.register("collectionDate")}
                 />
                 {form.formState.errors.collectionDate && (
-                  <p className="text-sm text-red-500">{form.formState.errors.collectionDate.message}</p>
+                  <p className="text-sm text-red-500">{tAny(form.formState.errors.collectionDate.message)}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="collectedBy">Collected By *</Label>
+                <Label htmlFor="collectedBy">{t("Collected By *")}</Label>
                 <Input
                   id="collectedBy"
                   {...form.register("collectedBy")}
-                  placeholder="Staff member name"
+                  placeholder={t("Staff member name")}
                 />
                 {form.formState.errors.collectedBy && (
-                  <p className="text-sm text-red-500">{form.formState.errors.collectedBy.message}</p>
+                  <p className="text-sm text-red-500">{tAny(form.formState.errors.collectedBy.message)}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">{t("Notes")}</Label>
                 <Textarea
                   id="notes"
                   {...form.register("notes")}
-                  placeholder="Collection notes, patient condition, etc..."
+                  placeholder={t("Collection notes, patient condition, etc...")}
                   rows={3}
                 />
               </div>
 
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setCollectionDialogOpen(false)}>
-                  Cancel
+                  {t("Cancel")}
                 </Button>
-                <Button type="submit">Collect Sample</Button>
+                <Button type="submit">{t("Collect Sample")}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -353,9 +358,9 @@ export function SampleTracking({
                     <div className="text-2xl">{getSampleTypeIcon(sample.sampleType)}</div>
                     <div>
                       <CardTitle className="flex items-center gap-2">
-                        Sample: {sample.sampleId}
+                        {t("Sample:")} {sample.sampleId}
                         <Badge className={getStatusColor(sample.status)}>
-                          {sample.status.replace('_', ' ')}
+                          {tAny(sample.status)}
                         </Badge>
                         {sample.temperature && (
                           <Badge variant="outline" className="flex items-center gap-1">
@@ -365,9 +370,7 @@ export function SampleTracking({
                         )}
                       </CardTitle>
                       <CardDescription>
-                        Patient: {sample.patientName} (MRN: {sample.patientMRN}) • 
-                        Barcode: {sample.barcode} • 
-                        Collected: {new Date(sample.collectionDate).toLocaleString()}
+                        {t("Patient: {patientName} (MRN: {patientMRN}) • Barcode: {barcode} • Collected: {amount}", { patientName: sample.patientName, patientMRN: sample.patientMRN, barcode: sample.barcode, amount: fmt(sample.collectionDate, "PP p") })}
                       </CardDescription>
                     </div>
                   </div>
@@ -378,7 +381,7 @@ export function SampleTracking({
                       onClick={() => openBarcodeDialog(sample)}
                     >
                       <QrCode className="mr-2 h-4 w-4" />
-                      Barcode
+                      {t("Barcode")}
                     </Button>
                     {sample.status === "collected" && (
                       <Button
@@ -387,7 +390,7 @@ export function SampleTracking({
                         onClick={() => onReceiveSample(sample.id)}
                       >
                         <CheckCircle className="mr-2 h-4 w-4" />
-                        Receive
+                        {t("Receive")}
                       </Button>
                     )}
                     {(sample.status === "collected" || sample.status === "received") && (
@@ -397,7 +400,7 @@ export function SampleTracking({
                         onClick={() => openRejectDialog(sample)}
                       >
                         <XCircle className="mr-2 h-4 w-4" />
-                        Reject
+                        {t("Reject")}
                       </Button>
                     )}
                   </div>
@@ -406,35 +409,35 @@ export function SampleTracking({
               <CardContent>
                 <Tabs defaultValue="details" className="w-full">
                   <TabsList>
-                    <TabsTrigger value="details">Sample Details</TabsTrigger>
-                    <TabsTrigger value="tests">Tests ({sample.tests.length})</TabsTrigger>
-                    <TabsTrigger value="tracking">Tracking</TabsTrigger>
+                    <TabsTrigger value="details">{t("Sample Details")}</TabsTrigger>
+                    <TabsTrigger value="tests">{t("Tests ({length})", { length: sample.tests.length })}</TabsTrigger>
+                    <TabsTrigger value="tracking">{t("Tracking")}</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="details" className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <p className="font-medium text-gray-900">Sample Type</p>
-                        <p className="text-gray-600">{getSampleTypeIcon(sample.sampleType)} {sample.sampleType}</p>
+                        <p className="font-medium text-foreground">{t("Sample Type")}</p>
+                        <p className="text-muted-foreground">{getSampleTypeIcon(sample.sampleType)} {tAny(sample.sampleType)}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Volume</p>
-                        <p className="text-gray-600">{sample.volume} {sample.unit}</p>
+                        <p className="font-medium text-foreground">{t("Volume")}</p>
+                        <p className="text-muted-foreground">{sample.volume} {tAny(sample.unit)}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Collected By</p>
-                        <p className="text-gray-600">{sample.collectedBy}</p>
+                        <p className="font-medium text-foreground">{t("Collected By")}</p>
+                        <p className="text-muted-foreground">{sample.collectedBy}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Storage Location</p>
-                        <p className="text-gray-600">
+                        <p className="font-medium text-foreground">{t("Storage Location")}</p>
+                        <p className="text-muted-foreground">
                           {sample.storageLocation ? (
                             <>
                               <MapPin className="inline h-4 w-4 mr-1" />
                               {sample.storageLocation}
                             </>
                           ) : (
-                            "Not assigned"
+                            t("Not assigned")
                           )}
                         </p>
                       </div>
@@ -444,7 +447,7 @@ export function SampleTracking({
                       <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                         <AlertTriangle className="h-4 w-4 text-yellow-600" />
                         <span className="text-yellow-800">
-                          Expires: {new Date(sample.expiryDate).toLocaleDateString()}
+                          {t("Expires: {toLocaleDateString}", { toLocaleDateString: fmt(sample.expiryDate, "PP") })}
                         </span>
                       </div>
                     )}
@@ -453,29 +456,29 @@ export function SampleTracking({
                       <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
                         <XCircle className="h-4 w-4 text-red-600" />
                         <span className="text-red-800">
-                          Rejected: {sample.rejectionReason}
+                          {t("Rejected: {rejectionReason}", { rejectionReason: sample.rejectionReason })}
                         </span>
                       </div>
                     )}
 
                     {sample.notes && (
                       <div>
-                        <p className="font-medium text-gray-900">Notes</p>
-                        <p className="text-gray-600">{sample.notes}</p>
+                        <p className="font-medium text-foreground">{t("Notes")}</p>
+                        <p className="text-muted-foreground">{sample.notes}</p>
                       </div>
                     )}
 
                     {sample.storageLocation && (
                       <div className="flex items-center gap-2">
-                        <Label>Update Location:</Label>
+                        <Label>{t("Update Location:")}</Label>
                         <Select onValueChange={(value) => onUpdateLocation(sample.id, value)}>
                           <SelectTrigger className="w-64">
-                            <SelectValue placeholder="Select new location" />
+                            <SelectValue placeholder={t("Select new location")} />
                           </SelectTrigger>
                           <SelectContent>
                             {STORAGE_LOCATIONS.map((location) => (
                               <SelectItem key={location} value={location}>
-                                {location}
+                                {tAny(location)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -487,33 +490,33 @@ export function SampleTracking({
                   <TabsContent value="tests" className="space-y-3">
                     {sample.tests.map((testId, index) => (
                       <div key={index} className="p-3 border rounded-lg">
-                        <p className="font-medium">Test ID: {testId}</p>
-                        <p className="text-sm text-gray-600">Associated with this sample</p>
+                        <p className="font-medium">{t("Test ID: {testId}", { testId: testId })}</p>
+                        <p className="text-sm text-muted-foreground">{t("Associated with this sample")}</p>
                       </div>
                     ))}
                     {sample.tests.length === 0 && (
-                      <p className="text-gray-500 text-center py-4">No tests associated with this sample</p>
+                      <p className="text-muted-foreground text-center py-4">{t("No tests associated with this sample")}</p>
                     )}
                   </TabsContent>
 
                   <TabsContent value="tracking" className="space-y-3">
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded">
+                      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded">
                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium">Sample collected</p>
-                          <p className="text-xs text-gray-600">
-                            {new Date(sample.collectionDate).toLocaleString()} by {sample.collectedBy}
+                          <p className="text-sm font-medium">{t("Sample collected")}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {t("{amount} by {collectedBy}", { amount: fmt(sample.collectionDate, "PP p"), collectedBy: sample.collectedBy })}
                           </p>
                         </div>
                       </div>
                       
                       {sample.status !== "collected" && (
-                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded">
+                        <div className="flex items-center gap-3 p-3 bg-muted/50 rounded">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                           <div className="flex-1">
-                            <p className="text-sm font-medium">Sample received in lab</p>
-                            <p className="text-xs text-gray-600">Status updated to {sample.status}</p>
+                            <p className="text-sm font-medium">{t("Sample received in lab")}</p>
+                            <p className="text-xs text-muted-foreground">{t("Status updated to {status}", { status: tAny(sample.status) })}</p>
                           </div>
                         </div>
                       )}
@@ -522,8 +525,8 @@ export function SampleTracking({
                         <div className="flex items-center gap-3 p-3 bg-red-50 rounded">
                           <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                           <div className="flex-1">
-                            <p className="text-sm font-medium">Sample rejected</p>
-                            <p className="text-xs text-gray-600">Reason: {sample.rejectionReason}</p>
+                            <p className="text-sm font-medium">{t("Sample rejected")}</p>
+                            <p className="text-xs text-muted-foreground">{t("Reason: {rejectionReason}", { rejectionReason: sample.rejectionReason })}</p>
                           </div>
                         </div>
                       )}
@@ -539,10 +542,10 @@ export function SampleTracking({
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-8">
-                <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-muted-foreground">No samples found</p>
+                <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">{t("No samples found")}</p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Collect samples to start tracking
+                  {t("Collect samples to start tracking")}
                 </p>
               </div>
             </CardContent>
@@ -554,9 +557,9 @@ export function SampleTracking({
       <Dialog open={barcodeDialogOpen} onOpenChange={setBarcodeDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Sample Barcode</DialogTitle>
+            <DialogTitle>{t("Sample Barcode")}</DialogTitle>
             <DialogDescription>
-              Barcode for sample {selectedSample?.sampleId}
+              {t("Barcode for sample {sampleId}", { sampleId: selectedSample?.sampleId })}
             </DialogDescription>
           </DialogHeader>
           {selectedSample && (
@@ -568,16 +571,16 @@ export function SampleTracking({
               />
               <div>
                 <p className="font-mono text-lg">{selectedSample.barcode}</p>
-                <p className="text-sm text-gray-600">{selectedSample.patientName}</p>
-                <p className="text-sm text-gray-600">{selectedSample.sampleType} sample</p>
+                <p className="text-sm text-muted-foreground">{selectedSample.patientName}</p>
+                <p className="text-sm text-muted-foreground">{t("{sampleType} sample", { sampleType: selectedSample.sampleType })}</p>
               </div>
             </div>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setBarcodeDialogOpen(false)}>
-              Close
+              {t("Close")}
             </Button>
-            <Button onClick={printBarcode}>Print Barcode</Button>
+            <Button onClick={printBarcode}>{t("Print Barcode")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -586,22 +589,22 @@ export function SampleTracking({
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Reject Sample</DialogTitle>
+            <DialogTitle>{t("Reject Sample")}</DialogTitle>
             <DialogDescription>
-              Select a reason for rejecting sample {selectedSample?.sampleId}
+              {t("Select a reason for rejecting sample {sampleId}", { sampleId: selectedSample?.sampleId })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Rejection Reason</Label>
+              <Label>{t("Rejection Reason")}</Label>
               <Select value={rejectionReason} onValueChange={setRejectionReason}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select rejection reason" />
+                  <SelectValue placeholder={t("Select rejection reason")} />
                 </SelectTrigger>
                 <SelectContent>
                   {REJECTION_REASONS.map((reason) => (
                     <SelectItem key={reason} value={reason}>
-                      {reason}
+                      {tAny(reason)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -610,10 +613,10 @@ export function SampleTracking({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button variant="destructive" onClick={handleRejectSample}>
-              Reject Sample
+              {t("Reject Sample")}
             </Button>
           </DialogFooter>
         </DialogContent>

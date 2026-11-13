@@ -9,12 +9,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Bed, type Ward } from "@/features/nursing/inpatient/types";
 import { Search, Plus, Filter, BedDouble, CheckCircle2, AlertCircle, Wrench, Clock } from "lucide-react";
+import { useT, useTranslateAny } from "@/lib/i18n/messages";
+import { INPATIENT_KM } from "@/features/nursing/inpatient/km";
 
 interface BedManagementProps {
   onBedSelect?: (bed: Bed) => void;
 }
 
 export function BedManagement({ onBedSelect }: BedManagementProps) {
+  const t = useT(INPATIENT_KM);
+  const tAny = useTranslateAny(INPATIENT_KM);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterWard, setFilterWard] = useState<string>("all");
@@ -147,12 +151,12 @@ export function BedManagement({ onBedSelect }: BedManagementProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Bed Management</h2>
-          <p className="text-muted-foreground">Manage hospital beds and occupancy</p>
+          <h2 className="text-2xl font-bold">{t("Bed Management")}</h2>
+          <p className="text-muted-foreground">{t("Manage hospital beds and occupancy")}</p>
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Add Bed
+          {t("Add Bed")}
         </Button>
       </div>
 
@@ -162,25 +166,25 @@ export function BedManagement({ onBedSelect }: BedManagementProps) {
           <Card key={ward.id}>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">{ward.name}</CardTitle>
-              <CardDescription>{ward.department}</CardDescription>
+              <CardDescription>{tAny(ward.department)}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Total Beds:</span>
+                  <span>{t("Total Beds:")}</span>
                   <span className="font-semibold">{ward.totalBeds}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span>Occupied:</span>
+                  <span>{t("Occupied:")}</span>
                   <span className="font-semibold text-red-600">{ward.occupiedBeds}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span>Available:</span>
+                  <span>{t("Available:")}</span>
                   <span className="font-semibold text-green-600">{ward.availableBeds}</span>
                 </div>
                 <div className="pt-2">
-                  <div className="text-xs text-muted-foreground mb-1">Occupancy Rate</div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="text-xs text-muted-foreground mb-1">{t("Occupancy Rate")}</div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full bg-blue-500"
                       style={{ width: `${(ward.occupiedBeds / ward.totalBeds) * 100}%` }}
@@ -199,17 +203,17 @@ export function BedManagement({ onBedSelect }: BedManagementProps) {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Bed Inventory</CardTitle>
+          <CardTitle className="text-lg">{t("Bed Inventory")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
-              <Label htmlFor="search">Search</Label>
+              <Label htmlFor="search">{t("Search")}</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Bed number or ward..."
+                  placeholder={t("Bed number or ward...")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -217,28 +221,28 @@ export function BedManagement({ onBedSelect }: BedManagementProps) {
               </div>
             </div>
             <div>
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{t("Status")}</Label>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger id="status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="occupied">Occupied</SelectItem>
-                  <SelectItem value="maintenance">Maintenance</SelectItem>
-                  <SelectItem value="reserved">Reserved</SelectItem>
+                  <SelectItem value="all">{t("All Status")}</SelectItem>
+                  <SelectItem value="available">{t("Available")}</SelectItem>
+                  <SelectItem value="occupied">{t("Occupied")}</SelectItem>
+                  <SelectItem value="maintenance">{t("Maintenance")}</SelectItem>
+                  <SelectItem value="reserved">{t("Reserved")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="ward">Ward</Label>
+              <Label htmlFor="ward">{t("Ward")}</Label>
               <Select value={filterWard} onValueChange={setFilterWard}>
                 <SelectTrigger id="ward">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Wards</SelectItem>
+                  <SelectItem value="all">{t("All Wards")}</SelectItem>
                   {wards.map((ward) => (
                     <SelectItem key={ward.id} value={ward.id}>
                       {ward.name}
@@ -248,18 +252,18 @@ export function BedManagement({ onBedSelect }: BedManagementProps) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="type">Bed Type</Label>
+              <Label htmlFor="type">{t("Bed Type")}</Label>
               <Select value={filterType} onValueChange={setFilterType}>
                 <SelectTrigger id="type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="general">General</SelectItem>
-                  <SelectItem value="icu">ICU</SelectItem>
-                  <SelectItem value="private">Private</SelectItem>
-                  <SelectItem value="semi-private">Semi-Private</SelectItem>
-                  <SelectItem value="isolation">Isolation</SelectItem>
+                  <SelectItem value="all">{t("All Types")}</SelectItem>
+                  <SelectItem value="general">{t("General")}</SelectItem>
+                  <SelectItem value="icu">{t("ICU")}</SelectItem>
+                  <SelectItem value="private">{t("Private")}</SelectItem>
+                  <SelectItem value="semi-private">{t("Semi-Private")}</SelectItem>
+                  <SelectItem value="isolation">{t("Isolation")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -288,18 +292,18 @@ export function BedManagement({ onBedSelect }: BedManagementProps) {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Badge variant="outline" className="capitalize">
-                        {bed.bedType}
+                        {tAny(bed.bedType)}
                       </Badge>
                       <Badge
                         variant={bed.status === "available" ? "default" : "secondary"}
                         className="capitalize"
                       >
-                        {bed.status}
+                        {tAny(bed.status)}
                       </Badge>
                     </div>
                     <div className="text-sm">
                       <div className="text-muted-foreground">{bed.floor}</div>
-                      <div className="font-semibold mt-1">₹{bed.dailyRate}/day</div>
+                      <div className="font-semibold mt-1">{t("${dailyRate}/day", { dailyRate: bed.dailyRate })}</div>
                     </div>
                     {bed.features.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
@@ -324,7 +328,7 @@ export function BedManagement({ onBedSelect }: BedManagementProps) {
           {filteredBeds.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
               <BedDouble className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <p>No beds found matching your criteria</p>
+              <p>{t("No beds found matching your criteria")}</p>
             </div>
           )}
         </CardContent>

@@ -11,6 +11,8 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CustomDashboard, DashboardWidget } from "@/features/admin/reporting/types";
+import { useDateFormat, useT } from "@/lib/i18n/messages";
+import { REPORTING_KM } from "@/features/admin/reporting/km";
 
 interface CustomDashboardsProps {
   dashboards: CustomDashboard[];
@@ -29,6 +31,8 @@ export function CustomDashboards({
   onExportDashboard,
   onToggleWidgetVisibility
 }: CustomDashboardsProps) {
+  const fmt = useDateFormat();
+  const t = useT(REPORTING_KM);
   const [selectedDashboard, setSelectedDashboard] = useState<string>(dashboards[0]?.id || "");
   const [editMode, setEditMode] = useState(false);
 
@@ -79,14 +83,14 @@ export function CustomDashboards({
         <CardContent>
           {widget.type === "metric" && (
             <div className="space-y-2">
-              <div className="text-3xl font-bold">Sample Metric</div>
+              <div className="text-3xl font-bold">{t("Sample Metric")}</div>
               <div className="flex items-center gap-1 text-sm text-green-600">
                 +5.2%
-                <span className="text-muted-foreground">vs last period</span>
+                <span className="text-muted-foreground">{t("vs last period")}</span>
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
-                  <span>Target: 100</span>
+                  <span>{t("Target: 100")}</span>
                   <span>85%</span>
                 </div>
                 <Progress value={85} className="h-2" />
@@ -96,17 +100,16 @@ export function CustomDashboards({
 
           {widget.type === "chart" && (
             <div className="h-48 flex items-center justify-center border border-dashed rounded-lg text-muted-foreground">
-              [Chart Placeholder: {widget.chartType || 'bar'}]
-            </div>
+              {t("[Chart Placeholder: {value}]", { value: widget.chartType || 'bar' })}</div>
           )}
 
           {widget.type === "table" && (
             <div className="space-y-2">
               {[
-                { label: "Appointments", value: "245" },
-                { label: "Patients", value: "189" },
-                { label: "Revenue", value: "$12,450" },
-                { label: "Efficiency", value: "87%" }
+                { label: t("Appointments"), value: "245" },
+                { label: t("Patients"), value: "189" },
+                { label: t("Revenue"), value: "$12,450" },
+                { label: t("Efficiency"), value: "87%" }
               ].map((row, index) => (
                 <div key={index} className="flex justify-between items-center py-2 border-b last:border-0">
                   <span className="text-sm">{row.label}</span>
@@ -119,7 +122,7 @@ export function CustomDashboards({
           {widget.type === "gauge" && (
             <div className="flex flex-col items-center space-y-2">
               <div className="relative w-32 h-32 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-8 border-gray-200"></div>
+                <div className="absolute inset-0 rounded-full border-8 border-border"></div>
                 <div 
                   className="absolute inset-0 rounded-full border-8 border-transparent border-l-blue-600"
                   style={{
@@ -130,22 +133,22 @@ export function CustomDashboards({
                 ></div>
                 <div className="text-2xl font-bold">75%</div>
               </div>
-              <div className="text-sm text-muted-foreground">Performance Score</div>
+              <div className="text-sm text-muted-foreground">{t("Performance Score")}</div>
             </div>
           )}
         </CardContent>
       </Card>
     );
-  }, [editMode, selectedDashboard, onToggleWidgetVisibility]);
+  }, [editMode, selectedDashboard, onToggleWidgetVisibility, t]);
 
   if (!currentDashboard) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="text-lg font-medium">No Dashboards Available</div>
-        <p className="text-muted-foreground">Create your first custom dashboard to get started.</p>
+        <div className="text-lg font-medium">{t("No Dashboards Available")}</div>
+        <p className="text-muted-foreground">{t("Create your first custom dashboard to get started.")}</p>
         <Button onClick={onCreateDashboard}>
           <Plus className="mr-2 h-4 w-4" />
-          Create Dashboard
+          {t("Create Dashboard")}
         </Button>
       </div>
     );
@@ -155,9 +158,9 @@ export function CustomDashboards({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Custom Dashboards</h2>
+          <h2 className="text-2xl font-bold">{t("Custom Dashboards")}</h2>
           <p className="text-muted-foreground">
-            Personalized analytics and reporting views
+            {t("Personalized analytics and reporting views")}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -167,15 +170,15 @@ export function CustomDashboards({
               checked={editMode}
               onCheckedChange={setEditMode}
             />
-            <Label htmlFor="edit-mode" className="text-sm">Edit Mode</Label>
+            <Label htmlFor="edit-mode" className="text-sm">{t("Edit Mode")}</Label>
           </div>
           <Button variant="outline" size="sm" onClick={onCreateDashboard}>
             <Plus className="mr-2 h-4 w-4" />
-            New Dashboard
+            {t("New Dashboard")}
           </Button>
           <Button variant="outline" size="sm" onClick={() => onExportDashboard(selectedDashboard, "pdf")}>
             <Download className="mr-2 h-4 w-4" />
-            Export
+            {t("Export")}
           </Button>
         </div>
       </div>
@@ -187,8 +190,7 @@ export function CustomDashboards({
               <TabsTrigger key={dashboard.id} value={dashboard.id} className="flex items-center gap-2">
                 {dashboard.name}
                 <Badge variant="outline" className="text-xs">
-                  {dashboard.widgets.filter(w => w.isVisible).length} widgets
-                </Badge>
+                  {t("{length} widgets", { length: dashboard.widgets.filter(w => w.isVisible).length })}</Badge>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -201,7 +203,7 @@ export function CustomDashboards({
                 onClick={() => onEditDashboard(currentDashboard.id)}
               >
                 <Settings className="mr-2 h-4 w-4" />
-                Configure
+                {t("Configure")}
               </Button>
               <Button
                 variant="outline"
@@ -210,7 +212,7 @@ export function CustomDashboards({
                 onClick={() => onDeleteDashboard(currentDashboard.id)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {t("Delete")}
               </Button>
             </div>
           )}
@@ -224,9 +226,9 @@ export function CustomDashboards({
                 <p className="text-muted-foreground">{dashboard.description}</p>
               </div>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>Layout: {dashboard.layout}</span>
-                <span>Category: {dashboard.category}</span>
-                <span>Updated: {new Date(dashboard.updatedAt).toLocaleDateString()}</span>
+                <span>{t("Layout: {layout}", { layout: dashboard.layout })}</span>
+                <span>{t("Category: {category}", { category: dashboard.category })}</span>
+                <span>{t("Updated: {toLocaleDateString}", { toLocaleDateString: fmt(dashboard.updatedAt, "PP") })}</span>
               </div>
             </div>
 
@@ -242,16 +244,16 @@ export function CustomDashboards({
             </div>
 
             {editMode && (
-              <Card className="border-2 border-dashed border-gray-300 bg-gray-50">
+              <Card className="border-2 border-dashed border-border bg-muted/50">
                 <CardContent className="flex flex-col items-center justify-center h-48 space-y-4">
-                  <Plus className="h-12 w-12 text-gray-400" />
+                  <Plus className="h-12 w-12 text-muted-foreground" />
                   <div className="text-center">
-                    <div className="font-medium text-gray-600">Add New Widget</div>
-                    <p className="text-sm text-gray-500">
-                      Click to add charts, metrics, tables, or gauges
+                    <div className="font-medium text-muted-foreground">{t("Add New Widget")}</div>
+                    <p className="text-sm text-muted-foreground">
+                      {t("Click to add charts, metrics, tables, or gauges")}
                     </p>
                   </div>
-                  <Button variant="outline">Add Widget</Button>
+                  <Button variant="outline">{t("Add Widget")}</Button>
                 </CardContent>
               </Card>
             )}

@@ -23,6 +23,8 @@ import {
   type LabReportFormData,
   type LabResultEntryFormData,
 } from "@/features/diagnostics/laboratory/validations";
+import { useDateFormat, useT, useTranslateAny } from "@/lib/i18n/messages";
+import { LAB_KM } from "@/features/diagnostics/laboratory/km";
 
 interface TestResultEntryProps {
   results: LabTestResult[];
@@ -103,6 +105,9 @@ export function TestResultEntry({
   onPrintReport,
   onSendReport,
 }: TestResultEntryProps) {
+  const fmt = useDateFormat();
+  const t = useT(LAB_KM);
+  const tAny = useTranslateAny(LAB_KM);
   const [resultDialogOpen, setResultDialogOpen] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [criticalDialogOpen, setCriticalDialogOpen] = useState(false);
@@ -211,13 +216,13 @@ export function TestResultEntry({
   });
 
   const getStatusColor = (status: string) => RESULT_STATUS_CONFIG[status as keyof typeof RESULT_STATUS_CONFIG]?.color || "bg-gray-100 text-gray-800";
-  const getFlagColor = (flag: string) => FLAG_TYPES.find(f => f.value === flag)?.color || "text-gray-600";
+  const getFlagColor = (flag: string) => FLAG_TYPES.find(f => f.value === flag)?.color || "text-muted-foreground";
 
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Test Result Entry & Validation</h1>
-        <p className="text-gray-600">Enter, validate, and report laboratory test results</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("Test Result Entry & Validation")}</h1>
+        <p className="text-muted-foreground">{t("Enter, validate, and report laboratory test results")}</p>
       </div>
 
       {/* Critical Values Alert */}
@@ -226,19 +231,19 @@ export function TestResultEntry({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-800">
               <AlertTriangle className="h-5 w-5" />
-              Critical Values Pending Notification
+              {t("Critical Values Pending Notification")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {criticalResults.map((result) => (
-                <div key={result.id} className="flex justify-between items-center p-3 bg-white border border-red-200 rounded">
+                <div key={result.id} className="flex justify-between items-center p-3 bg-background border border-red-200 rounded">
                   <div>
                     <p className="font-medium text-red-900">
-                      {result.testCode}: {result.value} {result.unit}
+                      {result.testCode}: {result.value} {tAny(result.unit)}
                     </p>
                     <p className="text-sm text-red-700">
-                      Order: {result.orderId} • Entered: {new Date(result.enteredAt).toLocaleString()}
+                      {t("Order: {orderId} • Entered: {amount}", { orderId: result.orderId, amount: fmt(result.enteredAt, "PP p") })}
                     </p>
                   </div>
                   <Button
@@ -246,7 +251,7 @@ export function TestResultEntry({
                     size="sm"
                     onClick={() => openCriticalDialog(result)}
                   >
-                    Notify
+                    {t("Notify")}
                   </Button>
                 </div>
               ))}
@@ -258,50 +263,50 @@ export function TestResultEntry({
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1">
           <Input
-            placeholder="Search results by test code, order ID, or value..."
+            placeholder={t("Search results by test code, order ID, or value...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t("Status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="preliminary">Preliminary</SelectItem>
-            <SelectItem value="final">Final</SelectItem>
-            <SelectItem value="corrected">Corrected</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="all">{t("All Status")}</SelectItem>
+            <SelectItem value="pending">{t("Pending")}</SelectItem>
+            <SelectItem value="preliminary">{t("Preliminary")}</SelectItem>
+            <SelectItem value="final">{t("Final")}</SelectItem>
+            <SelectItem value="corrected">{t("Corrected")}</SelectItem>
+            <SelectItem value="cancelled">{t("Cancelled")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={flagFilter} onValueChange={setFlagFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Flag" />
+            <SelectValue placeholder={t("Flag")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Flags</SelectItem>
+            <SelectItem value="all">{t("All Flags")}</SelectItem>
             {FLAG_TYPES.map((flag) => (
               <SelectItem key={flag.value} value={flag.value}>
-                {flag.label}
+                {tAny(flag.label)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Button onClick={() => setResultDialogOpen(true)}>
-          Enter Result
+          {t("Enter Result")}
         </Button>
         <Button variant="outline" onClick={() => setReportDialogOpen(true)}>
           <FileText className="mr-2 h-4 w-4" />
-          Create Report
+          {t("Create Report")}
         </Button>
       </div>
 
       <Tabs defaultValue="results" className="w-full">
         <TabsList>
-          <TabsTrigger value="results">Test Results</TabsTrigger>
-          <TabsTrigger value="reports">Lab Reports</TabsTrigger>
+          <TabsTrigger value="results">{t("Test Results")}</TabsTrigger>
+          <TabsTrigger value="reports">{t("Lab Reports")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="results" className="space-y-4">
@@ -313,7 +318,7 @@ export function TestResultEntry({
                     <CardTitle className="flex items-center gap-2">
                       {result.testCode}
                       <Badge className={getStatusColor(result.status)}>
-                        {result.status}
+                        {tAny(result.status)}
                       </Badge>
                       <Badge variant="outline" className={getFlagColor(result.flag)}>
                         {FLAG_TYPES.find(f => f.value === result.flag)?.label}
@@ -321,12 +326,12 @@ export function TestResultEntry({
                       {result.isCritical && (
                         <Badge variant="destructive">
                           <AlertTriangle className="h-3 w-3 mr-1" />
-                          Critical
+                          {t("Critical")}
                         </Badge>
                       )}
                     </CardTitle>
                     <CardDescription>
-                      Order: {result.orderId} • Entered: {new Date(result.enteredAt).toLocaleString()}
+                      {t("Order: {orderId} • Entered: {amount}", { orderId: result.orderId, amount: fmt(result.enteredAt, "PP p") })}
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
@@ -337,7 +342,7 @@ export function TestResultEntry({
                         onClick={() => handleValidateResult(result.id)}
                       >
                         <CheckCircle className="mr-2 h-4 w-4" />
-                        Validate
+                        {t("Validate")}
                       </Button>
                     )}
                     {result.isCritical && (
@@ -347,7 +352,7 @@ export function TestResultEntry({
                         onClick={() => openCriticalDialog(result)}
                       >
                         <AlertTriangle className="mr-2 h-4 w-4" />
-                        Handle Critical
+                        {t("Handle Critical")}
                       </Button>
                     )}
                   </div>
@@ -356,39 +361,39 @@ export function TestResultEntry({
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <p className="font-medium text-gray-900">Result Value</p>
+                    <p className="font-medium text-foreground">{t("Result Value")}</p>
                     <p className={`text-lg font-bold ${getFlagColor(result.flag)}`}>
-                      {result.value} {result.unit}
+                      {result.value} {tAny(result.unit)}
                     </p>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Reference Range</p>
-                    <p className="text-gray-600">
-                      {result.normalRange || "Not specified"}
+                    <p className="font-medium text-foreground">{t("Reference Range")}</p>
+                    <p className="text-muted-foreground">
+                      {result.normalRange || t("Not specified")}
                     </p>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Entered By</p>
-                    <p className="text-gray-600">{result.enteredBy}</p>
+                    <p className="font-medium text-foreground">{t("Entered By")}</p>
+                    <p className="text-muted-foreground">{result.enteredBy}</p>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Method</p>
-                    <p className="text-gray-600">{result.method || "Standard"}</p>
+                    <p className="font-medium text-foreground">{t("Method")}</p>
+                    <p className="text-muted-foreground">{result.method || t("Standard")}</p>
                   </div>
                 </div>
 
                 {result.notes && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded">
-                    <p className="font-medium text-gray-900">Comments</p>
-                    <p className="text-gray-700">{result.notes}</p>
+                  <div className="mt-4 p-3 bg-muted/50 rounded">
+                    <p className="font-medium text-foreground">{t("Comments")}</p>
+                    <p className="text-muted-foreground">{result.notes}</p>
                   </div>
                 )}
 
                 {result.validatedBy && (
                   <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
-                    <p className="font-medium text-green-900">Validation Information</p>
+                    <p className="font-medium text-green-900">{t("Validation Information")}</p>
                     <p className="text-green-700">
-                      Validated by {result.validatedBy} on {result.validatedAt && new Date(result.validatedAt).toLocaleString()}
+                      {t("Validated by {validatedBy} on {value}", { validatedBy: result.validatedBy, value: result.validatedAt ? fmt(result.validatedAt, "PP p") : "" })}
                     </p>
                     {result.validationComments && (
                       <p className="text-green-700 mt-1">{result.validationComments}</p>
@@ -408,13 +413,13 @@ export function TestResultEntry({
                   <div>
                     <CardTitle className="flex items-center gap-2">
                       <FileText className="h-5 w-5" />
-                      Lab Report #{report.reportNumber}
+                      {t("Lab Report #")}{report.reportNumber}
                       <Badge className={getStatusColor(report.status)}>
-                        {report.status}
+                        {tAny(report.status)}
                       </Badge>
                     </CardTitle>
                     <CardDescription>
-                      {report.patientName} • Order: {report.orderId} • {new Date(report.reportDate).toLocaleString()}
+                      {t("{patientName} • Order: {orderId} • {amount}", { patientName: report.patientName, orderId: report.orderId, amount: fmt(report.reportDate, "PP p") })}
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
@@ -424,7 +429,7 @@ export function TestResultEntry({
                       onClick={() => onDownloadReport(report.id)}
                     >
                       <Download className="mr-2 h-4 w-4" />
-                      Download
+                      {t("Download")}
                     </Button>
                     <Button
                       variant="outline"
@@ -432,14 +437,14 @@ export function TestResultEntry({
                       onClick={() => onPrintReport(report.id)}
                     >
                       <Printer className="mr-2 h-4 w-4" />
-                      Print
+                      {t("Print")}
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => openSendReportDialog(report)}
                     >
                       <Send className="mr-2 h-4 w-4" />
-                      Send
+                      {t("Send")}
                     </Button>
                   </div>
                 </div>
@@ -447,29 +452,29 @@ export function TestResultEntry({
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <p className="font-medium text-gray-900">Delivery</p>
-                    <Badge variant="outline">{DELIVERY_METHOD_LABELS[report.deliveryMethod]}</Badge>
+                    <p className="font-medium text-foreground">{t("Delivery")}</p>
+                    <Badge variant="outline">{tAny(DELIVERY_METHOD_LABELS[report.deliveryMethod])}</Badge>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Technologist</p>
-                    <p className="text-gray-600">{report.technologist.name}</p>
+                    <p className="font-medium text-foreground">{t("Technologist")}</p>
+                    <p className="text-muted-foreground">{report.technologist.name}</p>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Notification</p>
-                    <p className="text-gray-600">
+                    <p className="font-medium text-foreground">{t("Notification")}</p>
+                    <p className="text-muted-foreground">
                       {report.criticalValues
                         ? report.notificationSent
-                          ? "Critical values notified"
-                          : "Critical values not yet notified"
-                        : "No critical values"}
+                          ? t("Critical values notified")
+                          : t("Critical values not yet notified")
+                        : t("No critical values")}
                     </p>
                   </div>
                 </div>
 
                 {report.interpretation && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded">
-                    <p className="font-medium text-gray-900">Interpretation</p>
-                    <p className="text-gray-700">{report.interpretation}</p>
+                  <div className="mt-4 p-3 bg-muted/50 rounded">
+                    <p className="font-medium text-foreground">{t("Interpretation")}</p>
+                    <p className="text-muted-foreground">{report.interpretation}</p>
                   </div>
                 )}
               </CardContent>
@@ -482,46 +487,46 @@ export function TestResultEntry({
       <Dialog open={resultDialogOpen} onOpenChange={setResultDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Enter Test Result</DialogTitle>
+            <DialogTitle>{t("Enter Test Result")}</DialogTitle>
             <DialogDescription>
-              Enter laboratory test result and validation information
+              {t("Enter laboratory test result and validation information")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={resultForm.handleSubmit(handleEnterResult)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="orderId">Order ID *</Label>
-                <Input id="orderId" {...resultForm.register("orderId")} placeholder="Order ID" />
+                <Label htmlFor="orderId">{t("Order ID *")}</Label>
+                <Input id="orderId" {...resultForm.register("orderId")} placeholder={t("Order ID")} />
                 <FieldError message={resultForm.formState.errors.orderId?.message} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="testCode">Test Code *</Label>
-                <Input id="testCode" {...resultForm.register("testCode")} placeholder="e.g., GLU" />
+                <Label htmlFor="testCode">{t("Test Code *")}</Label>
+                <Input id="testCode" {...resultForm.register("testCode")} placeholder={t("e.g., GLU")} />
                 <FieldError message={resultForm.formState.errors.testCode?.message} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="value">Result Value *</Label>
+                <Label htmlFor="value">{t("Result Value *")}</Label>
                 <Input id="value" type="number" step="0.01" {...resultForm.register("value", { valueAsNumber: true })} />
                 <FieldError message={resultForm.formState.errors.value?.message} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="unit">Unit *</Label>
-                <Input id="unit" {...resultForm.register("unit")} placeholder="e.g., mg/dL" />
+                <Label htmlFor="unit">{t("Unit *")}</Label>
+                <Input id="unit" {...resultForm.register("unit")} placeholder={t("e.g., mg/dL")} />
                 <FieldError message={resultForm.formState.errors.unit?.message} />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="normalRange">Reference Range</Label>
-              <Input id="normalRange" {...resultForm.register("normalRange")} placeholder="e.g., 70-100 mg/dL" />
+              <Label htmlFor="normalRange">{t("Reference Range")}</Label>
+              <Input id="normalRange" {...resultForm.register("normalRange")} placeholder={t("e.g., 70-100 mg/dL")} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Status</Label>
+                <Label>{t("Status")}</Label>
                 <Controller
                   control={resultForm.control}
                   name="status"
@@ -531,16 +536,16 @@ export function TestResultEntry({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="preliminary">Preliminary</SelectItem>
-                        <SelectItem value="final">Final</SelectItem>
+                        <SelectItem value="pending">{t("Pending")}</SelectItem>
+                        <SelectItem value="preliminary">{t("Preliminary")}</SelectItem>
+                        <SelectItem value="final">{t("Final")}</SelectItem>
                       </SelectContent>
                     </Select>
                   )}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Flag</Label>
+                <Label>{t("Flag")}</Label>
                 <Controller
                   control={resultForm.control}
                   name="flag"
@@ -552,7 +557,7 @@ export function TestResultEntry({
                       <SelectContent>
                         {FLAG_TYPES.map((flag) => (
                           <SelectItem key={flag.value} value={flag.value}>
-                            {flag.label}
+                            {tAny(flag.label)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -564,19 +569,19 @@ export function TestResultEntry({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="method">Method</Label>
-                <Input id="method" {...resultForm.register("method")} placeholder="Testing method" />
+                <Label htmlFor="method">{t("Method")}</Label>
+                <Input id="method" {...resultForm.register("method")} placeholder={t("Testing method")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="enteredBy">Entered By *</Label>
-                <Input id="enteredBy" {...resultForm.register("enteredBy")} placeholder="Technologist name" />
+                <Label htmlFor="enteredBy">{t("Entered By *")}</Label>
+                <Input id="enteredBy" {...resultForm.register("enteredBy")} placeholder={t("Technologist name")} />
                 <FieldError message={resultForm.formState.errors.enteredBy?.message} />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">Comments</Label>
-              <Textarea id="notes" {...resultForm.register("notes")} placeholder="Result comments..." rows={3} />
+              <Label htmlFor="notes">{t("Comments")}</Label>
+              <Textarea id="notes" {...resultForm.register("notes")} placeholder={t("Result comments...")} rows={3} />
             </div>
 
             <Controller
@@ -585,16 +590,16 @@ export function TestResultEntry({
               render={({ field }) => (
                 <div className="flex items-center space-x-2">
                   <Checkbox id="isCritical" checked={field.value} onCheckedChange={(v) => field.onChange(v === true)} />
-                  <Label htmlFor="isCritical">Mark as critical value</Label>
+                  <Label htmlFor="isCritical">{t("Mark as critical value")}</Label>
                 </div>
               )}
             />
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setResultDialogOpen(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
-              <Button type="submit">Enter Result</Button>
+              <Button type="submit">{t("Enter Result")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -604,20 +609,20 @@ export function TestResultEntry({
       <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Create Lab Report</DialogTitle>
+            <DialogTitle>{t("Create Lab Report")}</DialogTitle>
             <DialogDescription>
-              Generate a laboratory report with selected results
+              {t("Generate a laboratory report with selected results")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={reportForm.handleSubmit(handleCreateReport)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="reportOrderId">Order ID *</Label>
-              <Input id="reportOrderId" {...reportForm.register("orderId")} placeholder="Order ID for report" />
+              <Label htmlFor="reportOrderId">{t("Order ID *")}</Label>
+              <Input id="reportOrderId" {...reportForm.register("orderId")} placeholder={t("Order ID for report")} />
               <FieldError message={reportForm.formState.errors.orderId?.message} />
             </div>
 
             <div className="space-y-2">
-              <Label>Delivery</Label>
+              <Label>{t("Delivery")}</Label>
               <Controller
                 control={reportForm.control}
                 name="deliveryMethod"
@@ -629,7 +634,7 @@ export function TestResultEntry({
                     <SelectContent>
                       {(Object.keys(DELIVERY_METHOD_LABELS) as LabReport["deliveryMethod"][]).map((m) => (
                         <SelectItem key={m} value={m}>
-                          {DELIVERY_METHOD_LABELS[m]}
+                          {tAny(DELIVERY_METHOD_LABELS[m])}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -639,15 +644,15 @@ export function TestResultEntry({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="interpretation">Interpretation</Label>
-              <Textarea id="interpretation" {...reportForm.register("interpretation")} placeholder="Clinical interpretation of the results..." rows={3} />
+              <Label htmlFor="interpretation">{t("Interpretation")}</Label>
+              <Textarea id="interpretation" {...reportForm.register("interpretation")} placeholder={t("Clinical interpretation of the results...")} rows={3} />
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setReportDialogOpen(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
-              <Button type="submit">Generate Report</Button>
+              <Button type="submit">{t("Generate Report")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -657,22 +662,22 @@ export function TestResultEntry({
       <Dialog open={criticalDialogOpen} onOpenChange={setCriticalDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Handle Critical Value</DialogTitle>
+            <DialogTitle>{t("Handle Critical Value")}</DialogTitle>
             <DialogDescription>
-              Record who was told about this critical result: {selectedResult?.testCode}
+              {t("Record who was told about this critical result: {testCode}", { testCode: selectedResult?.testCode })}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={criticalForm.handleSubmit(handleCriticalValue)} className="space-y-4">
             <div className="p-4 bg-red-50 border border-red-200 rounded">
-              <p className="font-medium text-red-900">Critical Result</p>
+              <p className="font-medium text-red-900">{t("Critical Result")}</p>
               <p className="text-red-700">
-                {selectedResult?.testCode}: {selectedResult?.value} {selectedResult?.unit}
+                {selectedResult?.testCode}: {selectedResult?.value} {tAny(selectedResult?.unit)}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Notification Method</Label>
+                <Label>{t("Notification Method")}</Label>
                 <Controller
                   control={criticalForm.control}
                   name="notificationMethod"
@@ -682,17 +687,17 @@ export function TestResultEntry({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="phone">Phone Call</SelectItem>
-                        <SelectItem value="in_person">In Person</SelectItem>
-                        <SelectItem value="sms">SMS</SelectItem>
-                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="phone">{t("Phone Call")}</SelectItem>
+                        <SelectItem value="in_person">{t("In Person")}</SelectItem>
+                        <SelectItem value="sms">{t("SMS")}</SelectItem>
+                        <SelectItem value="email">{t("Email")}</SelectItem>
                       </SelectContent>
                     </Select>
                   )}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Urgency</Label>
+                <Label>{t("Urgency")}</Label>
                 <Controller
                   control={criticalForm.control}
                   name="urgency"
@@ -702,9 +707,9 @@ export function TestResultEntry({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="immediate">Immediate</SelectItem>
-                        <SelectItem value="urgent">Urgent</SelectItem>
-                        <SelectItem value="routine">Routine</SelectItem>
+                        <SelectItem value="immediate">{t("Immediate")}</SelectItem>
+                        <SelectItem value="urgent">{t("Urgent")}</SelectItem>
+                        <SelectItem value="routine">{t("Routine")}</SelectItem>
                       </SelectContent>
                     </Select>
                   )}
@@ -713,27 +718,27 @@ export function TestResultEntry({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notifiedPerson">Person Notified *</Label>
-              <Input id="notifiedPerson" {...criticalForm.register("notifiedPerson")} placeholder="Doctor or nurse name" />
+              <Label htmlFor="notifiedPerson">{t("Person Notified *")}</Label>
+              <Input id="notifiedPerson" {...criticalForm.register("notifiedPerson")} placeholder={t("Doctor or nurse name")} />
               <FieldError message={criticalForm.formState.errors.notifiedPerson?.message} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notificationNotes">Notification Notes</Label>
+              <Label htmlFor="notificationNotes">{t("Notification Notes")}</Label>
               <Textarea
                 id="notificationNotes"
                 {...criticalForm.register("notificationNotes")}
-                placeholder="Details of notification conversation..."
+                placeholder={t("Details of notification conversation...")}
                 rows={3}
               />
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setCriticalDialogOpen(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" variant="destructive">
-                Send Notification
+                {t("Send Notification")}
               </Button>
             </DialogFooter>
           </form>
@@ -744,47 +749,46 @@ export function TestResultEntry({
       <Dialog open={sendReportDialogOpen} onOpenChange={setSendReportDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Send Report</DialogTitle>
+            <DialogTitle>{t("Send Report")}</DialogTitle>
             <DialogDescription>
-              Send report #{selectedReport?.reportNumber} to recipient
-            </DialogDescription>
+              {t("Send report #{reportNumber} to recipient", { reportNumber: selectedReport?.reportNumber })}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Delivery Method</Label>
+              <Label>{t("Delivery Method")}</Label>
               <Select value={sendMethod} onValueChange={(value) => setSendMethod(value as typeof sendMethod)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="portal">Patient Portal</SelectItem>
-                  <SelectItem value="fax">Fax</SelectItem>
+                  <SelectItem value="email">{t("Email")}</SelectItem>
+                  <SelectItem value="portal">{t("Patient Portal")}</SelectItem>
+                  <SelectItem value="fax">{t("Fax")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="recipient">Recipient</Label>
+              <Label htmlFor="recipient">{t("Recipient")}</Label>
               <Input
                 id="recipient"
                 value={sendRecipient}
                 onChange={(e) => setSendRecipient(e.target.value)}
                 placeholder={
-                  sendMethod === "email" ? "email@example.com" :
+                  sendMethod === "email" ? t("email@example.com") :
                   sendMethod === "fax" ? "555-123-4567" :
-                  "Patient portal username"
+                  t("Patient portal username")
                 }
               />
             </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setSendReportDialogOpen(false)}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button onClick={handleSendReport}>
                 <Send className="mr-2 h-4 w-4" />
-                Send Report
+                {t("Send Report")}
               </Button>
             </DialogFooter>
           </div>
