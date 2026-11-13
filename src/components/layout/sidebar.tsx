@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +12,6 @@ import {
   FileText,
   Activity,
   Heart,
-  Settings,
   BedDouble,
   UserCog,
   TestTube,
@@ -35,12 +34,17 @@ interface NavItem {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const tab = useSearchParams().get("tab");
+  const currentHref = tab ? `${pathname}?tab=${tab}` : pathname;
   const [isOpen, setIsOpen] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  // Groups start expanded when they contain the current page; set after navItems is defined below.
+  const [expandedItems, setExpandedItems] = useState<string[] | null>(null);
 
   const toggleExpand = (title: string) => {
     setExpandedItems((prev) =>
-      prev.includes(title) ? prev.filter((item) => item !== title) : [...prev, title]
+      (prev ?? openGroups).includes(title)
+        ? (prev ?? openGroups).filter((item) => item !== title)
+        : [...(prev ?? openGroups), title]
     );
   };
 
@@ -54,13 +58,8 @@ export function Sidebar() {
       title: "Patient Management",
       icon: <Users className="h-5 w-5" />,
       children: [
-        { title: "Patient List", href: "/patients", icon: <Users className="h-4 w-4" /> },
-        {
-          title: "Registration",
-          href: "/patient-demo",
-          icon: <FileText className="h-4 w-4" />,
-        },
-        { title: "Appointments", href: "/scheduling-demo", icon: <Calendar className="h-4 w-4" /> },
+        { title: "Patients", href: "/front-desk/patients", icon: <Users className="h-4 w-4" /> },
+        { title: "Book Appointment", href: "/front-desk/scheduling?tab=booking", icon: <Calendar className="h-4 w-4" /> },
       ],
     },
     {
@@ -68,20 +67,20 @@ export function Sidebar() {
       icon: <BedDouble className="h-5 w-5" />,
       badge: "New",
       children: [
-        { title: "IPD Dashboard", href: "/inpatient", icon: <Activity className="h-4 w-4" /> },
+        { title: "IPD Dashboard", href: "/nursing/inpatient", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Bed Management",
-          href: "/inpatient?tab=beds",
+          href: "/nursing/inpatient?tab=beds",
           icon: <BedDouble className="h-4 w-4" />,
         },
         {
           title: "Admissions",
-          href: "/inpatient?tab=admission",
+          href: "/nursing/inpatient?tab=admission",
           icon: <FileText className="h-4 w-4" />,
         },
         {
           title: "Vital Signs",
-          href: "/inpatient?tab=vitals",
+          href: "/nursing/inpatient?tab=vitals",
           icon: <Activity className="h-4 w-4" />,
         },
       ],
@@ -90,69 +89,42 @@ export function Sidebar() {
       title: "OPD Management",
       icon: <Stethoscope className="h-5 w-5" />,
       children: [
-        { title: "OPD Dashboard", href: "/opd", icon: <Activity className="h-4 w-4" /> },
-        {
-          title: "Registration",
-          href: "/opd/registration",
-          icon: <FileText className="h-4 w-4" />,
-        },
-        {
-          title: "Consultation",
-          href: "/opd/consultation",
-          icon: <Stethoscope className="h-4 w-4" />,
-        },
-        { title: "Prescription", href: "/opd/prescription", icon: <FileText className="h-4 w-4" /> },
+        { title: "OPD Dashboard", href: "/doctor/opd", icon: <Activity className="h-4 w-4" /> },
+        { title: "Registration", href: "/doctor/opd?tab=registration", icon: <FileText className="h-4 w-4" /> },
+        { title: "Consultation", href: "/doctor/opd?tab=consultation", icon: <Stethoscope className="h-4 w-4" /> },
+        { title: "Diagnosis", href: "/doctor/opd?tab=diagnosis", icon: <FileText className="h-4 w-4" /> },
+        { title: "Prescription", href: "/doctor/opd?tab=prescription", icon: <FileText className="h-4 w-4" /> },
       ],
     },
     {
       title: "Laboratory",
       icon: <TestTube className="h-5 w-5" />,
       children: [
-        { title: "Lab Dashboard", href: "/laboratory", icon: <Activity className="h-4 w-4" /> },
-        { title: "Lab Orders", href: "/laboratory/orders", icon: <FileText className="h-4 w-4" /> },
-        {
-          title: "Test Results",
-          href: "/laboratory/results",
-          icon: <TestTube className="h-4 w-4" />,
-        },
-        {
-          title: "Sample Tracking",
-          href: "/laboratory/samples",
-          icon: <Activity className="h-4 w-4" />,
-        },
+        { title: "Lab Dashboard", href: "/diagnostics/laboratory", icon: <Activity className="h-4 w-4" /> },
+        { title: "Lab Orders", href: "/diagnostics/laboratory?tab=orders", icon: <FileText className="h-4 w-4" /> },
+        { title: "Sample Tracking", href: "/diagnostics/laboratory?tab=samples", icon: <Activity className="h-4 w-4" /> },
+        { title: "Test Results", href: "/diagnostics/laboratory?tab=results", icon: <TestTube className="h-4 w-4" /> },
       ],
     },
     {
       title: "Radiology",
-      href: "/radiology",
       icon: <Scan className="h-5 w-5" />,
       children: [
-        { title: "Radiology Dashboard", href: "/radiology", icon: <Activity className="h-4 w-4" /> },
-        { title: "Imaging Orders", href: "/radiology/orders", icon: <FileText className="h-4 w-4" /> },
-        { title: "Reports", href: "/radiology/reports", icon: <FileText className="h-4 w-4" /> },
-        { title: "Scheduling", href: "/radiology/schedule", icon: <Calendar className="h-4 w-4" /> },
+        { title: "Radiology Dashboard", href: "/diagnostics/radiology", icon: <Activity className="h-4 w-4" /> },
+        { title: "Imaging Orders", href: "/diagnostics/radiology?tab=orders", icon: <FileText className="h-4 w-4" /> },
+        { title: "Scheduling", href: "/diagnostics/radiology?tab=scheduling", icon: <Calendar className="h-4 w-4" /> },
+        { title: "Studies", href: "/diagnostics/radiology?tab=studies", icon: <Scan className="h-4 w-4" /> },
+        { title: "Reports", href: "/diagnostics/radiology?tab=reports", icon: <FileText className="h-4 w-4" /> },
       ],
     },
     {
       title: "Scheduling",
-      href: "/scheduling-demo",
       icon: <Calendar className="h-5 w-5" />,
       children: [
-        {
-          title: "Appointments",
-          href: "/scheduling-demo",
-          icon: <Calendar className="h-4 w-4" />,
-        },
-        {
-          title: "Emergency Triage",
-          href: "/scheduling/triage",
-          icon: <Activity className="h-4 w-4" />,
-        },
-        {
-          title: "Telemedicine",
-          href: "/scheduling/telemedicine",
-          icon: <Activity className="h-4 w-4" />,
-        },
+        { title: "Overview", href: "/front-desk/scheduling", icon: <Calendar className="h-4 w-4" /> },
+        { title: "Department Rosters", href: "/front-desk/scheduling?tab=departments", icon: <Users className="h-4 w-4" /> },
+        { title: "Reminders", href: "/front-desk/scheduling?tab=reminders", icon: <Activity className="h-4 w-4" /> },
+        { title: "Telemedicine", href: "/front-desk/scheduling?tab=telemedicine", icon: <Activity className="h-4 w-4" /> },
       ],
     },
     {
@@ -160,19 +132,17 @@ export function Sidebar() {
       icon: <UserCog className="h-5 w-5" />,
       badge: "New",
       children: [
-        { title: "Staff Dashboard", href: "/staff", icon: <Activity className="h-4 w-4" /> },
+        { title: "Staff Dashboard", href: "/admin/staff", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Staff Registration",
-          href: "/staff?tab=register",
+          href: "/admin/staff?tab=register",
           icon: <UserCog className="h-4 w-4" />,
         },
         {
           title: "Leave Management",
-          href: "/staff?tab=leave",
+          href: "/admin/staff?tab=leave",
           icon: <Calendar className="h-4 w-4" />,
         },
-        { title: "Attendance", href: "/staff/attendance", icon: <Activity className="h-4 w-4" /> },
-        { title: "Shifts", href: "/staff/shifts", icon: <Calendar className="h-4 w-4" /> },
       ],
     },
     {
@@ -180,15 +150,15 @@ export function Sidebar() {
       icon: <Activity className="h-5 w-5" />,
       badge: "New",
       children: [
-        { title: "OT Dashboard", href: "/operation-theater", icon: <Activity className="h-4 w-4" /> },
+        { title: "OT Dashboard", href: "/nursing/operation-theater", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Surgery Schedule",
-          href: "/operation-theater?tab=schedule",
+          href: "/nursing/operation-theater?tab=schedule",
           icon: <Calendar className="h-4 w-4" />,
         },
         {
           title: "Theaters",
-          href: "/operation-theater?tab=theaters",
+          href: "/nursing/operation-theater?tab=theaters",
           icon: <BedDouble className="h-4 w-4" />,
         },
       ],
@@ -198,15 +168,15 @@ export function Sidebar() {
       icon: <FileText className="h-5 w-5" />,
       badge: "New",
       children: [
-        { title: "Inventory Dashboard", href: "/inventory", icon: <Activity className="h-4 w-4" /> },
+        { title: "Inventory Dashboard", href: "/support/inventory", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Stock Items",
-          href: "/inventory?tab=items",
+          href: "/support/inventory?tab=items",
           icon: <FileText className="h-4 w-4" />,
         },
         {
           title: "Purchase Orders",
-          href: "/inventory?tab=orders",
+          href: "/support/inventory?tab=orders",
           icon: <FileText className="h-4 w-4" />,
         },
       ],
@@ -216,20 +186,20 @@ export function Sidebar() {
       icon: <Heart className="h-5 w-5" />,
       badge: "New",
       children: [
-        { title: "ER Dashboard", href: "/emergency", icon: <Activity className="h-4 w-4" /> },
+        { title: "ER Dashboard", href: "/nursing/emergency", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Active Cases",
-          href: "/emergency?tab=cases",
+          href: "/nursing/emergency?tab=cases",
           icon: <FileText className="h-4 w-4" />,
         },
         {
           title: "ER Beds",
-          href: "/emergency?tab=beds",
+          href: "/nursing/emergency?tab=beds",
           icon: <BedDouble className="h-4 w-4" />,
         },
         {
           title: "Ambulances",
-          href: "/emergency?tab=ambulances",
+          href: "/nursing/emergency?tab=ambulances",
           icon: <Activity className="h-4 w-4" />,
         },
       ],
@@ -239,15 +209,15 @@ export function Sidebar() {
       icon: <Users className="h-5 w-5" />,
       badge: "New",
       children: [
-        { title: "Queue Dashboard", href: "/queue", icon: <Activity className="h-4 w-4" /> },
+        { title: "Queue Dashboard", href: "/front-desk/queue", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Active Queue",
-          href: "/queue?tab=queue",
+          href: "/front-desk/queue?tab=queue",
           icon: <Users className="h-4 w-4" />,
         },
         {
           title: "Counters",
-          href: "/queue?tab=counters",
+          href: "/front-desk/queue?tab=counters",
           icon: <Activity className="h-4 w-4" />,
         },
       ],
@@ -257,17 +227,18 @@ export function Sidebar() {
       icon: <FileText className="h-5 w-5" />,
       badge: "New",
       children: [
-        { title: "Records Dashboard", href: "/medical-records", icon: <Activity className="h-4 w-4" /> },
+        { title: "Records Dashboard", href: "/doctor/medical-records", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Patient Records",
-          href: "/medical-records?tab=records",
+          href: "/doctor/medical-records?tab=records",
           icon: <FileText className="h-4 w-4" />,
         },
         {
           title: "Documents",
-          href: "/medical-records?tab=documents",
+          href: "/doctor/medical-records?tab=documents",
           icon: <FileText className="h-4 w-4" />,
         },
+        { title: "Consent Forms", href: "/doctor/medical-records?tab=consents", icon: <FileText className="h-4 w-4" /> },
       ],
     },
     {
@@ -275,20 +246,20 @@ export function Sidebar() {
       icon: <Heart className="h-5 w-5" />,
       badge: "New",
       children: [
-        { title: "Blood Bank Dashboard", href: "/blood-bank", icon: <Activity className="h-4 w-4" /> },
+        { title: "Blood Bank Dashboard", href: "/diagnostics/blood-bank", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Donors",
-          href: "/blood-bank?tab=donors",
+          href: "/diagnostics/blood-bank?tab=donors",
           icon: <Users className="h-4 w-4" />,
         },
         {
           title: "Inventory",
-          href: "/blood-bank?tab=inventory",
+          href: "/diagnostics/blood-bank?tab=inventory",
           icon: <FileText className="h-4 w-4" />,
         },
         {
           title: "Requests",
-          href: "/blood-bank?tab=requests",
+          href: "/diagnostics/blood-bank?tab=requests",
           icon: <FileText className="h-4 w-4" />,
         },
       ],
@@ -298,20 +269,20 @@ export function Sidebar() {
       icon: <Activity className="h-5 w-5" />,
       badge: "New",
       children: [
-        { title: "Ambulance Dashboard", href: "/ambulance-services", icon: <Activity className="h-4 w-4" /> },
+        { title: "Ambulance Dashboard", href: "/support/ambulance", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Active Trips",
-          href: "/ambulance-services?tab=trips",
+          href: "/support/ambulance?tab=trips",
           icon: <Activity className="h-4 w-4" />,
         },
         {
           title: "Fleet",
-          href: "/ambulance-services?tab=fleet",
+          href: "/support/ambulance?tab=fleet",
           icon: <Activity className="h-4 w-4" />,
         },
         {
           title: "Requests",
-          href: "/ambulance-services?tab=requests",
+          href: "/support/ambulance?tab=requests",
           icon: <FileText className="h-4 w-4" />,
         },
       ],
@@ -321,20 +292,20 @@ export function Sidebar() {
       icon: <Heart className="h-5 w-5" />,
       badge: "New",
       children: [
-        { title: "Diet Dashboard", href: "/diet-management", icon: <Activity className="h-4 w-4" /> },
+        { title: "Diet Dashboard", href: "/support/diet", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Diet Orders",
-          href: "/diet-management?tab=orders",
+          href: "/support/diet?tab=orders",
           icon: <FileText className="h-4 w-4" />,
         },
         {
           title: "Meal Services",
-          href: "/diet-management?tab=services",
+          href: "/support/diet?tab=services",
           icon: <Activity className="h-4 w-4" />,
         },
         {
           title: "Assessments",
-          href: "/diet-management?tab=assessments",
+          href: "/support/diet?tab=assessments",
           icon: <FileText className="h-4 w-4" />,
         },
       ],
@@ -344,20 +315,21 @@ export function Sidebar() {
       icon: <Activity className="h-5 w-5" />,
       badge: "New",
       children: [
-        { title: "CSSD Dashboard", href: "/cssd-management", icon: <Activity className="h-4 w-4" /> },
+        { title: "CSSD Dashboard", href: "/support/cssd", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Sterilization",
-          href: "/cssd-management?tab=cycles",
+          href: "/support/cssd?tab=cycles",
           icon: <Activity className="h-4 w-4" />,
         },
         {
           title: "Packs",
-          href: "/cssd-management?tab=packs",
+          href: "/support/cssd?tab=packs",
           icon: <FileText className="h-4 w-4" />,
         },
+        { title: "Requests", href: "/support/cssd?tab=requests", icon: <FileText className="h-4 w-4" /> },
         {
           title: "Equipment",
-          href: "/cssd-management?tab=equipment",
+          href: "/support/cssd?tab=equipment",
           icon: <Activity className="h-4 w-4" />,
         },
       ],
@@ -366,32 +338,23 @@ export function Sidebar() {
       title: "Reporting & Analytics",
       icon: <BarChart3 className="h-5 w-5" />,
       children: [
-        { title: "Dashboard", href: "/reports", icon: <Activity className="h-4 w-4" /> },
-        { title: "Clinical Reports", href: "/reports/clinical", icon: <FileText className="h-4 w-4" /> },
-        { title: "Billing Summary", href: "/reports/billing", icon: <FileText className="h-4 w-4" /> },
-        { title: "Daily Census", href: "/reports/census", icon: <Activity className="h-4 w-4" /> },
+        { title: "Overview", href: "/admin/reporting", icon: <Activity className="h-4 w-4" /> },
+        { title: "Daily Census", href: "/admin/reporting?tab=census", icon: <Activity className="h-4 w-4" /> },
+        { title: "Clinical Reports", href: "/admin/reporting?tab=clinical", icon: <FileText className="h-4 w-4" /> },
+        { title: "Billing Summary", href: "/admin/reporting?tab=billing", icon: <FileText className="h-4 w-4" /> },
+        { title: "Inventory Reports", href: "/admin/reporting?tab=inventory", icon: <FileText className="h-4 w-4" /> },
       ],
-    },
-    {
-      title: "Billing & Finance",
-      icon: <Heart className="h-5 w-5" />,
-      badge: "Soon",
-      children: [
-        { title: "Patient Billing", href: "#", icon: <FileText className="h-4 w-4" /> },
-        { title: "Insurance Claims", href: "#", icon: <FileText className="h-4 w-4" /> },
-        { title: "Payments", href: "#", icon: <Activity className="h-4 w-4" /> },
-      ],
-    },
-    {
-      title: "Settings",
-      href: "/settings",
-      icon: <Settings className="h-5 w-5" />,
     },
   ];
 
+  const openGroups = navItems
+    .filter((item) => item.children?.some((child) => child.href?.split("?")[0] === pathname))
+    .map((item) => item.title);
+  const expanded = expandedItems ?? openGroups;
+
   const renderNavItem = (item: NavItem, level: number = 0) => {
-    const isActive = pathname === item.href;
-    const isExpanded = expandedItems.includes(item.title);
+    const isActive = currentHref === item.href;
+    const isExpanded = expanded.includes(item.title);
     const hasChildren = item.children && item.children.length > 0;
 
     return (

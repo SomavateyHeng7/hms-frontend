@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -36,9 +37,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="flex min-h-screen">
-            <Sidebar />
+            <Suspense>
+              <Sidebar />
+            </Suspense>
             <main className="flex-1 lg:pl-64">
-              {children}
+              {/* Suspense lets client components read ?tab= (useSearchParams) on static pages */}
+              <Suspense>{children}</Suspense>
             </main>
           </div>
         </ThemeProvider>

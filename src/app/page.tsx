@@ -39,7 +39,7 @@ export default function Home() {
                 <li>• Insurance Details Management</li>
                 <li>• Medical History Tracking</li>
               </ul>
-              <Link href="/patient-demo">
+              <Link href="/front-desk/patients">
                 <Button className="w-full">
                   Access Patient Management
                 </Button>
@@ -66,7 +66,7 @@ export default function Home() {
                 <li>• Visit History Tracking</li>
                 <li>• Department-wise Scheduling</li>
               </ul>
-              <Link href="/scheduling-demo">
+              <Link href="/front-desk/scheduling">
                 <Button className="w-full">
                   Access Scheduling System
                 </Button>
@@ -93,9 +93,9 @@ export default function Home() {
                 <li>• Diagnostic Reports</li>
                 <li>• Treatment History</li>
               </ul>
-              <Button className="w-full" variant="outline" disabled>
-                Coming Soon
-              </Button>
+              <Link href="/doctor/medical-records">
+                <Button className="w-full">Access Medical Records</Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -118,9 +118,9 @@ export default function Home() {
                 <li>• Equipment Management</li>
                 <li>• Department Coordination</li>
               </ul>
-              <Button className="w-full" variant="outline" disabled>
-                Coming Soon
-              </Button>
+              <Link href="/nursing/inpatient">
+                <Button className="w-full">Access Hospital Operations</Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -144,7 +144,7 @@ export default function Home() {
                 <li>• Revenue Management</li>
               </ul>
               <Button className="w-full" variant="outline" disabled>
-                Coming Soon
+                Handled by the billing system
               </Button>
             </CardContent>
           </Card>
@@ -168,9 +168,9 @@ export default function Home() {
                 <li>• Audit Trails</li>
                 <li>• Compliance Management</li>
               </ul>
-              <Button className="w-full" variant="outline" disabled>
-                Coming Soon
-              </Button>
+              <Link href="/admin/staff">
+                <Button className="w-full">Access Administration</Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
