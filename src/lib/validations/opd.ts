@@ -113,47 +113,35 @@ export const treatmentPlanSchema = z.object({
 });
 
 export const prescriptionSchema = z.object({
+  type: z.enum(["regular", "emergency", "repeat", "discharge"]),
+  priority: z.enum(["low", "medium", "high", "urgent"]),
+  status: z.enum(["active", "completed", "cancelled", "expired", "on_hold"]),
+  notes: z.string().optional(),
   medications: z.array(z.object({
-    drugName: z.string().min(1, "Drug name is required"),
+    name: z.string().min(1, "Medication name is required"),
     genericName: z.string().optional(),
-    strength: z.string().min(1, "Strength is required"),
-    dosageForm: z.enum(["tablet", "capsule", "syrup", "injection", "cream", "drops", "inhaler", "patch"]),
-    quantity: z.number().min(1, "Quantity must be at least 1"),
     dosage: z.string().min(1, "Dosage is required"),
     frequency: z.string().min(1, "Frequency is required"),
-    route: z.enum(["oral", "iv", "im", "sc", "topical", "inhalation", "rectal", "sublingual"]),
     duration: z.string().min(1, "Duration is required"),
-    instructions: z.string().min(1, "Instructions are required"),
-    substitutionAllowed: z.boolean(),
-    refills: z.number().min(0).max(12),
-    warnings: z.array(z.string()),
+    quantity: z.number().min(1, "Quantity must be at least 1"),
+    instructions: z.string().optional(),
+    route: z.enum(["oral", "topical", "injection", "inhalation", "rectal", "sublingual"]),
   })).min(1, "At least one medication is required"),
-  instructions: z.string().min(1, "General instructions are required"),
-  duration: z.string().min(1, "Treatment duration is required"),
-  followUpDate: z.string().optional(),
-  pharmacyNotes: z.string().optional(),
 });
 
 export const opdBillingSchema = z.object({
+  status: z.enum(["draft", "pending", "approved", "partial", "paid", "overdue", "cancelled"]),
+  paymentStatus: z.enum(["pending", "partial", "paid", "overdue", "refunded"]),
   items: z.array(z.object({
-    type: z.enum(["consultation", "procedure", "medication", "lab_test", "imaging", "room_charge", "equipment", "other"]),
-    code: z.string().min(1, "Item code is required"),
+    serviceCode: z.string().min(1, "Service code is required"),
     description: z.string().min(1, "Description is required"),
-    quantity: z.number().min(1),
-    unitPrice: z.number().min(0),
-    doctorId: z.string().optional(),
-    departmentId: z.string().optional(),
-    isInsuranceCovered: z.boolean(),
-    insuranceCoverage: z.number().min(0).max(100).optional(),
+    quantity: z.number().min(1, "Quantity must be at least 1"),
+    unitPrice: z.number().min(0, "Unit price cannot be negative"),
+    discount: z.number().min(0).max(100),
+    taxRate: z.number().min(0).max(100),
   })).min(1, "At least one billing item is required"),
-  discounts: z.array(z.object({
-    type: z.enum(["percentage", "fixed_amount", "insurance", "employee", "senior_citizen", "student"]),
-    description: z.string().min(1),
-    amount: z.number().min(0),
-    percentage: z.number().min(0).max(100).optional(),
-    reason: z.string().optional(),
-  })),
-  paymentMethod: z.enum(["cash", "card", "insurance", "bank_transfer", "check"]).optional(),
+  discount: z.number().min(0).max(100),
+  taxRate: z.number().min(0).max(100),
   notes: z.string().optional(),
 });
 
@@ -163,3 +151,11 @@ export type DiagnosisFormData = z.infer<typeof diagnosisSchema>;
 export type TreatmentPlanFormData = z.infer<typeof treatmentPlanSchema>;
 export type PrescriptionFormData = z.infer<typeof prescriptionSchema>;
 export type OPDBillingFormData = z.infer<typeof opdBillingSchema>;
+
+/** Bill form data plus the totals the billing screen computes before saving */
+export type OPDBillingSubmission = OPDBillingFormData & {
+  subtotal: number;
+  discountAmount: number;
+  taxAmount: number;
+  totalAmount: number;
+};

@@ -16,20 +16,29 @@ import {
 } from "lucide-react";
 
 // Import all radiology components
+import { useTabParam } from "@/hooks/use-tab-param";
+import { toast } from "sonner";
+import { useClinicalData } from "@/lib/clinical-store";
+import { useAccess } from "@/lib/access";
+import { RoleNotice } from "@/components/layout/role-notice";
+import { PatientFilterBanner, useSelectedPatient } from "@/components/layout/patient-filter-banner";
+import type { ImagingOrderFormData } from "@/lib/validations/radiology";
 import { ImagingOrders } from "./imaging-orders";
 import { RadiologyScheduling } from "./radiology-scheduling";
 import { StudyManagement } from "./study-management";
 import { RadiologyReports } from "./radiology-reports";
 import { PACSIntegration } from "./pacs-integration";
+import { formatEquipmentLocation } from "@/lib/radiology-utils";
+import type { ImagingOrder, ImagingEquipment, ImagingSchedule, ImagingStudy, RadiologyReport, PACSConfig } from "@/types/radiology";
 
 // Mock data for demonstration
-const mockOrders = [
+const mockOrders: ImagingOrder[] = [
   {
     id: "ORD-001",
     orderNumber: "IMG2024001",
-    patientId: "PAT-001",
+    patientId: "1",
     patientName: "John Smith",
-    patientMRN: "MRN001234",
+    patientMRN: "PAT001",
     imagingType: "ct" as const,
     examType: "Head CT",
     bodyPart: "Head",
@@ -56,12 +65,16 @@ const mockOrders = [
     ],
     specialInstructions: "Patient has mild anxiety - may need reassurance",
     scheduledDateTime: new Date("2024-11-15T14:00:00"),
-    technologist: { id: "TECH-001", name: "Mike Rodriguez" },
-    radiologist: { id: "RAD-001", name: "Dr. Emily Chen" },
+    estimatedDuration: 45,
+    technologist: { id: "TECH-001", name: "Mike Rodriguez", license: "RT12345" },
+    radiologist: { id: "RAD-001", name: "Dr. Emily Chen", license: "RAD12345" },
+    createdBy: "DOC-001",
+    createdAt: new Date("2024-11-15T08:00:00"),
+    updatedAt: new Date("2024-11-15T08:00:00"),
   }
 ];
 
-const mockSchedules = [
+const mockSchedules: ImagingSchedule[] = [
   {
     id: "SCH-001",
     orderId: "ORD-001",
@@ -91,7 +104,7 @@ const mockSchedules = [
   }
 ];
 
-const mockStudies = [
+const mockStudies: ImagingStudy[] = [
   {
     id: "STU-001",
     studyInstanceUID: "1.2.840.113619.2.5.1762583153.215519.978957063.78",
@@ -137,43 +150,46 @@ const mockStudies = [
   }
 ];
 
-const mockReports = [
+const mockReports: RadiologyReport[] = [
   {
     id: "REP-001",
     reportNumber: "RAD2024001",
     studyId: "STU-001",
-    studyInstanceUID: "1.2.840.113619.2.5.1762583153.215519.978957063.78",
+    orderId: "ORD-001",
+    patientId: "PAT-001",
     patientName: "John Smith",
-    accessionNumber: "ACC001234",
-    reportType: "diagnostic" as const,
-    priority: "urgent" as const,
-    status: "preliminary" as const,
-    radiologistId: "RAD-001",
+    studyInstanceUID: "1.2.840.113619.2.5.1762583153.215519.978957063.78",
     radiologist: {
       id: "RAD-001",
       name: "Dr. Emily Chen",
-      license: "RAD12345"
+      license: "RAD12345",
+      signature: ""
     },
-    reportDate: new Date("2024-11-15T15:30:00"),
+    reportType: "preliminary",
     clinicalHistory: "Headache with neurological symptoms",
     technique: "Non-contrast CT of the head performed",
     findings: [
       "No evidence of acute intracranial abnormality",
       "Ventricular system is normal in size and configuration",
       "No midline shift or mass effect"
-    ],
+    ].join("\n"),
     impression: "Normal CT head. No acute findings.",
     recommendations: [
       "Clinical correlation recommended",
       "Consider MRI if symptoms persist"
-    ],
+    ].join("\n"),
+    reportStatus: "preliminary",
+    status: "pending_review",
+    priority: "urgent",
+    reportDate: new Date("2024-11-15T15:30:00"),
+    dictationDate: new Date("2024-11-15T15:15:00"),
+    radiologistId: "RAD-001",
     createdAt: new Date("2024-11-15T15:15:00"),
     updatedAt: new Date("2024-11-15T15:30:00"),
-    signedAt: undefined
   }
 ];
 
-const mockPacsConfig = {
+const mockPacsConfig: PACSConfig = {
   id: "PACS-001",
   name: "Main PACS Server",
   serverAddress: "pacs.hospital.com",
@@ -209,34 +225,49 @@ const mockConnectionStatus = {
 };
 
 export default function RadiologyManagement() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useTabParam("overview", ["overview", "orders", "scheduling", "studies", "reports", "pacs"]);
 
   // Mock data arrays
-  const patients = [
-    { id: "PAT-001", name: "John Smith", mrn: "MRN001234", age: 45, gender: "Male" },
-    { id: "PAT-002", name: "Mary Johnson", mrn: "MRN001235", age: 38, gender: "Female" }
-  ];
+  const { patients: clinicalPatients, imagingOrders, addImagingOrder } = useClinicalData();
+  const { user, can } = useAccess();
+  const selectedPatient = useSelectedPatient();
+  const patients = clinicalPatients.map((p) => ({
+    id: p.id,
+    name: `${p.firstName} ${p.lastName}`,
+    mrn: p.patientId,
+    age: new Date().getFullYear() - p.dateOfBirth.getFullYear(),
+    gender: p.gender,
+  }));
+  const allOrders: ImagingOrder[] = [...imagingOrders, ...mockOrders];
+  const orders = selectedPatient ? allOrders.filter((o) => o.patientId === selectedPatient.id) : allOrders;
 
   const physicians = [
     { id: "DOC-001", name: "Dr. Sarah Johnson", department: "Neurology", license: "MD12345" },
     { id: "DOC-002", name: "Dr. Michael Brown", department: "Emergency", license: "MD12346" }
   ];
 
-  const equipment = [
+  const equipment: ImagingEquipment[] = [
     {
       id: "EQ-001",
       name: "Siemens CT Scanner",
-      type: "ct" as const,
+      type: "ct",
+      manufacturer: "Siemens",
       model: "SOMATOM Definition AS",
       serialNumber: "CT001234",
-      location: "Radiology Suite 1",
-      status: "operational" as const,
+      installationDate: new Date("2020-01-15"),
+      lastMaintenanceDate: new Date("2024-10-01"),
+      nextMaintenanceDate: new Date("2024-12-01"),
+      location: { building: "Main Building", floor: "1", room: "Radiology Suite 1" },
+      status: "operational",
       capabilities: ["contrast", "cardiac", "angiography"],
-      installDate: new Date("2020-01-15"),
-      lastMaintenance: new Date("2024-10-01"),
-      nextMaintenance: new Date("2024-12-01"),
+      maxPatientWeight: 227,
+      powerRequirements: "480V 3-phase",
+      operatingHours: { start: "07:00", end: "19:00", daysOfWeek: [1, 2, 3, 4, 5] },
+      technicalSpecs: {},
       utilizationRate: 85,
-      maintenanceHistory: []
+      maintenanceHistory: [],
+      createdAt: new Date("2020-01-15"),
+      updatedAt: new Date("2024-10-01"),
     }
   ];
 
@@ -281,8 +312,19 @@ export default function RadiologyManagement() {
   ];
 
   // Mock handlers
-  const handleCreateOrder = async (data: any) => {
-    console.log("Creating order:", data);
+  const handleCreateOrder = async (data: ImagingOrderFormData) => {
+    if (!can("imagingOrder.create")) {
+      toast.error("Your role can't create imaging orders");
+      return;
+    }
+    const order = addImagingOrder(data);
+    if (order) {
+      toast.success(`Imaging order ${order.orderNumber} created`, {
+        description: `${order.examType} for ${order.patientName}`,
+      });
+    } else {
+      toast.error("Could not create imaging order", { description: "Patient not found." });
+    }
   };
 
   const handleUpdateOrder = async (id: string, data: any) => {
@@ -385,8 +427,10 @@ export default function RadiologyManagement() {
           </p>
         </div>
 
+        {user && <RoleNotice role={user.role} limits={[!can("imagingOrder.create") && "you can't create imaging orders"].filter(Boolean) as string[]} />}
+        <PatientFilterBanner />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid h-auto w-full grid-cols-3 sm:grid-cols-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Overview
@@ -468,7 +512,7 @@ export default function RadiologyManagement() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockOrders.slice(0, 5).map((order) => (
+                    {orders.slice(0, 5).map((order) => (
                       <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
                           <p className="font-medium">{order.patientName}</p>
@@ -503,7 +547,7 @@ export default function RadiologyManagement() {
                       <div key={eq.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
                           <p className="font-medium">{eq.name}</p>
-                          <p className="text-sm text-gray-600">{eq.location}</p>
+                          <p className="text-sm text-gray-600">{formatEquipmentLocation(eq.location)}</p>
                         </div>
                         <div className="text-right">
                           <Badge className={
@@ -543,7 +587,9 @@ export default function RadiologyManagement() {
 
           <TabsContent value="orders">
             <ImagingOrders
-              orders={mockOrders}
+              orders={orders}
+              defaultPatientId={selectedPatient?.id}
+              canCreate={can("imagingOrder.create")}
               patients={patients}
               physicians={physicians}
               onCreateOrder={handleCreateOrder}

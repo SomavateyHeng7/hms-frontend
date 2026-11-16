@@ -259,7 +259,7 @@ export interface WashingCycle {
     itemName: string;
     quantity: number;
     department: string;
-    contamination Level?: 'low' | 'medium' | 'high';
+    contaminationLevel?: 'low' | 'medium' | 'high';
   }>;
   
   washingParameters: {

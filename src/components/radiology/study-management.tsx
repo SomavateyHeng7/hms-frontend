@@ -12,10 +12,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { ImagingStudy, StudyQualityControlFormData } from "@/types/radiology";
+import { ImagingStudy } from "@/types/radiology";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { studyQualityControlSchema } from "@/lib/validations/radiology";
+import { studyQualityControlSchema, StudyQualityControlFormData } from "@/lib/validations/radiology";
 
 interface StudyManagementProps {
   studies: ImagingStudy[];
@@ -303,7 +303,7 @@ export function StudyManagement({
                     {study.qualityControl && (
                       <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                         <h4 className="font-medium mb-2">Quality Control Results</h4>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                           <div>
                             <p><strong>Overall Quality:</strong> {study.qualityControl.overallQuality}</p>
                             <p><strong>Technical Adequacy:</strong> {study.qualityControl.technicalAdequacy}</p>

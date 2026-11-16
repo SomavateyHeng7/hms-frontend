@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Sidebar } from "@/components/layout/sidebar";
+import { AppShell } from "@/components/layout/app-shell";
+import { AccessProvider } from "@/lib/access";
+import { ClinicalDataProvider } from "@/lib/clinical-store";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,12 +38,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex min-h-screen">
-            <Sidebar />
-            <main className="flex-1 lg:pl-64">
-              {children}
-            </main>
-          </div>
+          <AccessProvider>
+            <ClinicalDataProvider>
+              <AppShell>{children}</AppShell>
+              <Toaster richColors closeButton position="top-right" />
+            </ClinicalDataProvider>
+          </AccessProvider>
         </ThemeProvider>
       </body>
     </html>

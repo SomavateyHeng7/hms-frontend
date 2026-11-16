@@ -1,5 +1,6 @@
 "use client";
 
+import { averageOf } from "@/lib/utils";
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { 
@@ -20,10 +21,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ResourceUtilizationReport } from "@/types/reporting";
+import type { ResourceUtilizationReport as ResourceUtilizationData } from "@/types/reporting";
 
 interface ResourceUtilizationReportProps {
-  report: ResourceUtilizationReport;
+  report: ResourceUtilizationData;
   onExport: (format: string) => void;
   onDrillDown: (resourceId: string, type: "room" | "equipment" | "staff") => void;
 }
@@ -34,21 +35,21 @@ export function ResourceUtilizationReport({ report, onExport, onDrillDown }: Res
   const utilizationStats = [
     {
       title: "Room Utilization",
-      value: `${Math.round(report.rooms.reduce((acc, room) => acc + room.utilizationRate, 0) / report.rooms.length)}%`,
+      value: `${averageOf(report.rooms.map((room) => room.utilizationRate))}%`,
       icon: Bed,
       color: "text-blue-600",
       bgColor: "bg-blue-100"
     },
     {
       title: "Equipment Utilization", 
-      value: `${Math.round(report.equipment.reduce((acc, eq) => acc + eq.utilizationRate, 0) / report.equipment.length)}%`,
+      value: `${averageOf(report.equipment.map((eq) => eq.utilizationRate))}%`,
       icon: Monitor,
       color: "text-green-600",
       bgColor: "bg-green-100"
     },
     {
       title: "Staff Efficiency",
-      value: `${Math.round(report.staffUtilization.reduce((acc, staff) => acc + staff.utilizationRate, 0) / report.staffUtilization.length)}%`,
+      value: `${averageOf(report.staffUtilization.map((staff) => staff.utilizationRate))}%`,
       icon: Activity,
       color: "text-purple-600",
       bgColor: "bg-purple-100"

@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ImagingOrder, ImagingOrderFormData } from "@/types/radiology";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { imagingOrderSchema } from "@/lib/validations/radiology";
 
@@ -25,6 +25,10 @@ interface ImagingOrdersProps {
   onUpdateOrder: (id: string, data: Partial<ImagingOrder>) => Promise<void>;
   onCancelOrder: (id: string, reason: string) => Promise<void>;
   onScheduleOrder: (orderId: string) => void;
+  /** Pre-fills the patient when creating a new order (e.g. opened from a patient timeline) */
+  defaultPatientId?: string;
+  /** Role-based access; creating and editing orders is disabled when false */
+  canCreate?: boolean;
 }
 
 const IMAGING_TYPES = {
@@ -108,6 +112,8 @@ export function ImagingOrders({
   onUpdateOrder,
   onCancelOrder,
   onScheduleOrder,
+  defaultPatientId,
+  canCreate = true,
 }: ImagingOrdersProps) {
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<ImagingOrder | null>(null);
@@ -128,15 +134,22 @@ export function ImagingOrders({
     },
   });
 
-  const { fields: allergiesFields, append: appendAllergy, remove: removeAllergy } = useFieldArray({
-    control: form.control,
-    name: "contrast.allergies",
-  });
+  // react-hook-form's useFieldArray only supports arrays of objects, so these
+  // string lists are managed with watch/setValue.
+  const allergies = form.watch("contrast.allergies") ?? [];
+  const prepInstructions = form.watch("preparationInstructions") ?? [];
 
-  const { fields: prepFields, append: appendPrep, remove: removePrep } = useFieldArray({
-    control: form.control,
-    name: "preparationInstructions",
-  });
+  const appendAllergy = () => form.setValue("contrast.allergies", [...allergies, ""]);
+  const updateAllergy = (index: number, value: string) =>
+    form.setValue("contrast.allergies", allergies.map((a, i) => (i === index ? value : a)));
+  const removeAllergy = (index: number) =>
+    form.setValue("contrast.allergies", allergies.filter((_, i) => i !== index));
+
+  const appendPrep = () => form.setValue("preparationInstructions", [...prepInstructions, ""]);
+  const updatePrep = (index: number, value: string) =>
+    form.setValue("preparationInstructions", prepInstructions.map((p, i) => (i === index ? value : p)));
+  const removePrep = (index: number) =>
+    form.setValue("preparationInstructions", prepInstructions.filter((_, i) => i !== index));
 
   const watchedImagingType = form.watch("imagingType");
   const watchedContrastRequired = form.watch("contrast.required");
@@ -173,6 +186,7 @@ export function ImagingOrders({
     } else {
       setEditingOrder(null);
       form.reset();
+      if (defaultPatientId) form.setValue("patientId", defaultPatientId);
     }
     setOrderDialogOpen(true);
   };
@@ -211,7 +225,7 @@ export function ImagingOrders({
   });
 
   const addPreparationInstruction = () => {
-    appendPrep("");
+    appendPrep();
   };
 
   const loadPreparationTemplate = (template: string) => {
@@ -274,7 +288,7 @@ export function ImagingOrders({
         </Select>
         <Dialog open={orderDialogOpen} onOpenChange={setOrderDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => openOrderDialog()}>
+            <Button onClick={() => openOrderDialog()} disabled={!canCreate}>
               <Plus className="mr-2 h-4 w-4" />
               New Order
             </Button>
@@ -289,10 +303,10 @@ export function ImagingOrders({
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Patient *</Label>
-                  <Select onValueChange={(value) => form.setValue("patientId", value)}>
+                  <Select value={form.watch("patientId") || undefined} onValueChange={(value) => form.setValue("patientId", value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select patient" />
                     </SelectTrigger>
@@ -327,7 +341,7 @@ export function ImagingOrders({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Exam Type *</Label>
                   <Select 
@@ -374,7 +388,7 @@ export function ImagingOrders({
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Urgency *</Label>
                   <Select onValueChange={(value) => form.setValue("urgency", value as any)}>
@@ -405,7 +419,7 @@ export function ImagingOrders({
               {watchedContrastRequired && (
                 <div className="border p-4 rounded-lg space-y-4">
                   <h4 className="font-medium">Contrast Information</h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Contrast Type</Label>
                       <Select onValueChange={(value) => form.setValue("contrast.type", value as any)}>
@@ -432,10 +446,11 @@ export function ImagingOrders({
 
                   <div className="space-y-2">
                     <Label>Known Allergies</Label>
-                    {allergiesFields.map((field, index) => (
-                      <div key={field.id} className="flex gap-2">
+                    {allergies.map((allergy, index) => (
+                      <div key={index} className="flex gap-2">
                         <Input
-                          {...form.register(`contrast.allergies.${index}` as const)}
+                          value={allergy}
+                          onChange={(e) => updateAllergy(index, e.target.value)}
                           placeholder="Enter allergy"
                         />
                         <Button
@@ -452,7 +467,7 @@ export function ImagingOrders({
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => appendAllergy("")}
+                      onClick={appendAllergy}
                     >
                       Add Allergy
                     </Button>
@@ -475,10 +490,11 @@ export function ImagingOrders({
                     </SelectContent>
                   </Select>
                 </div>
-                {prepFields.map((field, index) => (
-                  <div key={field.id} className="flex gap-2">
+                {prepInstructions.map((instruction, index) => (
+                  <div key={index} className="flex gap-2">
                     <Input
-                      {...form.register(`preparationInstructions.${index}` as const)}
+                      value={instruction}
+                      onChange={(e) => updatePrep(index, e.target.value)}
                       placeholder="Preparation instruction"
                     />
                     <Button
@@ -567,6 +583,7 @@ export function ImagingOrders({
                     variant="outline"
                     size="sm"
                     onClick={() => openOrderDialog(order)}
+                    disabled={!canCreate}
                   >
                     Edit
                   </Button>

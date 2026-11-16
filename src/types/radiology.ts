@@ -46,50 +46,46 @@ export interface ImagingOrder {
 export interface ImagingStudy {
   id: string;
   studyInstanceUID: string;
-  orderId: string;
-  patientId: string;
   accessionNumber: string;
+  patientId: string;
+  patientName: string;
   studyDate: Date;
-  studyTime: string;
-  modality: string;
-  bodyPartExamined: string;
   studyDescription: string;
-  seriesCount: number;
-  instanceCount: number;
-  studyStatus: "in_progress" | "completed" | "verified" | "archived";
-  acquisitionDate: Date;
-  technologist: {
+  modality: string;
+  institutionName: string;
+  equipment?: {
     id: string;
     name: string;
-    license: string;
   };
-  equipment: {
-    manufacturer: string;
-    model: string;
-    serialNumber: string;
-    stationName: string;
+  referringPhysician: string;
+  status: "pending" | "in_progress" | "completed" | "cancelled" | "archived";
+  series: StudySeries[];
+  pacsInfo: {
+    server: string;
+    aeTitle: string;
+    stored: boolean;
+    archived: boolean;
+    retrieveAeTitle?: string;
   };
-  acquisitionParameters: {
-    kvp?: number;
-    mas?: number;
-    sliceThickness?: number;
-    pixelSpacing?: string;
-    imageOrientation?: string;
-    contrastUsed?: boolean;
-    contrastAgent?: string;
-  };
-  fileSize: number; // in bytes
-  imageCount: number;
-  pacsLocation: string;
-  backupLocation?: string;
-  qualityControl: {
-    status: "pending" | "passed" | "failed" | "needs_repeat";
-    reviewer?: string;
-    reviewDate?: Date;
+  qualityControl?: {
+    status: "pending" | "passed" | "failed" | "review_required";
+    overallQuality?: "excellent" | "good" | "acceptable" | "poor" | "unacceptable";
+    technicalAdequacy?: "adequate" | "suboptimal" | "inadequate";
+    artifactsPresent?: boolean;
+    reviewedBy?: string;
+    reviewedAt?: Date;
     comments?: string;
   };
-  createdAt: Date;
-  updatedAt: Date;
+}
+
+export interface StudySeries {
+  seriesInstanceUID: string;
+  seriesNumber: number;
+  seriesDescription: string;
+  instanceCount: number;
+  bodyPartExamined: string;
+  /** Size in bytes */
+  imageSize: number;
 }
 
 export interface RadiologyReport {
@@ -172,6 +168,8 @@ export interface ImagingEquipment {
   technicalSpecs: {
     [key: string]: string | number;
   };
+  /** Percentage of available hours in use */
+  utilizationRate?: number;
   maintenanceHistory: {
     date: Date;
     type: "routine" | "repair" | "calibration" | "upgrade";
@@ -185,60 +183,62 @@ export interface ImagingEquipment {
 
 export interface ImagingSchedule {
   id: string;
-  date: Date;
+  orderId: string;
+  orderNumber: string;
+  patientName: string;
+  patientMRN: string;
+  examType: string;
+  bodyPart: string;
+  urgency: "routine" | "urgent" | "stat" | "emergency";
+  scheduledDateTime: Date;
+  /** Estimated duration in minutes */
+  estimatedDuration: number;
+  status: "scheduled" | "in_progress" | "completed" | "cancelled" | "no_show" | "rescheduled";
   equipmentId: string;
-  timeSlots: {
-    startTime: string;
-    endTime: string;
-    duration: number;
-    status: "available" | "booked" | "blocked" | "maintenance";
-    orderId?: string;
-    patientId?: string;
-    examType?: string;
-    technologist?: string;
-  }[];
-  capacity: {
-    total: number;
-    booked: number;
-    available: number;
-    blocked: number;
+  equipment?: {
+    id: string;
+    name: string;
+    location: string;
   };
-  specialNotes?: string;
-  emergencySlots: number;
-  createdAt: Date;
-  updatedAt: Date;
+  technicianId: string;
+  technician?: {
+    id: string;
+    name: string;
+  };
+  notes?: string;
+  preparationRequired?: boolean;
+  preparationInstructions?: string[];
+}
+
+export interface TimeSlot {
+  time: string;
+  available: boolean;
 }
 
 export interface PACSConfig {
   id: string;
   name: string;
-  host: string;
+  serverAddress: string;
   port: number;
   aeTitle: string;
-  protocol: "DICOM" | "HL7" | "REST";
-  authentication: {
-    required: boolean;
-    username?: string;
-    password?: string;
-    certificate?: string;
-  };
-  storageClass: string[];
-  transferSyntax: string[];
-  compression: {
-    enabled: boolean;
-    algorithm?: "JPEG" | "JPEG2000" | "RLE";
-  };
-  queryRetrieveLevel: "PATIENT" | "STUDY" | "SERIES" | "IMAGE";
-  maxConnections: number;
+  callingAeTitle: string;
+  supportedProtocols: string[];
+  /** Timeout in seconds */
   timeout: number;
   retryAttempts: number;
-  storageLocation: string;
-  backupEnabled: boolean;
-  backupLocation?: string;
-  archivePolicy: {
-    enabled: boolean;
-    archiveAfterDays: number;
-    archiveLocation: string;
+  security: {
+    tlsEnabled: boolean;
+    username?: string;
+    password?: string;
+    certificatePath?: string;
+  };
+  storage: {
+    compression: "none" | "jpeg" | "jpeg2000" | "jpegls" | "rle";
+    /** Max file size in MB */
+    maxFileSize: number;
+    retentionDays: number;
+    autoArchive: boolean;
+    archivePath?: string;
   };
   isActive: boolean;
   createdAt: Date;
@@ -287,16 +287,6 @@ export interface ImagingOrderFormData {
   preparationInstructions: string[];
   preferredDate?: string;
   preferredTime?: string;
-}
-
-export interface ImagingScheduleFormData {
-  orderId: string;
-  equipmentId: string;
-  scheduledDate: string;
-  scheduledTime: string;
-  duration: number;
-  technologistId: string;
-  specialNotes?: string;
 }
 
 export interface RadiologyReportFormData {

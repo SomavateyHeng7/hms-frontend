@@ -20,10 +20,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DoctorPerformanceReport } from "@/types/reporting";
+import type { DoctorPerformanceReport as DoctorPerformanceData } from "@/types/reporting";
 
 interface DoctorPerformanceReportProps {
-  report: DoctorPerformanceReport;
+  report: DoctorPerformanceData;
   onExport: (format: string) => void;
   onDrillDown: (doctorId: string) => void;
 }
@@ -291,7 +291,7 @@ export function DoctorPerformanceReport({ report, onExport, onDrillDown }: Docto
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
                               <span>Quality</span>
@@ -373,7 +373,7 @@ export function DoctorPerformanceReport({ report, onExport, onDrillDown }: Docto
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <div className="space-y-1">
                           <div className="text-xs text-muted-foreground">Quality</div>
                           <Progress value={specialty.averageQualityScore} className="h-2" />

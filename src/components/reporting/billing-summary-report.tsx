@@ -1,5 +1,6 @@
 "use client";
 
+import { percentOf } from "@/lib/utils";
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { 
@@ -16,6 +17,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DonutChart } from "@/components/ui/charts";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BillingSummary } from "@/types/reporting";
@@ -53,7 +55,7 @@ export function BillingSummaryReport({ summary, onExport, onDrillDown }: Billing
     },
     {
       title: "Collection Rate",
-      value: `${Math.round((summary.collectedAmount / summary.totalRevenue) * 100)}%`,
+      value: `${percentOf(summary.collectedAmount, summary.totalRevenue)}%`,
       icon: BarChart3,
       color: "text-purple-600",
       bgColor: "bg-purple-100"
@@ -229,9 +231,14 @@ export function BillingSummaryReport({ summary, onExport, onDrillDown }: Billing
                   ))}
                 </div>
                 <div className="text-center">
-                  <div className="h-48 flex items-center justify-center text-muted-foreground border border-dashed rounded-lg">
-                    [Payment Method Chart Placeholder]
-                  </div>
+                  <DonutChart
+                    data={summary.paymentMethods.map((m) => ({
+                      name: m.method.replace("_", " "),
+                      value: m.amount,
+                    }))}
+                    valueFormatter={(v) => `$${v.toLocaleString()}`}
+                    emptyTitle="No payments recorded"
+                  />
                 </div>
               </div>
             </CardContent>

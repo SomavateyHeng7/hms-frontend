@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { PACSConfig } from "@/types/radiology";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { pacsConfigSchema } from "@/lib/validations/radiology";
+import { pacsConfigSchema, PACSConfigFormData } from "@/lib/validations/radiology";
 
 interface PACSIntegrationProps {
   pacsConfig: PACSConfig;
@@ -59,12 +59,12 @@ export function PACSIntegration({
   const [testingConnection, setTestingConnection] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
-  const form = useForm<PACSConfig>({
+  const form = useForm<PACSConfigFormData>({
     resolver: zodResolver(pacsConfigSchema),
     defaultValues: pacsConfig,
   });
 
-  const handleUpdateConfig = async (data: PACSConfig) => {
+  const handleUpdateConfig = async (data: PACSConfigFormData) => {
     try {
       await onUpdateConfig(data);
       setConfigDialogOpen(false);
@@ -236,7 +236,7 @@ export function PACSIntegration({
                       </TabsList>
 
                       <TabsContent value="connection" className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="serverAddress">Server Address *</Label>
                             <Input
@@ -256,7 +256,7 @@ export function PACSIntegration({
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="aeTitle">AE Title *</Label>
                             <Input
@@ -298,7 +298,7 @@ export function PACSIntegration({
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="timeout">Timeout (seconds)</Label>
                             <Input
@@ -332,7 +332,7 @@ export function PACSIntegration({
                           <Label htmlFor="tlsEnabled">Enable TLS Encryption</Label>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="username">Username</Label>
                             <Input
@@ -382,7 +382,7 @@ export function PACSIntegration({
                           </Select>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="maxFileSize">Max File Size (MB)</Label>
                             <Input

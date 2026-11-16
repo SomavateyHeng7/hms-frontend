@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Plus, Minus, Save, Printer, Search, Filter, Clock, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,16 +13,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Prescription, Medication, PrescriptionFormData } from "@/types/opd";
+import { Prescription } from "@/types/opd";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { prescriptionSchema } from "@/lib/validations/opd";
+import { prescriptionSchema, PrescriptionFormData } from "@/lib/validations/opd";
+import { SafetyWarnings } from "@/components/clinical/safety-warnings";
+import { checkPrescriptionSafety, requiresAcknowledgement } from "@/lib/clinical-safety";
+
+/** Recorded when a prescriber proceeds despite safety warnings */
+export interface PrescriptionSafetyMeta {
+  overriddenWarnings: string[];
+}
 
 interface PrescriptionGenerationProps {
   patientId: string;
   consultationId: string;
   prescriptions: Prescription[];
-  onCreatePrescription: (data: PrescriptionFormData) => Promise<void>;
+  /** Allergies and current medications are free text from the patient record, used for safety checks */
+  patientAllergies?: string;
+  patientCurrentMedications?: string;
+  /** Role-based access; creating and editing prescriptions is disabled when false */
+  canCreate?: boolean;
+  onCreatePrescription: (data: PrescriptionFormData, meta?: PrescriptionSafetyMeta) => Promise<void>;
   onUpdatePrescription: (id: string, data: PrescriptionFormData) => Promise<void>;
   onDeletePrescription: (id: string) => Promise<void>;
   onPrintPrescription: (id: string) => void;
@@ -97,6 +109,9 @@ export function PrescriptionGeneration({
   patientId,
   consultationId,
   prescriptions,
+  patientAllergies,
+  patientCurrentMedications,
+  canCreate = true,
   onCreatePrescription,
   onUpdatePrescription,
   onDeletePrescription,
@@ -134,12 +149,34 @@ export function PrescriptionGeneration({
     name: "medications",
   });
 
+  // react-hook-form mutates the watched array in place, so key the memo on the drug
+  // names themselves rather than the array reference.
+  const watchedMedications = form.watch("medications");
+  const medicationKey = JSON.stringify((watchedMedications ?? []).map((m) => [m?.name ?? "", m?.genericName ?? ""]));
+  const safetyWarnings = useMemo(
+    () =>
+      checkPrescriptionSafety(
+        (JSON.parse(medicationKey) as [string, string][]).map(([name, genericName]) => ({ name, genericName })),
+        { allergies: patientAllergies, currentMedications: patientCurrentMedications }
+      ),
+    [medicationKey, patientAllergies, patientCurrentMedications]
+  );
+  const [safetyAcknowledged, setSafetyAcknowledged] = useState(false);
+  const warningKey = safetyWarnings.map((w) => w.id).join("|");
+  // A changed set of warnings needs a fresh acknowledgement
+  useEffect(() => setSafetyAcknowledged(false), [warningKey]);
+  const blockedBySafety = requiresAcknowledgement(safetyWarnings) && !safetyAcknowledged;
+
   const handleSubmit = async (data: PrescriptionFormData) => {
+    if (blockedBySafety) return;
     try {
       if (editingPrescription) {
         await onUpdatePrescription(editingPrescription.id, data);
       } else {
-        await onCreatePrescription(data);
+        await onCreatePrescription(
+          data,
+          safetyWarnings.length > 0 ? { overriddenWarnings: safetyWarnings.map((w) => w.message) } : undefined
+        );
       }
       setPrescriptionDialogOpen(false);
       setEditingPrescription(null);
@@ -157,7 +194,16 @@ export function PrescriptionGeneration({
         priority: prescription.priority,
         status: prescription.status,
         notes: prescription.notes || "",
-        medications: prescription.medications,
+        medications: prescription.medications.map((m) => ({
+          name: m.name,
+          genericName: m.genericName,
+          dosage: m.dosage,
+          frequency: m.frequency,
+          duration: m.duration,
+          quantity: m.quantity,
+          instructions: m.instructions,
+          route: m.route === "iv" || m.route === "im" || m.route === "sc" ? "injection" : m.route,
+        })),
       });
     } else {
       setEditingPrescription(null);
@@ -343,7 +389,7 @@ export function PrescriptionGeneration({
           </Dialog>
           <Dialog open={prescriptionDialogOpen} onOpenChange={setPrescriptionDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => openPrescriptionDialog()}>
+              <Button onClick={() => openPrescriptionDialog()} disabled={!canCreate}>
                 <Plus className="mr-2 h-4 w-4" />
                 New Prescription
               </Button>
@@ -358,7 +404,7 @@ export function PrescriptionGeneration({
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Prescription Type</Label>
                     <Select onValueChange={(value) => form.setValue("type", value as any)}>
@@ -449,7 +495,7 @@ export function PrescriptionGeneration({
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div className="space-y-2">
                           <Label htmlFor={`medications.${index}.name`}>Medication Name *</Label>
                           <Input
@@ -467,7 +513,7 @@ export function PrescriptionGeneration({
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-4 mb-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
                         <div className="space-y-2">
                           <Label htmlFor={`medications.${index}.dosage`}>Dosage *</Label>
                           <Input
@@ -502,7 +548,7 @@ export function PrescriptionGeneration({
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Route</Label>
                           <Select onValueChange={(value) => form.setValue(`medications.${index}.route`, value as any)}>
@@ -542,6 +588,14 @@ export function PrescriptionGeneration({
                   />
                 </div>
 
+                {/* Pinned to the bottom so warnings stay visible while scrolling the medication list */}
+                <div className="sticky -bottom-6 -mx-6 -mb-6 space-y-3 border-t bg-background px-6 py-4">
+                <SafetyWarnings
+                  warnings={safetyWarnings}
+                  acknowledged={safetyAcknowledged}
+                  onAcknowledgedChange={setSafetyAcknowledged}
+                />
+
                 <DialogFooter>
                   <Button
                     type="button"
@@ -550,11 +604,12 @@ export function PrescriptionGeneration({
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">
+                  <Button type="submit" disabled={blockedBySafety}>
                     <Save className="mr-2 h-4 w-4" />
                     {editingPrescription ? "Update" : "Create"} Prescription
                   </Button>
                 </DialogFooter>
+                </div>
               </form>
             </DialogContent>
           </Dialog>
@@ -587,6 +642,7 @@ export function PrescriptionGeneration({
                     variant="outline"
                     size="sm"
                     onClick={() => openPrescriptionDialog(prescription)}
+                    disabled={!canCreate}
                   >
                     Edit
                   </Button>

@@ -18,9 +18,11 @@ import {
   Barcode,
   Edit,
   Download,
-  Printer
+  Printer,
+  Activity
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -129,7 +131,13 @@ export function PatientDetails({
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/patients/${patient.id}`}>
+              <Activity className="mr-2 h-4 w-4" />
+              Timeline
+            </Link>
+          </Button>
           <Button variant="outline" size="sm">
             <Download className="mr-2 h-4 w-4" />
             Export
@@ -147,7 +155,7 @@ export function PatientDetails({
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="appointments">Appointments</TabsTrigger>
           <TabsTrigger value="visits">Visit History</TabsTrigger>
@@ -165,7 +173,7 @@ export function PatientDetails({
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="font-medium text-muted-foreground">Date of Birth:</span>
                     <p>{format(patient.dateOfBirth, "MMMM dd, yyyy")}</p>
@@ -256,7 +264,7 @@ export function PatientDetails({
                     <span className="font-medium text-muted-foreground">Provider:</span>
                     <p>{patient.insurance.provider}</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="font-medium text-muted-foreground">Policy Number:</span>
                       <p>{patient.insurance.policyNumber}</p>

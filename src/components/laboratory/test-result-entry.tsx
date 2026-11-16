@@ -14,10 +14,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
-import { LabTestResult, LabReport, LabReportFormData, CriticalValueFormData } from "@/types/laboratory";
+import { LabTestResult, LabReport, LabReportDeliveryMethod } from "@/types/laboratory";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { labReportSchema, criticalValueSchema } from "@/lib/validations/laboratory";
+import { labReportSchema, criticalValueSchema, LabReportFormData, CriticalValueFormData } from "@/lib/validations/laboratory";
 
 interface TestResultEntryProps {
   results: LabTestResult[];
@@ -29,7 +29,20 @@ interface TestResultEntryProps {
   onDownloadReport: (reportId: string) => Promise<void>;
   onPrintReport: (reportId: string) => Promise<void>;
   onSendReport: (reportId: string, method: 'email' | 'portal' | 'fax', recipient: string) => Promise<void>;
+  /** Critical results whose provider notification has already been recorded */
+  acknowledgedResultIds?: string[];
+  /** Orders that results can be entered against (suggested while typing the order ID) */
+  orderOptions?: { id: string; orderNumber: string; patientName: string }[];
+  /** Role-based access; the matching actions are disabled when false */
+  canEnterResults?: boolean;
+  canValidate?: boolean;
+  canAcknowledge?: boolean;
+  canCreateReport?: boolean;
 }
+
+// Stable references so omitted props do not retrigger effects on every render
+const NO_IDS: string[] = [];
+const NO_ORDER_OPTIONS: { id: string; orderNumber: string; patientName: string }[] = [];
 
 const RESULT_STATUS_CONFIG = {
   pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock },
@@ -48,7 +61,7 @@ const FLAG_TYPES = [
   { value: "abnormal", label: "Abnormal", color: "text-orange-600" },
 ];
 
-const DELIVERY_METHODS = [
+const DELIVERY_METHODS: { value: LabReportDeliveryMethod; label: string; icon: string }[] = [
   { value: "digital", label: "Digital Portal", icon: "💻" },
   { value: "email", label: "Email", icon: "📧" },
   { value: "print", label: "Print", icon: "🖨️" },
@@ -65,6 +78,12 @@ export function TestResultEntry({
   onDownloadReport,
   onPrintReport,
   onSendReport,
+  acknowledgedResultIds = NO_IDS,
+  orderOptions = NO_ORDER_OPTIONS,
+  canEnterResults = true,
+  canValidate = true,
+  canAcknowledge = true,
+  canCreateReport = true,
 }: TestResultEntryProps) {
   const [resultDialogOpen, setResultDialogOpen] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
@@ -106,11 +125,12 @@ export function TestResultEntry({
 
   useEffect(() => {
     // Identify critical results
-    const critical = results.filter(r => 
-      r.flag === "critical_low" || r.flag === "critical_high" || r.isCritical
+    const critical = results.filter(r =>
+      (r.flag === "critical_low" || r.flag === "critical_high" || r.isCritical) &&
+      !acknowledgedResultIds.includes(r.id)
     );
     setCriticalResults(critical);
-  }, [results]);
+  }, [results, acknowledgedResultIds]);
 
   const handleEnterResult = async (data: LabTestResult) => {
     try {
@@ -169,7 +189,7 @@ export function TestResultEntry({
   const openCriticalDialog = (result: LabTestResult) => {
     setSelectedResult(result);
     criticalForm.setValue("resultId", result.id);
-    criticalForm.setValue("patientId", result.orderId); // Assuming orderId contains patient reference
+    criticalForm.setValue("patientId", result.patientId ?? result.orderId);
     setCriticalDialogOpen(true);
   };
 
@@ -223,6 +243,7 @@ export function TestResultEntry({
                     variant="destructive"
                     size="sm"
                     onClick={() => openCriticalDialog(result)}
+                    disabled={!canAcknowledge}
                   >
                     Notify
                   </Button>
@@ -267,10 +288,10 @@ export function TestResultEntry({
             ))}
           </SelectContent>
         </Select>
-        <Button onClick={() => setResultDialogOpen(true)}>
+        <Button onClick={() => setResultDialogOpen(true)} disabled={!canEnterResults}>
           Enter Result
         </Button>
-        <Button variant="outline" onClick={() => setReportDialogOpen(true)}>
+        <Button variant="outline" onClick={() => setReportDialogOpen(true)} disabled={!canCreateReport}>
           <FileText className="mr-2 h-4 w-4" />
           Create Report
         </Button>
@@ -313,6 +334,7 @@ export function TestResultEntry({
                         variant="outline"
                         size="sm"
                         onClick={() => handleValidateResult(result.id)}
+                        disabled={!canValidate}
                       >
                         <CheckCircle className="mr-2 h-4 w-4" />
                         Validate
@@ -323,6 +345,7 @@ export function TestResultEntry({
                         variant="destructive"
                         size="sm"
                         onClick={() => openCriticalDialog(result)}
+                    disabled={!canAcknowledge}
                       >
                         <AlertTriangle className="mr-2 h-4 w-4" />
                         Handle Critical
@@ -392,7 +415,7 @@ export function TestResultEntry({
                       </Badge>
                     </CardTitle>
                     <CardDescription>
-                      Order: {report.orderId} • Generated: {new Date(report.generatedAt).toLocaleString()}
+                      Order: {report.orderId} • Generated: {report.generatedAt ? new Date(report.generatedAt).toLocaleString() : "—"}
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
@@ -482,14 +505,22 @@ export function TestResultEntry({
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={resultForm.handleSubmit(handleEnterResult)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="orderId">Order ID</Label>
                 <Input
                   id="orderId"
+                  list="result-order-options"
                   {...resultForm.register("orderId")}
-                  placeholder="Order ID"
+                  placeholder="Order number, e.g. LAB00001"
                 />
+                <datalist id="result-order-options">
+                  {orderOptions.map((o) => (
+                    <option key={o.id} value={o.orderNumber}>
+                      {o.patientName}
+                    </option>
+                  ))}
+                </datalist>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="testCode">Test Code</Label>
@@ -501,7 +532,7 @@ export function TestResultEntry({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="value">Result Value</Label>
                 <Input
@@ -530,7 +561,7 @@ export function TestResultEntry({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Status</Label>
                 <Select onValueChange={(value) => resultForm.setValue("status", value as any)}>

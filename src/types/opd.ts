@@ -150,7 +150,11 @@ export interface Prescription {
   instructions: string;
   duration: string;
   followUpDate?: Date;
-  status: "active" | "completed" | "cancelled" | "expired";
+  status: "active" | "completed" | "cancelled" | "expired" | "on_hold";
+  type: "regular" | "emergency" | "repeat" | "discharge";
+  priority: "low" | "medium" | "high" | "urgent";
+  prescribedBy: string;
+  notes?: string;
   issuedDate: Date;
   validUntil: Date;
   pharmacyNotes?: string;
@@ -160,7 +164,7 @@ export interface Prescription {
 
 export interface PrescriptionMedication {
   id: string;
-  drugName: string;
+  name: string;
   genericName?: string;
   strength: string;
   dosageForm: "tablet" | "capsule" | "syrup" | "injection" | "cream" | "drops" | "inhaler" | "patch";
@@ -195,7 +199,14 @@ export interface OPDBilling {
   totalAmount: number;
   paidAmount: number;
   balanceAmount: number;
-  status: "pending" | "partial" | "paid" | "overdue" | "cancelled";
+  status: "draft" | "pending" | "approved" | "partial" | "paid" | "overdue" | "cancelled";
+  paymentStatus: "pending" | "partial" | "paid" | "overdue" | "refunded";
+  /** Bill-level discount, as a percentage of the subtotal */
+  discount: number;
+  discountAmount: number;
+  /** Bill-level tax rate, as a percentage */
+  taxRate: number;
+  taxAmount: number;
   paymentMethod?: "cash" | "card" | "insurance" | "bank_transfer" | "check";
   insuranceClaim?: {
     claimNumber: string;
@@ -211,17 +222,14 @@ export interface OPDBilling {
 }
 
 export interface BillingItem {
-  id: string;
-  type: "consultation" | "procedure" | "medication" | "lab_test" | "imaging" | "room_charge" | "equipment" | "other";
-  code: string;
+  serviceCode: string;
   description: string;
   quantity: number;
   unitPrice: number;
-  totalPrice: number;
-  doctorId?: string;
-  departmentId?: string;
-  isInsuranceCovered: boolean;
-  insuranceCoverage?: number;
+  /** Item-level discount, as a percentage */
+  discount: number;
+  /** Item-level tax rate, as a percentage */
+  taxRate: number;
 }
 
 export interface BillingDiscount {

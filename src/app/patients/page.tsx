@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Patient, Appointment, Visit, EHRRecord } from "@/types/patient";
 import { PatientRegistrationFormData, AppointmentFormData, VisitFormData } from "@/lib/validations/patient";
 import { PatientList } from "@/components/patient/patient-list";
@@ -13,7 +13,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { useAccess } from "@/lib/access";
+import { RoleNotice } from "@/components/layout/role-notice";
+import type { Permission } from "@/lib/permissions";
+import { useClinicalData } from "@/lib/clinical-store";
 import { 
   Users, 
   UserPlus, 
@@ -38,152 +42,56 @@ type ViewMode =
 export default function PatientManagement() {
   const [currentView, setCurrentView] = useState<ViewMode>("dashboard");
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [visits, setVisits] = useState<Visit[]>([]);
-  const [ehrRecords, setEHRRecords] = useState<EHRRecord[]>([]);
+  const {
+    patients,
+    setPatients,
+    appointments,
+    setAppointments,
+    visits,
+    setVisits,
+    ehrRecords,
+    setEHRRecords,
+  } = useClinicalData();
   const [isLoading, setIsLoading] = useState(false);
+  const { user, can, log } = useAccess();
+  const canViewClinical = can("patient.viewClinical");
 
-  // Load mock data on component mount
-  useEffect(() => {
-    loadMockData();
-  }, []);
+  // Views that need a permission; everything else is open to anyone with the Patients module.
+  const VIEW_PERMISSION: Partial<Record<ViewMode, { permission: Permission; what: string }>> = {
+    "patient-registration": { permission: "patient.register", what: "register patients" },
+    "patient-edit": { permission: "patient.edit", what: "edit patient records" },
+    "appointment-scheduling": { permission: "appointment.book", what: "book appointments" },
+    "visit-recording": { permission: "visit.record", what: "record visits" },
+  };
 
-  const loadMockData = () => {
-    // Mock patients data
-    const mockPatients: Patient[] = [
-      {
-        id: "1",
-        patientId: "PAT001",
-        firstName: "John",
-        lastName: "Smith",
-        dateOfBirth: new Date("1985-03-15"),
-        gender: "male",
-        bloodType: "O+",
-        email: "john.smith@email.com",
-        phone: "555-123-4567",
-        emergencyContact: {
-          name: "Jane Smith",
-          relationship: "Spouse",
-          phone: "555-123-4568"
-        },
-        address: {
-          street: "123 Main St",
-          city: "Anytown",
-          state: "CA",
-          zipCode: "12345",
-          country: "USA"
-        },
-        insurance: {
-          provider: "Blue Cross Blue Shield",
-          policyNumber: "BC123456789",
-          membershipId: "BCBS001"
-        },
-        medicalHistory: "No significant medical history",
-        allergies: "Penicillin",
-        currentMedications: "None",
-        qrCode: "QR-PAT001-2024",
-        barcode: "BC001234567890",
-        rfidId: "RFID001",
-        registrationDate: new Date("2024-01-15"),
-        lastVisit: new Date("2024-10-01"),
-        status: "active"
-      },
-      {
-        id: "2",
-        patientId: "PAT002",
-        firstName: "Mary",
-        lastName: "Johnson",
-        dateOfBirth: new Date("1978-08-22"),
-        gender: "female",
-        bloodType: "A-",
-        email: "mary.johnson@email.com",
-        phone: "555-234-5678",
-        emergencyContact: {
-          name: "Robert Johnson",
-          relationship: "Spouse",
-          phone: "555-234-5679"
-        },
-        address: {
-          street: "456 Oak Ave",
-          city: "Springfield",
-          state: "IL",
-          zipCode: "62701",
-          country: "USA"
-        },
-        medicalHistory: "Diabetes Type 2, diagnosed 2020",
-        allergies: "Shellfish",
-        currentMedications: "Metformin 500mg twice daily",
-        qrCode: "QR-PAT002-2024",
-        registrationDate: new Date("2024-02-10"),
-        status: "active"
-      }
-    ];
+  const navigate = (view: ViewMode) => {
+    const rule = VIEW_PERMISSION[view];
+    if (rule && !can(rule.permission)) {
+      toast.error(`Your role can't ${rule.what}`);
+      log({ action: "access.denied", summary: `Not permitted to ${rule.what}`, details: [`Missing permission: ${rule.permission}`] });
+      return;
+    }
+    setCurrentView(view);
+  };
 
-    // Mock appointments
-    const mockAppointments: Appointment[] = [
-      {
-        id: "1",
-        patientId: "PAT001",
-        doctorId: "DOC001",
-        doctorName: "Dr. Sarah Johnson",
-        appointmentDate: new Date("2024-11-20"),
-        appointmentTime: "10:00",
-        duration: 30,
-        type: "consultation",
-        status: "scheduled",
-        reason: "Annual checkup",
-        department: "General Medicine"
-      }
-    ];
-
-    // Mock visits
-    const mockVisits: Visit[] = [
-      {
-        id: "1",
-        patientId: "PAT001",
-        visitDate: new Date("2024-10-01"),
-        visitTime: "14:30",
-        type: "routine",
-        chiefComplaint: "Annual physical examination",
-        diagnosis: "Overall good health",
-        treatment: "Continue current lifestyle",
-        vitals: {
-          temperature: 98.6,
-          bloodPressure: "120/80",
-          heartRate: 72,
-          weight: 175,
-          height: 70
-        },
-        doctorId: "DOC002",
-        doctorName: "Dr. Michael Chen",
-        department: "General Medicine",
-        status: "completed"
-      }
-    ];
-
-    // Mock EHR records
-    const mockEHRRecords: EHRRecord[] = [
-      {
-        id: "1",
-        patientId: "PAT001",
-        recordType: "visit",
-        date: new Date("2024-10-01"),
-        title: "Annual Physical Examination",
-        description: "Comprehensive physical examination. Patient in good health.",
-        doctorId: "DOC002",
-        doctorName: "Dr. Michael Chen",
-        department: "General Medicine"
-      }
-    ];
-
-    setPatients(mockPatients);
-    setAppointments(mockAppointments);
-    setVisits(mockVisits);
-    setEHRRecords(mockEHRRecords);
+  const openPatient = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setCurrentView("patient-details");
+    log({
+      action: "patient.view",
+      entityType: "patient",
+      entityId: patient.patientId,
+      patientId: patient.id,
+      patientName: `${patient.firstName} ${patient.lastName}`,
+      summary: `Opened the record of ${patient.firstName} ${patient.lastName}`,
+    });
   };
 
   const handlePatientRegistration = async (data: PatientRegistrationFormData) => {
+    if (!can("patient.register")) {
+      toast.error("Your role can't register patients");
+      return;
+    }
     setIsLoading(true);
     try {
       const newPatient: Patient = {
@@ -199,7 +107,15 @@ export default function PatientManagement() {
       
       setPatients([...patients, newPatient]);
       setCurrentView("patient-list");
-      // In a real app, you'd show a success toast here
+      toast.success("Patient registered");
+      log({
+        action: "patient.register",
+        entityType: "patient",
+        entityId: newPatient.patientId,
+        patientId: newPatient.id,
+        patientName: `${newPatient.firstName} ${newPatient.lastName}`,
+        summary: `Registered ${newPatient.firstName} ${newPatient.lastName} (${newPatient.patientId})`,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -207,6 +123,10 @@ export default function PatientManagement() {
 
   const handlePatientEdit = async (data: PatientRegistrationFormData) => {
     if (!selectedPatient) return;
+    if (!can("patient.edit")) {
+      toast.error("Your role can't edit patient records");
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -218,7 +138,15 @@ export default function PatientManagement() {
       setPatients(patients.map(p => p.id === selectedPatient.id ? updatedPatient : p));
       setSelectedPatient(updatedPatient);
       setCurrentView("patient-details");
-      // In a real app, you'd show a success toast here
+      toast.success("Patient updated");
+      log({
+        action: "patient.update",
+        entityType: "patient",
+        entityId: selectedPatient.patientId,
+        patientId: selectedPatient.id,
+        patientName: `${data.firstName} ${data.lastName}`,
+        summary: `Updated the record of ${data.firstName} ${data.lastName}`,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -235,7 +163,7 @@ export default function PatientManagement() {
       
       setAppointments([...appointments, newAppointment]);
       setCurrentView("patient-details");
-      // In a real app, you'd show a success toast here
+      toast.success("Appointment scheduled");
     } finally {
       setIsLoading(false);
     }
@@ -279,7 +207,7 @@ export default function PatientManagement() {
       }
       
       setCurrentView("patient-details");
-      // In a real app, you'd show a success toast here
+      toast.success("Visit recorded");
     } finally {
       setIsLoading(false);
     }
@@ -298,11 +226,9 @@ export default function PatientManagement() {
     );
     
     if (patient) {
-      setSelectedPatient(patient);
-      setCurrentView("patient-details");
+      openPatient(patient);
     } else {
-      // In a real app, you'd show an error toast here
-      alert("Patient not found. Please check the identifier and try again.");
+      toast.error("Patient not found", { description: "No patient matches that identification." });
     }
   };
 
@@ -311,11 +237,11 @@ export default function PatientManagement() {
   };
 
   const getPatientVisits = (patientId: string) => {
-    return visits.filter(v => v.patientId === patientId);
+    return canViewClinical ? visits.filter(v => v.patientId === patientId) : [];
   };
 
   const getPatientEHRRecords = (patientId: string) => {
-    return ehrRecords.filter(r => r.patientId === patientId);
+    return canViewClinical ? ehrRecords.filter(r => r.patientId === patientId) : [];
   };
 
   const renderCurrentView = () => {
@@ -344,7 +270,7 @@ export default function PatientManagement() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setCurrentView("patient-registration")}>
+              <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("patient-registration")}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Register Patient</CardTitle>
                   <UserPlus className="h-4 w-4 text-muted-foreground" />
@@ -368,7 +294,7 @@ export default function PatientManagement() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setCurrentView("appointment-scheduling")}>
+              <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("appointment-scheduling")}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Schedule Appointment</CardTitle>
                   <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -460,7 +386,7 @@ export default function PatientManagement() {
             </div>
             <PatientIdentification
               onPatientFound={handlePatientIdentification}
-              onError={(error) => alert(error)} // In a real app, use a toast
+              onError={(error) => toast.error(error)}
             />
           </div>
         );
@@ -469,22 +395,16 @@ export default function PatientManagement() {
         return (
           <PatientList
             patients={patients}
-            onAddPatient={() => setCurrentView("patient-registration")}
-            onViewPatient={(patient) => {
-              setSelectedPatient(patient);
-              setCurrentView("patient-details");
-            }}
+            onAddPatient={() => navigate("patient-registration")}
+            onViewPatient={openPatient}
             onEditPatient={(patient) => {
               setSelectedPatient(patient);
-              setCurrentView("patient-edit");
+              navigate("patient-edit");
             }}
-            onViewEHR={(patient) => {
-              setSelectedPatient(patient);
-              setCurrentView("patient-details");
-            }}
+            onViewEHR={openPatient}
             onScheduleAppointment={(patient) => {
               setSelectedPatient(patient);
-              setCurrentView("appointment-scheduling");
+              navigate("appointment-scheduling");
             }}
           />
         );
@@ -520,14 +440,14 @@ export default function PatientManagement() {
               <div className="flex gap-2">
                 <Button 
                   variant="outline"
-                  onClick={() => setCurrentView("visit-recording")}
+                  onClick={() => navigate("visit-recording")}
                 >
                   <FileText className="mr-2 h-4 w-4" />
                   Record Visit
                 </Button>
                 <Button 
                   variant="outline"
-                  onClick={() => setCurrentView("appointment-scheduling")}
+                  onClick={() => navigate("appointment-scheduling")}
                 >
                   <Calendar className="mr-2 h-4 w-4" />
                   Schedule Appointment
@@ -539,7 +459,7 @@ export default function PatientManagement() {
               appointments={getPatientAppointments(selectedPatient.patientId)}
               visits={getPatientVisits(selectedPatient.patientId)}
               ehrRecords={getPatientEHRRecords(selectedPatient.patientId)}
-              onEdit={() => setCurrentView("patient-edit")}
+              onEdit={() => navigate("patient-edit")}
               onClose={() => setCurrentView("patient-list")}
             />
           </div>
@@ -619,6 +539,16 @@ export default function PatientManagement() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-6 px-4">
+        {user && (
+          <RoleNotice
+            role={user.role}
+            limits={[
+              !can("patient.register") && "you can't register patients",
+              !can("patient.edit") && "you can't edit patient records",
+              !canViewClinical && "clinical records are hidden",
+            ].filter(Boolean) as string[]}
+          />
+        )}
         {renderCurrentView()}
       </div>
     </div>

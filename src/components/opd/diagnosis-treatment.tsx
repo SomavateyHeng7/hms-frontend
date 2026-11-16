@@ -247,7 +247,7 @@ export function DiagnosisTreatment({
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={diagnosisForm.handleSubmit(handleDiagnosisSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="icdCode">ICD Code *</Label>
                       <Input
@@ -285,7 +285,7 @@ export function DiagnosisTreatment({
                     )}
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label>Type</Label>
                       <Select onValueChange={(value) => diagnosisForm.setValue("type", value as any)}>
@@ -434,7 +434,7 @@ export function DiagnosisTreatment({
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={treatmentForm.handleSubmit(handleTreatmentSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="title">Title *</Label>
                       <Input
@@ -483,7 +483,7 @@ export function DiagnosisTreatment({
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="duration">Duration</Label>
                       <Input
@@ -512,7 +512,7 @@ export function DiagnosisTreatment({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="startDate">Start Date *</Label>
                       <Input
@@ -547,7 +547,7 @@ export function DiagnosisTreatment({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="assignedTo">Assigned To</Label>
                       <Input

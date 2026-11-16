@@ -26,6 +26,11 @@ interface LabOrdersProps {
   onUpdateOrder: (id: string, data: Partial<LabOrder>) => Promise<void>;
   onCancelOrder: (id: string, reason: string) => Promise<void>;
   onCollectSample: (orderId: string) => void;
+  /** Pre-fills the patient when creating a new order (e.g. opened from a patient timeline) */
+  defaultPatientId?: string;
+  /** Role-based access; the actions are disabled when false */
+  canCreate?: boolean;
+  canCancel?: boolean;
 }
 
 const PRIORITY_COLORS = {
@@ -67,6 +72,9 @@ export function LabOrders({
   onUpdateOrder,
   onCancelOrder,
   onCollectSample,
+  defaultPatientId,
+  canCreate = true,
+  canCancel = true,
 }: LabOrdersProps) {
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<LabOrder | null>(null);
@@ -118,6 +126,7 @@ export function LabOrders({
       setEditingOrder(null);
       setSelectedTests([]);
       form.reset();
+      if (defaultPatientId) form.setValue("patientId", defaultPatientId);
     }
     setOrderDialogOpen(true);
   };
@@ -195,7 +204,7 @@ export function LabOrders({
         </Select>
         <Dialog open={orderDialogOpen} onOpenChange={setOrderDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => openOrderDialog()}>
+            <Button onClick={() => openOrderDialog()} disabled={!canCreate} title="Your role can't do this">
               <Plus className="mr-2 h-4 w-4" />
               New Lab Order
             </Button>
@@ -210,10 +219,10 @@ export function LabOrders({
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Patient *</Label>
-                  <Select onValueChange={(value) => form.setValue("patientId", value)}>
+                  <Select value={form.watch("patientId") || undefined} onValueChange={(value) => form.setValue("patientId", value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select patient" />
                     </SelectTrigger>
@@ -309,7 +318,7 @@ export function LabOrders({
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -397,6 +406,7 @@ export function LabOrders({
                     variant="outline"
                     size="sm"
                     onClick={() => openOrderDialog(order)}
+                    disabled={!canCreate}
                   >
                     Edit
                   </Button>
@@ -405,6 +415,7 @@ export function LabOrders({
                       variant="destructive"
                       size="sm"
                       onClick={() => onCancelOrder(order.id, "Physician request")}
+                      disabled={!canCancel}
                     >
                       Cancel
                     </Button>

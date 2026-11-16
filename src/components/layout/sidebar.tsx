@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useAccess } from "@/lib/access";
+import { canAccessPath } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import {
   Home,
@@ -12,13 +14,13 @@ import {
   FileText,
   Activity,
   Heart,
-  Settings,
   BedDouble,
   UserCog,
   TestTube,
   Scan,
   Stethoscope,
   BarChart3,
+  ScrollText,
   Menu,
   X,
   ChevronDown,
@@ -35,6 +37,7 @@ interface NavItem {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAccess();
   const [isOpen, setIsOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
@@ -57,10 +60,10 @@ export function Sidebar() {
         { title: "Patient List", href: "/patients", icon: <Users className="h-4 w-4" /> },
         {
           title: "Registration",
-          href: "/patient-demo",
+          href: "/patients",
           icon: <FileText className="h-4 w-4" />,
         },
-        { title: "Appointments", href: "/scheduling-demo", icon: <Calendar className="h-4 w-4" /> },
+        { title: "Appointments", href: "/scheduling", icon: <Calendar className="h-4 w-4" /> },
       ],
     },
     {
@@ -93,15 +96,15 @@ export function Sidebar() {
         { title: "OPD Dashboard", href: "/opd", icon: <Activity className="h-4 w-4" /> },
         {
           title: "Registration",
-          href: "/opd/registration",
+          href: "/opd?tab=registration",
           icon: <FileText className="h-4 w-4" />,
         },
         {
           title: "Consultation",
-          href: "/opd/consultation",
+          href: "/opd?tab=consultation",
           icon: <Stethoscope className="h-4 w-4" />,
         },
-        { title: "Prescription", href: "/opd/prescription", icon: <FileText className="h-4 w-4" /> },
+        { title: "Prescription", href: "/opd?tab=prescription", icon: <FileText className="h-4 w-4" /> },
       ],
     },
     {
@@ -109,15 +112,15 @@ export function Sidebar() {
       icon: <TestTube className="h-5 w-5" />,
       children: [
         { title: "Lab Dashboard", href: "/laboratory", icon: <Activity className="h-4 w-4" /> },
-        { title: "Lab Orders", href: "/laboratory/orders", icon: <FileText className="h-4 w-4" /> },
+        { title: "Lab Orders", href: "/laboratory?tab=orders", icon: <FileText className="h-4 w-4" /> },
         {
           title: "Test Results",
-          href: "/laboratory/results",
+          href: "/laboratory?tab=results",
           icon: <TestTube className="h-4 w-4" />,
         },
         {
           title: "Sample Tracking",
-          href: "/laboratory/samples",
+          href: "/laboratory?tab=samples",
           icon: <Activity className="h-4 w-4" />,
         },
       ],
@@ -128,29 +131,29 @@ export function Sidebar() {
       icon: <Scan className="h-5 w-5" />,
       children: [
         { title: "Radiology Dashboard", href: "/radiology", icon: <Activity className="h-4 w-4" /> },
-        { title: "Imaging Orders", href: "/radiology/orders", icon: <FileText className="h-4 w-4" /> },
-        { title: "Reports", href: "/radiology/reports", icon: <FileText className="h-4 w-4" /> },
-        { title: "Scheduling", href: "/radiology/schedule", icon: <Calendar className="h-4 w-4" /> },
+        { title: "Imaging Orders", href: "/radiology?tab=orders", icon: <FileText className="h-4 w-4" /> },
+        { title: "Reports", href: "/radiology?tab=reports", icon: <FileText className="h-4 w-4" /> },
+        { title: "Scheduling", href: "/radiology?tab=scheduling", icon: <Calendar className="h-4 w-4" /> },
       ],
     },
     {
       title: "Scheduling",
-      href: "/scheduling-demo",
+      href: "/scheduling",
       icon: <Calendar className="h-5 w-5" />,
       children: [
         {
           title: "Appointments",
-          href: "/scheduling-demo",
+          href: "/scheduling",
           icon: <Calendar className="h-4 w-4" />,
         },
         {
           title: "Emergency Triage",
-          href: "/scheduling/triage",
+          href: "/scheduling?tab=triage",
           icon: <Activity className="h-4 w-4" />,
         },
         {
           title: "Telemedicine",
-          href: "/scheduling/telemedicine",
+          href: "/scheduling?tab=telemedicine",
           icon: <Activity className="h-4 w-4" />,
         },
       ],
@@ -171,8 +174,6 @@ export function Sidebar() {
           href: "/staff?tab=leave",
           icon: <Calendar className="h-4 w-4" />,
         },
-        { title: "Attendance", href: "/staff/attendance", icon: <Activity className="h-4 w-4" /> },
-        { title: "Shifts", href: "/staff/shifts", icon: <Calendar className="h-4 w-4" /> },
       ],
     },
     {
@@ -366,10 +367,10 @@ export function Sidebar() {
       title: "Reporting & Analytics",
       icon: <BarChart3 className="h-5 w-5" />,
       children: [
-        { title: "Dashboard", href: "/reports", icon: <Activity className="h-4 w-4" /> },
-        { title: "Clinical Reports", href: "/reports/clinical", icon: <FileText className="h-4 w-4" /> },
-        { title: "Billing Summary", href: "/reports/billing", icon: <FileText className="h-4 w-4" /> },
-        { title: "Daily Census", href: "/reports/census", icon: <Activity className="h-4 w-4" /> },
+        { title: "Dashboard", href: "/reporting", icon: <Activity className="h-4 w-4" /> },
+        { title: "Clinical Reports", href: "/reporting?tab=clinical", icon: <FileText className="h-4 w-4" /> },
+        { title: "Billing Summary", href: "/reporting?tab=billing", icon: <FileText className="h-4 w-4" /> },
+        { title: "Daily Census", href: "/reporting?tab=census", icon: <Activity className="h-4 w-4" /> },
       ],
     },
     {
@@ -383,11 +384,20 @@ export function Sidebar() {
       ],
     },
     {
-      title: "Settings",
-      href: "/settings",
-      icon: <Settings className="h-5 w-5" />,
+      title: "Audit Log",
+      href: "/audit",
+      icon: <ScrollText className="h-5 w-5" />,
     },
   ];
+
+  // Hide links to modules the signed-in role can't open (routes outside the governed
+  // modules stay visible to every signed-in user).
+  const allowed = (href?: string) => !href || href === "#" || canAccessPath(user?.role, href.split("?")[0]);
+  const visibleNavItems = navItems
+    .map((item) =>
+      item.children ? { ...item, children: item.children.filter((c) => allowed(c.href)) } : item
+    )
+    .filter((item) => (item.children ? item.children.length > 0 : allowed(item.href)));
 
   const renderNavItem = (item: NavItem, level: number = 0) => {
     const isActive = pathname === item.href;
@@ -486,7 +496,7 @@ export function Sidebar() {
 
           {/* Navigation */}
           <div className="flex-1 overflow-y-auto px-3 py-4">
-            <nav className="space-y-1">{navItems.map((item) => renderNavItem(item))}</nav>
+            <nav className="space-y-1">{visibleNavItems.map((item) => renderNavItem(item))}</nav>
           </div>
 
           {/* Footer */}
@@ -501,7 +511,6 @@ export function Sidebar() {
       </aside>
 
       {/* Main content offset */}
-      <div className="lg:pl-64">{/* Content goes here */}</div>
     </>
   );
 }

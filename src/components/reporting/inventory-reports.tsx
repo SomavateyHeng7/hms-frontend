@@ -1,5 +1,6 @@
 "use client";
 
+import { percentOf } from "@/lib/utils";
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { 
@@ -223,11 +224,11 @@ export function InventoryReports({ report, onExport, onReorder }: InventoryRepor
                         </div>
                       </div>
                       <Progress 
-                        value={Math.min((category.totalValue / report.totalValue) * 100, 100)} 
+                        value={Math.min(percentOf(category.totalValue, report.totalValue), 100)} 
                         className="h-2" 
                       />
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{Math.round((category.totalValue / report.totalValue) * 100)}% of total value</span>
+                        <span>{percentOf(category.totalValue, report.totalValue)}% of total value</span>
                         <span>Turnover: {category.turnoverRate.toFixed(1)}x</span>
                       </div>
                     </div>
@@ -339,7 +340,7 @@ export function InventoryReports({ report, onExport, onReorder }: InventoryRepor
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
                     <div className="text-2xl font-bold text-blue-600">
                       {report.purchaseOrders.pending}
@@ -401,7 +402,7 @@ export function InventoryReports({ report, onExport, onReorder }: InventoryRepor
                     <span className="font-medium">Cost Efficiency</span>
                   </div>
                   <p className="text-sm text-green-700 mt-1">
-                    Bulk ordering has saved {Math.round((report.costAnalysis.savingsFromBulkOrders / report.costAnalysis.totalPurchases) * 100)}% 
+                    Bulk ordering has saved {percentOf(report.costAnalysis.savingsFromBulkOrders, report.costAnalysis.totalPurchases)}% 
                     on total purchases this period.
                   </p>
                 </div>

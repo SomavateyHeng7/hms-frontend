@@ -116,7 +116,20 @@ export interface LabTestResult {
   validatedBy?: string;
   validatedAt?: Date;
   notes?: string;
+  orderId: string;
+  testCode: string;
+  referenceRange?: string;
+  method?: string;
+  comments?: string;
+  validationComments?: string;
+  isCritical?: boolean;
+  /** Set when the result is stored against a known patient */
+  patientId?: string;
+  /** Id of the staff member who entered the result */
+  enteredById?: string;
 }
+
+export type LabReportDeliveryMethod = "digital" | "email" | "print" | "fax";
 
 export interface LabReport {
   id: string;
@@ -150,7 +163,12 @@ export interface LabReport {
   criticalValues: boolean;
   notificationSent: boolean;
   printedAt?: Date;
-  deliveryMethod: "digital" | "print" | "both";
+  deliveryMethod: LabReportDeliveryMethod[];
+  template?: string;
+  generatedAt?: Date;
+  generatedBy?: string;
+  comments?: string;
+  deliveryStatus?: Record<string, string>;
 }
 
 export interface LabReportTest {
@@ -268,13 +286,6 @@ export interface TestResultFormData {
   }[];
   enteredBy: string;
   status: "preliminary" | "final";
-}
-
-export interface LabReportFormData {
-  orderId: string;
-  interpretation?: string;
-  recommendations?: string[];
-  deliveryMethod: "digital" | "print" | "both";
 }
 
 export interface QualityControlFormData {

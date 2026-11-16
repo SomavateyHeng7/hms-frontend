@@ -39,7 +39,7 @@ export default function Home() {
                 <li>• Insurance Details Management</li>
                 <li>• Medical History Tracking</li>
               </ul>
-              <Link href="/patient-demo">
+              <Link href="/patients">
                 <Button className="w-full">
                   Access Patient Management
                 </Button>
@@ -66,7 +66,7 @@ export default function Home() {
                 <li>• Visit History Tracking</li>
                 <li>• Department-wise Scheduling</li>
               </ul>
-              <Link href="/scheduling-demo">
+              <Link href="/scheduling">
                 <Button className="w-full">
                   Access Scheduling System
                 </Button>

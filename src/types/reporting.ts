@@ -158,79 +158,86 @@ export interface ResourceUtilizationReport {
     equipmentName: string;
     type: string;
     utilizationRate: number;
-    operationalHours: number;
-    maintenanceHours: number;
-    downtime: number;
+    hoursUsed: number;
+    hoursAvailable: number;
+    maintenanceStatus: "ok" | "due" | "overdue";
+    revenue: number;
     efficiency: number;
-    lastMaintenance: Date;
+    nextMaintenance: string;
   }>;
-  staff: Array<{
+  staffUtilization: Array<{
     staffId: string;
-    staffName: string;
+    name: string;
     role: string;
     department: string;
+    shift: string;
     hoursWorked: number;
-    overtime: number;
-    efficiency: number;
-    patientLoad: number;
-    absenceHours: number;
+    hoursScheduled: number;
+    overtimeHours: number;
+    utilizationRate: number;
+    productivityScore: number;
+    patientInteractions: number;
+    satisfactionScore: number;
   }>;
-  overall: {
-    roomUtilization: number;
-    equipmentUtilization: number;
-    staffUtilization: number;
-    costPerHour: number;
-    revenuePerHour: number;
-    efficiency: number;
+  energyUsage: {
+    /** Total usage in kWh */
+    totalUsage: number;
+    efficiencyScore: number;
+    costSavings: number;
+    departmentUsage: Array<{
+      department: string;
+      usage: number;
+      percentage: number;
+      cost: number;
+    }>;
   };
 }
 
-export interface DoctorPerformanceReport {
+export interface DoctorPerformanceEntry {
   doctorId: string;
-  doctorName: string;
-  specialization: string;
-  department: string;
-  reportPeriod: {
-    start: Date;
-    end: Date;
+  name: string;
+  specialty: string;
+  experienceYears: number;
+  totalPatients: number;
+  patientsPerDay: number;
+  successRate: number;
+  qualityScore: number;
+  /** Rating out of 5 */
+  patientSatisfactionScore: number;
+  efficiency: number;
+  /** Average consultation time in minutes */
+  averageConsultationTime: number;
+  revenue: number;
+}
+
+export interface DoctorPerformanceReport {
+  reportDate: Date;
+  totalDoctors: number;
+  averageSatisfactionScore: number;
+  averageQualityScore: number;
+  averageEfficiencyScore: number;
+  topPerformers: DoctorPerformanceEntry[];
+  doctors: DoctorPerformanceEntry[];
+  specialtyPerformance: Array<{
+    specialty: string;
+    doctorCount: number;
+    totalPatients: number;
+    totalRevenue: number;
+    averageExperience: number;
+    averageQualityScore: number;
+    averageSatisfaction: number;
+    averageEfficiency: number;
+  }>;
+  trends: {
+    qualityImprovement: number;
+    satisfactionImprovement: number;
+    efficiencyImprovement: number;
   };
-  appointmentMetrics: {
-    totalAppointments: number;
-    completedAppointments: number;
-    cancelledAppointments: number;
-    noShowRate: number;
-    averageConsultationTime: number;
-    punctualityScore: number;
-    rebookingRate: number;
-  };
-  financialMetrics: {
-    revenue: number;
-    collectionsRate: number;
-    averageRevenuePerPatient: number;
-    productivity: number;
-    costPerConsultation: number;
-  };
-  patientOutcomes: {
-    successfulTreatments: number;
-    referrals: number;
-    readmissions: number;
-    complications: number;
-    patientSatisfactionScore: number;
-    complaintCount: number;
-  };
-  qualityMetrics: {
-    adherenceToGuidelines: number;
-    documentationQuality: number;
-    safetyIncidents: number;
-    continuingEducationHours: number;
-    researchPublications: number;
-  };
-  workloadMetrics: {
-    workingHours: number;
-    overtime: number;
-    patientLoad: number;
-    caseComplexity: number;
-    burnoutRisk: "low" | "medium" | "high";
+  achievements: {
+    excellenceAwards: number;
+    qualityTargetsMet: number;
+    patientAdvocacyScore: number;
+    efficiencyLeaders: number;
   };
 }
 

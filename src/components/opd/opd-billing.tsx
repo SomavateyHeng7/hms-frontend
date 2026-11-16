@@ -13,20 +13,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
-import { OPDBilling, BillingItem, OPDBillingFormData } from "@/types/opd";
+import type { OPDBilling as OPDBillingRecord, BillingItem } from "@/types/opd";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { opdBillingSchema } from "@/lib/validations/opd";
+import { opdBillingSchema, OPDBillingFormData, OPDBillingSubmission } from "@/lib/validations/opd";
 
 interface OPDBillingProps {
   patientId: string;
   consultationId: string;
-  bills: OPDBilling[];
-  onCreateBill: (data: OPDBillingFormData) => Promise<void>;
-  onUpdateBill: (id: string, data: OPDBillingFormData) => Promise<void>;
+  bills: OPDBillingRecord[];
+  onCreateBill: (data: OPDBillingSubmission) => Promise<void>;
+  onUpdateBill: (id: string, data: OPDBillingSubmission) => Promise<void>;
   onDeleteBill: (id: string) => Promise<void>;
   onProcessPayment: (billId: string, paymentMethod: string, amount: number) => Promise<void>;
   onPrintBill: (billId: string) => void;
+  /** Role-based access; the matching actions are disabled when false */
+  canCreate?: boolean;
+  canRecordPayment?: boolean;
 }
 
 interface ServiceTemplate {
@@ -106,11 +109,13 @@ export function OPDBilling({
   onDeleteBill,
   onProcessPayment,
   onPrintBill,
+  canCreate = true,
+  canRecordPayment = true,
 }: OPDBillingProps) {
   const [billingDialogOpen, setBillingDialogOpen] = useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
-  const [editingBill, setEditingBill] = useState<OPDBilling | null>(null);
-  const [selectedBillForPayment, setSelectedBillForPayment] = useState<OPDBilling | null>(null);
+  const [editingBill, setEditingBill] = useState<OPDBillingRecord | null>(null);
+  const [selectedBillForPayment, setSelectedBillForPayment] = useState<OPDBillingRecord | null>(null);
   const [serviceSearch, setServiceSearch] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
@@ -158,7 +163,7 @@ export function OPDBilling({
 
   const handleSubmit = async (data: OPDBillingFormData) => {
     try {
-      const billData = {
+      const billData: OPDBillingSubmission = {
         ...data,
         subtotal,
         discountAmount,
@@ -193,7 +198,7 @@ export function OPDBilling({
     }
   };
 
-  const openBillingDialog = (bill?: OPDBilling) => {
+  const openBillingDialog = (bill?: OPDBillingRecord) => {
     if (bill) {
       setEditingBill(bill);
       form.reset({
@@ -211,7 +216,7 @@ export function OPDBilling({
     setBillingDialogOpen(true);
   };
 
-  const openPaymentDialog = (bill: OPDBilling) => {
+  const openPaymentDialog = (bill: OPDBillingRecord) => {
     setSelectedBillForPayment(bill);
     setPaymentAmount(bill.totalAmount);
     setPaymentDialogOpen(true);
@@ -279,7 +284,7 @@ export function OPDBilling({
         </div>
         <Dialog open={billingDialogOpen} onOpenChange={setBillingDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => openBillingDialog()}>
+            <Button onClick={() => openBillingDialog()} disabled={!canCreate}>
               <Plus className="mr-2 h-4 w-4" />
               Create Bill
             </Button>
@@ -294,7 +299,7 @@ export function OPDBilling({
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Bill Status</Label>
                   <Select onValueChange={(value) => form.setValue("status", value as any)}>
@@ -371,7 +376,7 @@ export function OPDBilling({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                       <div className="space-y-2">
                         <Label htmlFor={`items.${index}.serviceCode`}>Service Code</Label>
                         <Input
@@ -389,7 +394,7 @@ export function OPDBilling({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor={`items.${index}.quantity`}>Quantity *</Label>
                         <Input
@@ -433,7 +438,7 @@ export function OPDBilling({
               </div>
 
               <Card className="p-4 bg-gray-50">
-                <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                   <div className="space-y-2">
                     <Label htmlFor="discount">Overall Discount (%)</Label>
                     <Input
@@ -535,6 +540,7 @@ export function OPDBilling({
                     variant="outline"
                     size="sm"
                     onClick={() => openBillingDialog(bill)}
+                    disabled={!canCreate}
                   >
                     <Edit3 className="mr-2 h-4 w-4" />
                     Edit
@@ -544,6 +550,7 @@ export function OPDBilling({
                       variant="default"
                       size="sm"
                       onClick={() => openPaymentDialog(bill)}
+                      disabled={!canRecordPayment}
                     >
                       <CreditCard className="mr-2 h-4 w-4" />
                       Payment

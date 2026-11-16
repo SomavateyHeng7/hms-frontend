@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from "react";
 import { Plus, Settings, Download, Eye, EyeOff, Trash2, Edit3, Grid, BarChart3, PieChart, Activity } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -95,9 +96,12 @@ export function CustomDashboards({
           )}
 
           {widget.type === "chart" && (
-            <div className="h-48 flex items-center justify-center border border-dashed rounded-lg text-muted-foreground">
-              [Chart Placeholder: {widget.chartType || 'bar'}]
-            </div>
+            <EmptyState
+              icon={BarChart3}
+              title="No data source connected"
+              description={`This ${widget.chartType || "bar"} chart will render once "${widget.dataSource}" is available.`}
+              className="h-48 rounded-lg border border-dashed py-6"
+            />
           )}
 
           {widget.type === "table" && (

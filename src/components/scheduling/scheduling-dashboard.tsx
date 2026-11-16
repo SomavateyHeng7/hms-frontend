@@ -153,14 +153,14 @@ export function SchedulingDashboard({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Appointment & Scheduling</h1>
           <p className="text-muted-foreground">
             Comprehensive scheduling system for all departments
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button onClick={onScheduleTelemedicine} variant="outline">
             <Video className="mr-2 h-4 w-4" />
             Telemedicine
@@ -222,7 +222,7 @@ export function SchedulingDashboard({
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4">
           <TabsTrigger value="appointments">Appointments</TabsTrigger>
           <TabsTrigger value="calendar">Calendar View</TabsTrigger>
           <TabsTrigger value="emergency">Emergency Queue</TabsTrigger>

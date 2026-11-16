@@ -109,7 +109,7 @@ export function PatientIdentification({ onPatientFound, onError }: PatientIdenti
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="qr" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4">
             <TabsTrigger value="qr" className="flex items-center gap-2">
               <QrCode className="h-4 w-4" />
               QR Code

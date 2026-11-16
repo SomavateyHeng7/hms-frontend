@@ -80,13 +80,13 @@ const reminderTemplateSchema = z.object({
   timing: z.number().min(15, "Minimum timing is 15 minutes").max(10080, "Maximum timing is 7 days"),
   message: z.string().min(10, "Message must be at least 10 characters"),
   subject: z.string().optional(),
-  isActive: z.boolean().default(true)
+  isActive: z.boolean()
 });
 
 const bulkReminderSchema = z.object({
   templateId: z.string().min(1, "Template is required"),
   appointmentIds: z.array(z.string()).min(1, "At least one appointment must be selected"),
-  sendImmediately: z.boolean().default(false),
+  sendImmediately: z.boolean(),
   customMessage: z.string().optional()
 });
 
@@ -309,7 +309,7 @@ export function AutomatedReminderSystem({
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid h-auto w-full grid-cols-3 sm:grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="bulk">Bulk Send</TabsTrigger>
@@ -441,7 +441,7 @@ export function AutomatedReminderSystem({
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Reminder Type *</Label>
                       <Select onValueChange={(value) => templateForm.setValue("type", value as any)}>

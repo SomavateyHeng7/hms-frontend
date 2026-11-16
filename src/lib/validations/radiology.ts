@@ -22,11 +22,11 @@ export const imagingOrderSchema = z.object({
 export const imagingScheduleSchema = z.object({
   orderId: z.string().min(1, "Order ID is required"),
   equipmentId: z.string().min(1, "Equipment selection is required"),
-  scheduledDate: z.string().min(1, "Scheduled date is required"),
-  scheduledTime: z.string().min(1, "Scheduled time is required"),
-  duration: z.number().min(1, "Duration must be at least 1 minute"),
-  technologistId: z.string().min(1, "Technologist assignment is required"),
-  specialNotes: z.string().optional(),
+  technicianId: z.string().min(1, "Technician assignment is required"),
+  scheduledDateTime: z.string().min(1, "Scheduled date and time is required"),
+  estimatedDuration: z.number().min(1, "Duration must be at least 1 minute"),
+  status: z.enum(["scheduled", "in_progress", "completed", "cancelled", "no_show", "rescheduled"]),
+  notes: z.string().optional(),
 });
 
 export const radiologyReportSchema = z.object({
@@ -62,37 +62,33 @@ export const equipmentMaintenanceSchema = z.object({
 
 export const pacsConfigSchema = z.object({
   name: z.string().min(1, "PACS name is required"),
-  host: z.string().min(1, "Host address is required"),
+  serverAddress: z.string().min(1, "Server address is required"),
   port: z.number().min(1).max(65535, "Port must be between 1 and 65535"),
   aeTitle: z.string().min(1, "AE Title is required"),
-  protocol: z.enum(["DICOM", "HL7", "REST"]),
-  authentication: z.object({
-    required: z.boolean(),
+  callingAeTitle: z.string().min(1, "Calling AE Title is required"),
+  supportedProtocols: z.array(z.string()).min(1, "Select at least one protocol"),
+  timeout: z.number().min(1, "Timeout must be at least 1 second"),
+  retryAttempts: z.number().min(0).max(10, "Retry attempts must be between 0 and 10"),
+  security: z.object({
+    tlsEnabled: z.boolean(),
     username: z.string().optional(),
     password: z.string().optional(),
-    certificate: z.string().optional(),
+    certificatePath: z.string().optional(),
   }),
-  storageLocation: z.string().min(1, "Storage location is required"),
-  maxConnections: z.number().min(1).max(100, "Max connections must be between 1 and 100"),
-  timeout: z.number().min(1000, "Timeout must be at least 1000ms"),
-  retryAttempts: z.number().min(0).max(10, "Retry attempts must be between 0 and 10"),
-  backupEnabled: z.boolean(),
-  backupLocation: z.string().optional(),
-  archivePolicy: z.object({
-    enabled: z.boolean(),
-    archiveAfterDays: z.number().min(1).optional(),
-    archiveLocation: z.string().optional(),
+  storage: z.object({
+    compression: z.enum(["none", "jpeg", "jpeg2000", "jpegls", "rle"]),
+    maxFileSize: z.number().min(1, "Max file size must be at least 1 MB"),
+    retentionDays: z.number().min(1, "Retention must be at least 1 day"),
+    autoArchive: z.boolean(),
+    archivePath: z.string().optional(),
   }),
 });
 
 export const studyQualityControlSchema = z.object({
-  studyId: z.string().min(1, "Study ID is required"),
-  status: z.enum(["passed", "failed", "needs_repeat"]),
-  reviewer: z.string().min(1, "Reviewer name is required"),
+  overallQuality: z.enum(["excellent", "good", "acceptable", "poor", "unacceptable"]),
+  technicalAdequacy: z.enum(["adequate", "suboptimal", "inadequate"]),
+  artifactsPresent: z.boolean(),
   comments: z.string().optional(),
-  technicalIssues: z.array(z.string()).optional(),
-  imageQualityScore: z.number().min(1).max(5, "Quality score must be between 1 and 5"),
-  recommendations: z.string().optional(),
 });
 
 export const criticalFindingSchema = z.object({

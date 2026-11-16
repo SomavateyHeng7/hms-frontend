@@ -372,7 +372,7 @@ export function AdvancedAppointmentBooking({
                         setValue("type", "telemedicine");
                       }
                     }}
-                    disabled={selectedDoctor && !doctors.find(d => d.id === selectedDoctor)?.telemedicineEnabled}
+                    disabled={!!selectedDoctor && !doctors.find(d => d.id === selectedDoctor)?.telemedicineEnabled}
                   />
                   <Label htmlFor="telemedicine" className="flex items-center gap-2">
                     <Video className="h-4 w-4" />

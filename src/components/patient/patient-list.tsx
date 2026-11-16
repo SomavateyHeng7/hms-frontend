@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Plus, Eye, Edit, QrCode, Barcode, CreditCard, FileText, Calendar } from "lucide-react";
+import { Activity, Search, Plus, Eye, Edit, QrCode, Barcode, CreditCard, FileText, Calendar } from "lucide-react";
 import { Patient } from "@/types/patient";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -230,6 +231,12 @@ export function PatientList({
                     >
                       <FileText className="mr-1 h-3 w-3" />
                       EHR
+                    </Button>
+                    <Button size="sm" variant="outline" asChild className="flex-1">
+                      <Link href={`/patients/${patient.id}`}>
+                        <Activity className="mr-1 h-3 w-3" />
+                        Timeline
+                      </Link>
                     </Button>
                     <Button
                       size="sm"

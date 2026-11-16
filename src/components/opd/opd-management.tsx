@@ -1,5 +1,16 @@
+"use client";
+
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTabParam } from "@/hooks/use-tab-param";
+import { toast } from "sonner";
+import { useClinicalData } from "@/lib/clinical-store";
+import { useAccess } from "@/lib/access";
+import { RoleNotice } from "@/components/layout/role-notice";
+import { PatientFilterBanner, useSelectedPatient } from "@/components/layout/patient-filter-banner";
+import type { PrescriptionFormData, OPDBillingSubmission } from "@/lib/validations/opd";
+import { printDocument, prescriptionHtml, billHtml } from "@/lib/print";
+import type { PrescriptionSafetyMeta } from "@/components/opd/prescription-generation";
 import { OPDDashboard } from "@/components/opd/opd-dashboard";
 import { OPDRegistration } from "@/components/opd/opd-registration";
 import { ConsultationNotes } from "@/components/opd/consultation-notes";
@@ -9,15 +20,109 @@ import { OPDBilling } from "@/components/opd/opd-billing";
 import { OPDPatient, ConsultationNote, Diagnosis, TreatmentPlan, Prescription, OPDBilling as OPDBillingType } from "@/types/opd";
 
 export function OPDManagement() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const { user, can, log: audit } = useAccess();
+  // Tabs depend on role: clinical tabs need clinical access, billing needs a billing permission
+  const canViewClinical = can("patient.viewClinical");
+  const canSeeBilling = can("bill.create") || can("bill.payment") || can("bill.print");
+  const allowedTabs = [
+    "dashboard",
+    ...(can("patient.register") ? ["registration"] : []),
+    ...(canViewClinical ? ["consultation", "diagnosis", "prescription"] : []),
+    ...(canSeeBilling ? ["billing"] : []),
+  ];
+  const [activeTab, setActiveTab] = useTabParam("dashboard", allowedTabs);
   
   // Mock data - in real app, this would come from API/database
   const mockPatients: OPDPatient[] = [];
   const mockConsultations: ConsultationNote[] = [];
   const mockDiagnoses: Diagnosis[] = [];
   const mockTreatments: TreatmentPlan[] = [];
-  const mockPrescriptions: Prescription[] = [];
-  const mockBills: OPDBillingType[] = [];
+  const { patients, prescriptions, addPrescription, bills, addBill, recordBillPayment, getPatient } = useClinicalData();
+  const selectedPatient = useSelectedPatient();
+  // Prescriptions are written for the patient chosen via ?patient=, else the first patient
+  const activePatient = selectedPatient ?? patients[0];
+  const patientPrescriptions: Prescription[] = prescriptions.filter((p) => p.patientId === activePatient?.id);
+  const patientBills: OPDBillingType[] = bills.filter((b) => b.patientId === activePatient?.id);
+
+  const handleCreatePrescription = async (data: PrescriptionFormData, meta?: PrescriptionSafetyMeta) => {
+    if (!can("prescription.create")) {
+      toast.error("Your role can't create prescriptions");
+      return;
+    }
+    if (!activePatient) {
+      toast.error("No patient selected");
+      return;
+    }
+    const rx = addPrescription(data, activePatient.id, meta);
+    if (rx) {
+      toast.success(`Prescription ${rx.prescriptionNumber} created`, {
+        description: `For ${activePatient.firstName} ${activePatient.lastName}`,
+      });
+    }
+  };
+
+  const handleCreateBill = async (data: OPDBillingSubmission) => {
+    if (!can("bill.create")) {
+      toast.error("Your role can't create bills");
+      return;
+    }
+    if (!activePatient) {
+      toast.error("No patient selected");
+      return;
+    }
+    const bill = addBill(data, activePatient.id);
+    if (bill) {
+      toast.success(`Bill ${bill.billNumber} created`, { description: `Total $${bill.totalAmount.toFixed(2)}` });
+    }
+  };
+
+  const handlePrintPrescription = (id: string) => {
+    const rx = prescriptions.find((p) => p.id === id);
+    const patient = rx ? getPatient(rx.patientId) : undefined;
+    if (!rx || !patient) {
+      toast.error("Could not print prescription", { description: "Prescription or patient not found." });
+      return;
+    }
+    if (!can("prescription.print")) {
+      toast.error("Your role can't print prescriptions");
+      return;
+    }
+    audit({
+      action: "document.print",
+      entityType: "prescription",
+      entityId: rx.prescriptionNumber,
+      patientId: patient.id,
+      patientName: `${patient.firstName} ${patient.lastName}`,
+      summary: `Printed prescription ${rx.prescriptionNumber}`,
+    });
+    printDocument(prescriptionHtml(rx, patient, { printedBy: user?.name }));
+  };
+
+  const handlePrintBill = (id: string) => {
+    const bill = bills.find((b) => b.id === id);
+    const patient = bill ? getPatient(bill.patientId) : undefined;
+    if (!bill || !patient) {
+      toast.error("Could not print bill", { description: "Bill or patient not found." });
+      return;
+    }
+    if (!can("bill.print")) {
+      toast.error("Your role can't print bills");
+      return;
+    }
+    audit({
+      action: "document.print",
+      entityType: "bill",
+      entityId: bill.billNumber,
+      patientId: patient.id,
+      patientName: `${patient.firstName} ${patient.lastName}`,
+      summary: `Printed bill ${bill.billNumber}`,
+    });
+    printDocument(billHtml(bill, patient, { printedBy: user?.name }));
+  };
+
+  const notAvailable = (what: string) => async () => {
+    toast.info(`${what} isn't available in the demo yet`);
+  };
 
   // Navigation handlers
   const handleNavigateToTab = (tab: string) => {
@@ -68,15 +173,25 @@ export function OPDManagement() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto">
+      <div className="container mx-auto px-4">
+        {user && (
+          <RoleNotice
+            role={user.role}
+            limits={[
+              !can("prescription.create") && "you can view but not write prescriptions",
+              !can("bill.create") && "you can't create bills",
+            ].filter(Boolean) as string[]}
+          />
+        )}
+        <PatientFilterBanner patient={activePatient} selectable clinical={canViewClinical} />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="registration">Registration</TabsTrigger>
-            <TabsTrigger value="consultation">Consultation</TabsTrigger>
-            <TabsTrigger value="diagnosis">Diagnosis</TabsTrigger>
-            <TabsTrigger value="prescription">Prescription</TabsTrigger>
-            <TabsTrigger value="billing">Billing</TabsTrigger>
+          <TabsList className="flex h-auto w-full flex-wrap justify-start">
+            {allowedTabs.includes("dashboard") && <TabsTrigger value="dashboard">Dashboard</TabsTrigger>}
+            {allowedTabs.includes("registration") && <TabsTrigger value="registration">Registration</TabsTrigger>}
+            {allowedTabs.includes("consultation") && <TabsTrigger value="consultation">Consultation</TabsTrigger>}
+            {allowedTabs.includes("diagnosis") && <TabsTrigger value="diagnosis">Diagnosis</TabsTrigger>}
+            {allowedTabs.includes("prescription") && <TabsTrigger value="prescription">Prescription</TabsTrigger>}
+            {allowedTabs.includes("billing") && <TabsTrigger value="billing">Billing</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
@@ -85,8 +200,8 @@ export function OPDManagement() {
               consultations={mockConsultations}
               diagnoses={mockDiagnoses}
               treatments={mockTreatments}
-              prescriptions={mockPrescriptions}
-              bills={mockBills}
+              prescriptions={canViewClinical ? patientPrescriptions : []}
+              bills={canSeeBilling ? patientBills : []}
               onNavigateToRegistration={() => handleNavigateToTab("registration")}
               onNavigateToConsultation={() => handleNavigateToTab("consultation")}
               onNavigateToDiagnosis={() => handleNavigateToTab("diagnosis")}
@@ -168,53 +283,37 @@ export function OPDManagement() {
 
           <TabsContent value="prescription" className="space-y-6">
             <PrescriptionGeneration
-              patientId=""
+              patientId={activePatient?.id ?? ""}
               consultationId=""
-              prescriptions={mockPrescriptions}
-              onCreatePrescription={async (data) => {
-                console.log("Create prescription:", data);
-                alert("Prescription creation functionality would be implemented here");
-              }}
-              onUpdatePrescription={async (id, data) => {
-                console.log("Update prescription:", id, data);
-                alert("Prescription update functionality would be implemented here");
-              }}
-              onDeletePrescription={async (id) => {
-                console.log("Delete prescription:", id);
-                alert("Prescription deletion functionality would be implemented here");
-              }}
-              onPrintPrescription={(id) => {
-                console.log("Print prescription:", id);
-                alert("Prescription printing functionality would be implemented here");
-              }}
+              prescriptions={patientPrescriptions}
+              patientAllergies={activePatient?.allergies}
+              patientCurrentMedications={activePatient?.currentMedications}
+              canCreate={can("prescription.create")}
+              onCreatePrescription={handleCreatePrescription}
+              onUpdatePrescription={notAvailable("Editing prescriptions")}
+              onDeletePrescription={notAvailable("Deleting prescriptions")}
+              onPrintPrescription={handlePrintPrescription}
             />
           </TabsContent>
 
           <TabsContent value="billing" className="space-y-6">
             <OPDBilling
-              patientId=""
+              patientId={activePatient?.id ?? ""}
               consultationId=""
-              bills={mockBills}
-              onCreateBill={async (data) => {
-                console.log("Create bill:", data);
-                alert("Bill creation functionality would be implemented here");
-              }}
-              onUpdateBill={async (id, data) => {
-                console.log("Update bill:", id, data);
-                alert("Bill update functionality would be implemented here");
-              }}
-              onDeleteBill={async (id) => {
-                console.log("Delete bill:", id);
-                alert("Bill deletion functionality would be implemented here");
-              }}
+              bills={patientBills}
+              canCreate={can("bill.create")}
+              canRecordPayment={can("bill.payment")}
+              onCreateBill={handleCreateBill}
+              onUpdateBill={notAvailable("Editing bills")}
+              onDeleteBill={notAvailable("Deleting bills")}
               onProcessPayment={async (billId, paymentMethod, amount) => {
-                console.log("Process payment:", billId, paymentMethod, amount);
-                alert("Payment processing functionality would be implemented here");
+                if (!can("bill.payment") || !recordBillPayment(billId, paymentMethod, amount)) {
+                  toast.error("Could not record payment", { description: "Your role can't record payments, or the amount is invalid." });
+                  return;
+                }
+                toast.success("Payment recorded", { description: `$${amount.toFixed(2)} via ${paymentMethod}` });
               }}
-              onPrintBill={(id) => {
-                console.log("Print bill:", id);
-                alert("Bill printing functionality would be implemented here");
-              }}
+              onPrintBill={handlePrintBill}
             />
           </TabsContent>
         </Tabs>

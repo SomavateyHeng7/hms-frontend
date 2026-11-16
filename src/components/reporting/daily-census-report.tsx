@@ -1,5 +1,6 @@
 "use client";
 
+import { BarSeriesChart } from "@/components/ui/charts";
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { 
@@ -148,7 +149,7 @@ export function DailyCensusReport({ report, onExport, onRefresh }: DailyCensusRe
                   </div>
                   <Progress value={report.bedOccupancy.occupancyRate} className="h-3" />
                   
-                  <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                     <div>
                       <p className="text-2xl font-bold text-blue-600">
                         {report.bedOccupancy.totalBeds}
@@ -268,9 +269,25 @@ export function DailyCensusReport({ report, onExport, onRefresh }: DailyCensusRe
                     </div>
                   </div>
 
+                  <BarSeriesChart
+                    data={report.hourlyBreakdown.map((h) => ({
+                      hour: `${h.hour.toString().padStart(2, "0")}:00`,
+                      admissions: h.admissions,
+                      discharges: h.discharges,
+                      emergency: h.emergencyArrivals,
+                    }))}
+                    xKey="hour"
+                    series={[
+                      { key: "admissions", label: "Admissions", color: "#16a34a" },
+                      { key: "discharges", label: "Discharges", color: "#2563eb" },
+                      { key: "emergency", label: "Emergency", color: "#dc2626" },
+                    ]}
+                    emptyTitle="No hourly data"
+                  />
+
                   <div className="space-y-3">
                     {report.hourlyBreakdown.map((hourData) => (
-                      <div key={hourData.hour} className="grid grid-cols-4 gap-4 p-3 bg-gray-50 rounded-lg">
+                      <div key={hourData.hour} className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-3 bg-gray-50 rounded-lg">
                         <div className="font-medium">
                           {hourData.hour.toString().padStart(2, "0")}:00
                         </div>

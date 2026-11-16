@@ -29,8 +29,8 @@ export const clinicalReportSchema = z.object({
   }),
   departmentId: z.string().optional(),
   doctorId: z.string().optional(),
-  includeRecommendations: z.boolean().default(true),
-  includeBenchmarks: z.boolean().default(true)
+  includeRecommendations: z.boolean(),
+  includeBenchmarks: z.boolean()
 });
 
 export const billingSummarySchema = z.object({

@@ -11,10 +11,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { LabSample, SampleCollectionFormData } from "@/types/laboratory";
+import { LabSample } from "@/types/laboratory";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sampleCollectionSchema } from "@/lib/validations/laboratory";
+import { sampleCollectionSchema, SampleCollectionFormData } from "@/lib/validations/laboratory";
 import QRCode from "react-qr-code";
 
 interface SampleTrackingProps {
@@ -264,7 +264,7 @@ export function SampleTracking({
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="volume">Volume *</Label>
                   <Input

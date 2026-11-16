@@ -1,5 +1,6 @@
 "use client";
 
+import { BarSeriesChart, LineSeriesChart } from "@/components/ui/charts";
 import React, { useState, useEffect } from "react";
 import { 
   Activity, 
@@ -239,13 +240,13 @@ export function LaboratoryDashboard({
     .slice(0, 5);
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Laboratory Dashboard</h1>
           <p className="text-gray-600">Real-time overview of laboratory operations</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-32">
               <SelectValue />
@@ -489,51 +490,41 @@ export function LaboratoryDashboard({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Order Volume Trend</CardTitle>
-                <CardDescription>Daily order volume over the past week</CardDescription>
+                <CardTitle>Orders vs Completed Tests</CardTitle>
+                <CardDescription>Daily volume over the past week</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {trends.map((trend, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{trend.period}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
-                            style={{ width: `${Math.min((trend.orders / 50) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-gray-600 w-8">{trend.orders}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <BarSeriesChart
+                  data={trends.map((t) => ({ period: t.period, orders: t.orders, completed: t.completedTests }))}
+                  xKey="period"
+                  series={[
+                    { key: "orders", label: "Orders", color: "#2563eb" },
+                    { key: "completed", label: "Completed tests", color: "#16a34a" },
+                  ]}
+                  emptyTitle="No order activity yet"
+                />
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Test Completion Trend</CardTitle>
-                <CardDescription>Daily completed tests over the past week</CardDescription>
+                <CardTitle>Turnaround Time & Critical Values</CardTitle>
+                <CardDescription>Average turnaround (hours) and critical results per day</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {trends.map((trend, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{trend.period}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-green-600 h-2 rounded-full" 
-                            style={{ width: `${Math.min((trend.completedTests / 40) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-gray-600 w-8">{trend.completedTests}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <LineSeriesChart
+                  data={trends.map((t) => ({
+                    period: t.period,
+                    turnaround: t.turnaroundTime,
+                    critical: t.criticalValues,
+                  }))}
+                  xKey="period"
+                  series={[
+                    { key: "turnaround", label: "Turnaround (h)", color: "#f59e0b" },
+                    { key: "critical", label: "Critical values", color: "#dc2626" },
+                  ]}
+                  emptyTitle="No turnaround data yet"
+                />
               </CardContent>
             </Card>
           </div>

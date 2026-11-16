@@ -1,5 +1,7 @@
 "use client";
 
+import { averageOf } from "@/lib/utils";
+import { BarSeriesChart, LineSeriesChart } from "@/components/ui/charts";
 import React, { useState } from "react";
 import { format, subDays, subMonths } from "date-fns";
 import { 
@@ -55,8 +57,10 @@ interface ReportingAnalyticsProps {
   billingSummary: BillingSummary;
   inventoryReport: InventoryReport;
   resourceUtilization: ResourceUtilizationType;
-  doctorPerformance: DoctorPerformanceType[];
+  doctorPerformance: DoctorPerformanceType;
   customDashboards: CustomDashboard[];
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
 export function ReportingAnalytics({
@@ -66,9 +70,10 @@ export function ReportingAnalytics({
   inventoryReport,
   resourceUtilization,
   doctorPerformance,
-  customDashboards
+  customDashboards,
+  activeTab,
+  onTabChange
 }: ReportingAnalyticsProps) {
-  const [activeTab, setActiveTab] = useState("overview");
   const [selectedDateRange, setSelectedDateRange] = useState("today");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
 
@@ -108,7 +113,7 @@ export function ReportingAnalytics({
     },
     {
       title: "Resource Utilization",
-      value: `${resourceUtilization.overall.roomUtilization}%`,
+      value: `${averageOf(resourceUtilization.rooms.map((room) => room.utilizationRate))}%`,
       change: "+2%",
       trend: "up" as const,
       icon: Activity,
@@ -116,7 +121,7 @@ export function ReportingAnalytics({
     },
     {
       title: "Avg Doctor Performance",
-      value: `${Math.round(doctorPerformance.reduce((acc, doc) => acc + doc.patientOutcomes.patientSatisfactionScore, 0) / doctorPerformance.length)}%`,
+      value: `${Math.round(doctorPerformance.averageQualityScore)}%`,
       change: "+1.5%",
       trend: "up" as const,
       icon: BarChart3,
@@ -177,14 +182,14 @@ export function ReportingAnalytics({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Reporting & Analytics</h1>
           <p className="text-muted-foreground">
             Comprehensive reports and insights for hospital operations
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
           <Button variant="outline" size="sm">
             <Filter className="mr-2 h-4 w-4" />
             Filters
@@ -200,8 +205,8 @@ export function ReportingAnalytics({
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
+      <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-4">
+        <TabsList className="grid h-auto w-full grid-cols-4 sm:grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="census">Census</TabsTrigger>
           <TabsTrigger value="clinical">Clinical</TabsTrigger>
@@ -253,13 +258,25 @@ export function ReportingAnalytics({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-blue-500" />
-                  Patient Flow (Last 7 Days)
+                  Patient Flow (Today, by Hour)
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-64 flex items-center justify-center text-muted-foreground">
-                  [Patient Flow Chart Placeholder]
-                </div>
+                <LineSeriesChart
+                  data={dailyCensus.hourlyBreakdown.map((h) => ({
+                    hour: `${h.hour.toString().padStart(2, "0")}:00`,
+                    admissions: h.admissions,
+                    discharges: h.discharges,
+                    emergency: h.emergencyArrivals,
+                  }))}
+                  xKey="hour"
+                  series={[
+                    { key: "admissions", label: "Admissions", color: "#16a34a" },
+                    { key: "discharges", label: "Discharges", color: "#2563eb" },
+                    { key: "emergency", label: "Emergency", color: "#dc2626" },
+                  ]}
+                  emptyTitle="No patient flow data"
+                />
               </CardContent>
             </Card>
 
@@ -268,13 +285,24 @@ export function ReportingAnalytics({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="h-5 w-5 text-green-500" />
-                  Revenue Trend
+                  Revenue by Department
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-64 flex items-center justify-center text-muted-foreground">
-                  [Revenue Trend Chart Placeholder]
-                </div>
+                <BarSeriesChart
+                  data={billingSummary.departmentRevenue.map((d) => ({
+                    department: d.departmentName,
+                    revenue: d.revenue,
+                    collections: d.collections,
+                  }))}
+                  xKey="department"
+                  series={[
+                    { key: "revenue", label: "Revenue", color: "#16a34a" },
+                    { key: "collections", label: "Collections", color: "#2563eb" },
+                  ]}
+                  valueFormatter={(v) => `$${v.toLocaleString()}`}
+                  emptyTitle="No revenue data"
+                />
               </CardContent>
             </Card>
           </div>
@@ -376,35 +404,35 @@ export function ReportingAnalytics({
         <TabsContent value="inventory">
           <InventoryReports 
             report={inventoryReport}
-            onGenerateReport={(filters) => console.log("Generate inventory report", filters)}
             onExport={(format) => console.log("Export inventory report as", format)}
+            onReorder={(itemId) => console.log("Reorder inventory item", itemId)}
           />
         </TabsContent>
 
         <TabsContent value="resources">
           <ResourceUtilizationReport 
             report={resourceUtilization}
-            onOptimize={(resource) => console.log("Optimize resource", resource)}
-            onScheduleMaintenance={(equipment) => console.log("Schedule maintenance", equipment)}
+            onExport={(format) => console.log("Export resource utilization as", format)}
+            onDrillDown={(resourceId, type) => console.log("Drill down into resource", type, resourceId)}
           />
         </TabsContent>
 
         <TabsContent value="performance">
           <DoctorPerformanceReport 
-            reports={doctorPerformance}
-            onGenerateReport={(doctorId, period) => console.log("Generate performance report", doctorId, period)}
-            onComparePerformance={(doctorIds) => console.log("Compare performance", doctorIds)}
+            report={doctorPerformance}
+            onExport={(format) => console.log("Export doctor performance as", format)}
+            onDrillDown={(doctorId) => console.log("Drill down into doctor", doctorId)}
           />
         </TabsContent>
       </Tabs>
 
       {/* Quick Actions Footer */}
       <div className="border-t pt-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center gap-4">
           <div className="text-sm text-muted-foreground">
             Last updated: {format(new Date(), "MMM dd, yyyy 'at' HH:mm")}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm">
               <Settings className="mr-2 h-4 w-4" />
               Configure

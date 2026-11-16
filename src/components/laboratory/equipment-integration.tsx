@@ -493,7 +493,7 @@ export function EquipmentIntegration({
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="expectedValue">Expected Value</Label>
                 <Input
@@ -586,7 +586,7 @@ export function EquipmentIntegration({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="date">Scheduled Date</Label>
                 <Input

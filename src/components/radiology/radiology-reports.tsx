@@ -240,7 +240,7 @@ export function RadiologyReports({
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={reportForm.handleSubmit(handleSubmitReport)} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Study *</Label>
                   <Select onValueChange={(value) => reportForm.setValue("studyId", value)}>

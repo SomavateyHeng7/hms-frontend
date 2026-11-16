@@ -10,10 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { ImagingSchedule, ImagingScheduleFormData, ImagingEquipment, TimeSlot } from "@/types/radiology";
+import { ImagingSchedule, ImagingEquipment, TimeSlot } from "@/types/radiology";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { imagingScheduleSchema } from "@/lib/validations/radiology";
+import { imagingScheduleSchema, ImagingScheduleFormData } from "@/lib/validations/radiology";
+import { formatEquipmentLocation } from "@/lib/radiology-utils";
 import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
 
 interface RadiologySchedulingProps {
@@ -367,7 +368,7 @@ export function RadiologyScheduling({
             <SelectItem value="all">All Equipment</SelectItem>
             {equipment.map((eq) => (
               <SelectItem key={eq.id} value={eq.id}>
-                {eq.name} - {eq.location}
+                {eq.name} - {formatEquipmentLocation(eq.location)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -410,7 +411,7 @@ export function RadiologyScheduling({
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="orderId">Order ID *</Label>
                   <Input
@@ -434,7 +435,7 @@ export function RadiologyScheduling({
                         .filter(eq => eq.status === "operational")
                         .map((eq) => (
                           <SelectItem key={eq.id} value={eq.id}>
-                            {eq.name} - {eq.location}
+                            {eq.name} - {formatEquipmentLocation(eq.location)}
                           </SelectItem>
                         ))}
                     </SelectContent>
@@ -445,7 +446,7 @@ export function RadiologyScheduling({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Technologist *</Label>
                   <Select onValueChange={(value) => form.setValue("technicianId", value)}>
@@ -478,7 +479,7 @@ export function RadiologyScheduling({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="estimatedDuration">Duration (minutes) *</Label>
                   <Input

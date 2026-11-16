@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Plus,
   Filter,
+  BarChart3,
   Download,
   Settings,
   Eye,
@@ -277,7 +278,7 @@ export function DepartmentScheduleManagement({
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid h-auto w-full grid-cols-3 sm:grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="calendar">Calendar View</TabsTrigger>
           <TabsTrigger value="schedule">Create Schedule</TabsTrigger>
@@ -442,7 +443,7 @@ export function DepartmentScheduleManagement({
                                 className="text-xs p-1 mb-1 bg-blue-100 text-blue-800 rounded cursor-pointer hover:bg-blue-200 transition-colors"
                                 onClick={() => setEditingSchedule(schedule)}
                               >
-                                <div className="font-medium truncate">{doctor?.name}</div>
+                                <div className="font-medium truncate">{doctor ? `${doctor.firstName} ${doctor.lastName}` : ""}</div>
                                 <div className="truncate">{department?.name}</div>
                                 <div>{schedule.currentPatients}/{schedule.maxPatients}</div>
                               </div>
@@ -505,7 +506,7 @@ export function DepartmentScheduleManagement({
                           <SelectItem key={doctor.id} value={doctor.id}>
                             <div className="flex items-center gap-2">
                               <Stethoscope className="h-4 w-4" />
-                              {doctor.name} - {doctor.specialization}
+                              {doctor.firstName} {doctor.lastName} - {doctor.specialization}
                             </div>
                           </SelectItem>
                         ))}
@@ -733,7 +734,7 @@ export function DepartmentScheduleManagement({
                             {stats.utilizationRate}% utilized
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="text-muted-foreground">Doctors:</span> {stats.totalDoctors}
                           </div>
